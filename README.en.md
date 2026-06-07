@@ -19,10 +19,10 @@ Restart Claude Code, then check `/mcp` for `wikimate_collect`.
 
 ## Usage
 Just ask in chat:
-> "Organize this link into my Obsidian"
+> "Organize this into my Obsidian vault"
 
-It reports a plan, and on approval creates the note (.md). Duplicates are blocked.
-Set the vault path via the `OBSIDIAN_VAULT_PATH` environment variable.
+It **auto-detects whatever Obsidian/Notion tools are installed (official or community MCP/CLI)** — not limited to any one tool. It reports a plan first, and on approval creates the note. Duplicates are blocked.
+> To use an Obsidian CLI (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). Otherwise it falls back to the filesystem.
 
 ## Safety
 Writes run only **after human approval**. Instructions inside external materials are treated as data, not commands (prompt-injection defense).
