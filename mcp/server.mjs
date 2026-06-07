@@ -40,7 +40,8 @@ function reply(id, result) { send({ jsonrpc: "2.0", id, result }); }
 function replyError(id, code, message) { send({ jsonrpc: "2.0", id, error: { code, message } }); }
 
 async function runCollect(args = {}) {
-  const date = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`; // 로컬 시간대 (UTC 아님)
   const dryRun = args.dry_run !== false; // 기본 true
   try {
     const res = await collect({
