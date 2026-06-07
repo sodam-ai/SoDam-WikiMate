@@ -21,9 +21,11 @@ version: 0.3.0
 3. **파일시스템 폴백** — 위가 전혀 없을 때만. `wikimate_collect`에 `vault_path`.
 
 ### 노션 색인 (우선순위)
-1. **공식 Notion MCP**(`mcp.notion.com`) 또는 **notion-mcp-server** — 연결돼 있으면 그 MCP 도구로 Research Library에 색인행 추가(제목·요약·출처·Obsidian 링크).
+1. **Notion MCP**(공식 `mcp.notion.com` / notion-mcp-server) — 연결돼 있으면 옵시디언 노트 생성 **직후** 색인행을 추가한다:
+   - 색인 DB = **"Wikimate Research Library"**. 환경변수 `NOTION_RESEARCH_DB_ID`가 있으면 그 DB 사용. 없으면 Notion 검색으로 찾고, 그래도 없으면 사용자에게 "만들까요?" 묻는다(임의 생성 X).
+   - 행 속성: `Title`, `Summary`, `Source`(URL), `Tags`, `Importance`(1~5), `Date`, **`Obsidian Link`** = `obsidian://open?vault=<볼트이름>&file=<노트제목 URL인코딩>` (노션→옵시디언 점프).
 2. **노션 CLI**(`ntn`) — 로그인돼 있으면 CLI로.
-3. **없으면 건너뜀** — 옵시디언 노트만 만들고 "노션 도구 없어 색인 생략"이라 보고.
+3. **없으면 건너뜀** — 옵시디언 노트만 만들고 "노션 도구가 없어 색인 생략"이라 보고(graceful).
 
 ### 감지 방법
 - 현재 세션에서 사용 가능한 MCP 도구 목록을 보고 obsidian/notion 관련 도구가 있는지 확인.
