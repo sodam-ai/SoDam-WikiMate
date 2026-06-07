@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "wikimate": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/server.mjs"],
+      "env": {
+        "OBSIDIAN_VAULT_PATH": "${OBSIDIAN_VAULT_PATH}"
+      }
+    }
+  }
+}
