@@ -6,10 +6,11 @@ Tell an AI agent "organize this," and it tidies scattered materials into **Obsid
 
 ## Install (Claude Code)
 ```
-/plugin marketplace add sodam-ai/wikimate
+/plugin marketplace add https://github.com/sodam-ai/wikimate.git
 /plugin install wikimate@wikimate-marketplace
 ```
-Restart Claude Code after install. (The repo must be public to install it — public release comes after verification.)
+Restart Claude Code after install.
+> ⚠️ **The repo must be public for anyone to install it.** If private, you need your own GitHub credentials. (The `owner/repo` shorthand is tried over SSH and fails without keys → use the HTTPS URL.)
 
 ## Usage
 Just ask in chat:
