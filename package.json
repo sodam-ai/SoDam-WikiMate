@@ -11,7 +11,7 @@
     "start": "node mcp/server.mjs",
     "verify": "node scripts/verify-collect.mjs"
   },
-  "dependencies": {
+  "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   }
 }
