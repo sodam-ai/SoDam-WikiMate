@@ -46,6 +46,11 @@ Just ask in chat:
 - 🏷️ To use an Obsidian **CLI** (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). If you don't know it, check Obsidian's vault switcher (bottom-left). Otherwise it falls back to the filesystem.
 - It shows a plan first (where, which tool, whether to index in Notion), then creates the note on approval.
 
+**Ask it too** (read — from notes you already organized):
+> "Find and summarize RAG from my vault"
+
+- It searches the index (Notion) and originals (Obsidian) and answers **with the source**. It **verifies the original actually exists before answering**, and if a note was deleted (dangling index) it says so honestly (never cites a ghost).
+
 ## Environment variables (optional)
 | Variable | Purpose |
 |---|---|
