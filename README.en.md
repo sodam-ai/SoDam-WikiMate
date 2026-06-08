@@ -35,11 +35,15 @@ When a new version is pushed to GitHub, your local **marketplace cache does NOT 
 ```
 If that still fails, in the `/plugin` menu **remove → re-add → install** the marketplace (this re-fetches a fresh copy).
 
+> 💡 **"Do I need to push to GitHub?" → No.** Install/update *pulls from* GitHub, so you never push anything yourself. (Pushing is only for developers changing the code.)
+> ⚠️ **If install fails with `EBUSY: resource busy or locked`** → Windows antivirus (Defender) briefly locked the just-written files. **Fully quit and reopen Claude Code**, then re-run the commands — that usually clears it.
+
 ## Usage
 Just ask in chat:
-> "Organize this into my Obsidian vault"
+> "Organize this into my 'Vault' vault"
 
-- To use an Obsidian **CLI** (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). Otherwise it falls back to the filesystem.
+- 📎 **The "material" can be anything** — a one-line text, a web link (`organize this link: https://...`), or a file path (`organize this file: D:\notes\today.md`). Nothing to prepare.
+- 🏷️ To use an Obsidian **CLI** (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). If you don't know it, check Obsidian's vault switcher (bottom-left). Otherwise it falls back to the filesystem.
 - It shows a plan first (where, which tool, whether to index in Notion), then creates the note on approval.
 
 ## Environment variables (optional)
@@ -80,6 +84,8 @@ templates/           Note template
 - **Note not visible in Obsidian** → Check you said the exact vault *name* (the filesystem fallback writes into the `OBSIDIAN_VAULT_PATH` folder).
 - **Notion isn't getting indexed** → Check that a Notion MCP/CLI is connected and authenticated. If not, only the Obsidian note is created (normal fallback).
 - **Some symbols disappeared from a title** → Filename-forbidden characters like `/ \ : * ? " < > |` are replaced with spaces for safety (intended behavior).
+- **Install fails with `EBUSY ... locked`** → Antivirus file lock. Quit and reopen Claude Code, then reinstall (see "When updates don't show up"). If it repeats, wait a moment and retry.
+- **An old version (e.g. 0.1.0) gets installed** → The marketplace cache is stale. Refresh via `marketplace update` (or remove → re-add) above.
 
 ## Reference tools
 [notesmd-cli](https://github.com/Yakitrak/notesmd-cli) · [mcp-obsidian](https://github.com/MarkusPfundstein/mcp-obsidian) · [notion-mcp-server](https://github.com/makenotion/notion-mcp-server) · [ntn CLI](https://developers.notion.com/cli/get-started/overview)
