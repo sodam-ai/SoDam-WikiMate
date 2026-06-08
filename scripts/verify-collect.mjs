@@ -68,6 +68,11 @@ try {
   const r7 = await collect({ vault: vName, vaultPath: "${OBSIDIAN_VAULT_PATH}", title: "리터럴 경로 테스트", url: url5, text: text5, dryRun: true, date });
   const pass3 = r7.action === "skip-duplicate" && r7.duplicate_check === "done";
   console.log(`(리터럴 vault_path) action=${r7.action} / duplicate_check=${r7.duplicate_check} -> ${pass3 ? "PASS ✅ (리터럴 무시→이름으로 해석→중복 잡힘)" : "FAIL ❌ 리터럴에 막힘"}`);
+
+  // ★ #8: '잘못된-그러나-실존하는' 폴더(원본 파일 폴더 같은)를 vault_path로 줘도, 이름 우선이라 중복이 잡혀야 함
+  const r8 = await collect({ vault: vName, vaultPath: cfgDir, title: "잘못된 폴더 테스트", url: url5, text: text5, dryRun: true, date });
+  const pass4 = r8.action === "skip-duplicate" && r8.duplicate_check === "done";
+  console.log(`(잘못된 실존폴더 vault_path) action=${r8.action} -> ${pass4 ? "PASS ✅ (틀린 폴더 무시→이름 우선 해석→중복 잡힘)" : "FAIL ❌ 틀린 폴더를 스캔함"}`);
 } finally {
   delete process.env.OBSIDIAN_CONFIG_PATH;
   await rm(vDir, { recursive: true, force: true }).catch(() => {});
