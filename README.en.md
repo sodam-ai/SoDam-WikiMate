@@ -1,6 +1,6 @@
 # Wikimate
 
-Tell an AI agent **"organize this,"** and it files your scattered materials (web links, PDFs, chat logs, text) into **notes in your Obsidian vault** — and optionally **indexes them in Notion**. A Claude Code · Codex plugin.
+Tell an AI agent **"organize this,"** and it files your scattered materials (web links, PDFs, chat logs, text) into **notes in your Obsidian vault** — and optionally **indexes them in Notion**. A **Claude Code plugin**. (Codex has no plugin install (`/plugin`) — instead, clone the repo and register it as an **MCP server** via `codex mcp add`: see [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md).)
 
 **[한국어](./README.md)**
 
