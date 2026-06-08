@@ -8,7 +8,7 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=<내 볼트 절대경로> -- no
 ```
 예시(Windows):
 ```bash
-codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/MyVault -- node D:/AI_Dev_Work/2026y/26y_06m_10d_wikimate/mcp/server.mjs
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/MyVault -- node D:/path/to/wikimate/mcp/server.mjs
 ```
 확인:
 ```bash
