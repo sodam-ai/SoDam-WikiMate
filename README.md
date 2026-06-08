@@ -1,6 +1,6 @@
 # Wikimate (위키메이트)
 
-AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링크·PDF·대화 로그·텍스트)를 **내 옵시디언 볼트에 노트로 정리**하고, 원하면 **노션에 색인**해주는 Claude Code · Codex 플러그인.
+AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링크·PDF·대화 로그·텍스트)를 **내 옵시디언 볼트에 노트로 정리**하고, 원하면 **노션에 색인**해주는 **Claude Code 플러그인**. (Codex엔 "플러그인 설치(`/plugin`)"가 없어요 — 대신 저장소를 받아 `codex mcp add`로 **MCP 서버로 등록**해 연동합니다: [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md).)
 
 **[English](./README.en.md)**
 
