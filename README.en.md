@@ -50,6 +50,7 @@ Just ask in chat:
 > "Find and summarize RAG from my vault"
 
 - It searches the index (Notion) and originals (Obsidian) and answers **with the source**. It **verifies the original actually exists before answering**, and if a note was deleted (dangling index) it says so honestly (never cites a ghost).
+- 🔗 **Ask across multiple notes too**: "synthesize the relationship between RAG, embeddings, and vector DBs from my notes" → it gathers the related notes and **synthesizes with per-note sources** (showing which notes it will use first).
 
 ## Environment variables (optional)
 | Variable | Purpose |

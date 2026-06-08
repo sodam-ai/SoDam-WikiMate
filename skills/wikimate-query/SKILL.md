@@ -1,6 +1,6 @@
 ---
 name: Wikimate Query
-description: This skill should be used when the user asks to find, search, recall, or summarize from their own previously-organized notes/wiki — e.g. "내 볼트에서 ~ 찾아줘", "위키에서 ~ 물어봐/검색해줘", "전에 정리한 ~ 요약해줘", "내가 저장한 ~ 뭐였지", "search my notes/vault for ~", "what did I save about ~". It retrieves from the Obsidian vault (originals) and the Notion index (catalog), VERIFIES the cited note actually exists before answering (no dangling/ghost citations), and answers with the source. Read-only — never writes.
+description: This skill should be used when the user asks to find, search, recall, or summarize from their own previously-organized notes/wiki — e.g. "내 볼트에서 ~ 찾아줘", "위키에서 ~ 물어봐/검색해줘", "전에 정리한 ~ 요약해줘", "내가 저장한 ~ 뭐였지", "search my notes/vault for ~", "what did I save about ~", or to connect/synthesize across multiple notes — "내 노트들로 ~ 설명/비교/관계 정리해줘", "정리한 것들 묶어서 ~", "내 위키에 뭐 있어", "explain or compare across my notes". It retrieves from the Obsidian vault (originals) and the Notion index (catalog), VERIFIES the cited note actually exists before answering (no dangling/ghost citations), and answers with the source. Read-only — never writes.
 version: 0.1.0
 ---
 
@@ -23,6 +23,17 @@ version: 0.1.0
    - 노션 행은 AI가 삭제 못 함(커넥터 한계) → 끊긴 색인은 **사용자에게 "수동 삭제하시겠어요?" 안내**(또는 가능하면 행에 stale 표시 제안). 임의 삭제·수정 X.
 3. **원본 읽어 답** — 존재가 확인된 노트의 본문을 읽어 **출처(파일 경로 + 가능하면 노션 링크)와 함께** 답한다. 여러 노트면 종합.
 4. **한계 정직 고지** — 검색은 키워드 기반이라 *글자만 비슷한 무관 노트*가 섞일 수 있다. 후보가 애매하거나 여러 개면 단정 말고 사용자에게 어느 것인지 확인. 의미(semantic) 검색·관련도 순위는 아직 없음을 필요 시 밝힌다.
+
+## 여러 노트 종합 (synthesis) — "내 노트들로 ~ 설명/비교/관계"
+질문이 한 노트가 아니라 *여러 노트를 엮어야* 하는 것이면(예: "RAG 파이프라인 설명", "임베딩·벡터DB·RAG 관계 정리"):
+1. **넓게 검색** — 관련될 만한 노트를 *여럿* 찾는다(하나로 멈추지 말 것).
+2. **후보 투명 공개** — "이 노트들로 답할게요: A · B · C" 라고 *먼저 보여주고* 종합한다(키워드 검색이라 무관 노트가 섞일 수 있으니, 사용자가 빠진 것/엉뚱한 것을 잡게).
+3. **각 원본 확인(확인 우선)** — 종합에 쓰는 노트 *전부* 옵시디언 원본 실존 확인. 끊긴 색인은 근거에서 제외하고 그 사실을 밝힌다.
+4. **종합 답 + 노트별 출처** — 노트들을 엮어 답하되 **어느 내용이 어느 노트에서 왔는지** 출처를 노트별로 단다.
+5. **노트 vs 일반지식 구분** — 노트에 있는 내용과 (LLM의) 일반 지식을 섞지 말고 구분 표시. 관련 노트가 더 있을 수 있음(키워드 한계)을 필요 시 고지.
+
+## 내 위키 한눈에 보기 (overview)
+"내 위키/볼트에 뭐 있어?" 류엔 — 노션 색인(Research Library) 행들 또는 볼트 노트를 *주제별로 묶어* 목록으로 보여준다(읽기 전용, 지어내기 금지).
 
 ## 답변 형식
 - **찾음**: 핵심 답 + `근거: <볼트 내 파일경로>`(+ 노션 링크). 종합이면 노트별로 구분.
