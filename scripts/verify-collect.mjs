@@ -63,6 +63,11 @@ try {
   const r6 = await collect({ vault: "존재하지않는볼트XYZ", title: "t", url: "u", text: "x", dryRun: true, date });
   const pass2 = String(r6.duplicate_check).startsWith("skipped");
   console.log(`(미해결 볼트) duplicate_check=${r6.duplicate_check} -> ${pass2 ? "PASS ✅ (조용히 안 넘기고 명시)" : "FAIL ❌"}`);
+
+  // ★ 실제 서버 입력 재현(#7): vault_path에 미해석 리터럴 ${OBSIDIAN_VAULT_PATH}가 와도 중복이 잡혀야 함
+  const r7 = await collect({ vault: vName, vaultPath: "${OBSIDIAN_VAULT_PATH}", title: "리터럴 경로 테스트", url: url5, text: text5, dryRun: true, date });
+  const pass3 = r7.action === "skip-duplicate" && r7.duplicate_check === "done";
+  console.log(`(리터럴 vault_path) action=${r7.action} / duplicate_check=${r7.duplicate_check} -> ${pass3 ? "PASS ✅ (리터럴 무시→이름으로 해석→중복 잡힘)" : "FAIL ❌ 리터럴에 막힘"}`);
 } finally {
   delete process.env.OBSIDIAN_CONFIG_PATH;
   await rm(vDir, { recursive: true, force: true }).catch(() => {});
