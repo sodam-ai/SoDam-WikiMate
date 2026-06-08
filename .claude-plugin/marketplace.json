@@ -9,7 +9,7 @@
       "name": "wikimate",
       "source": "./",
       "description": "AI 에이전트 자료 정리 키트 (Obsidian × Notion). 설치 후 자연어 명령으로 자료를 정리·색인.",
-      "version": "0.2.2"
+      "version": "0.3.0"
     }
   ]
 }
