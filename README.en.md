@@ -1,8 +1,18 @@
 # Wikimate
 
-Tell an AI agent "organize this," and it tidies scattered materials into **Obsidian notes** and indexes them in **Notion**. A Claude Code plugin.
+Tell an AI agent **"organize this,"** and it files your scattered materials (web links, PDFs, chat logs, text) into **notes in your Obsidian vault** — and optionally **indexes them in Notion**. A Claude Code · Codex plugin.
 
 **[한국어](./README.md)**
+
+> Status: early stage (Phase 1a). Obsidian organizing is verified working; Notion indexing works in environments where a Notion tool is connected (see "Current status").
+
+## What it does
+- 🧹 **Organize in plain language** — just say "organize this link" and a note is created (no need to call any tool by hand).
+- 📒 **Into your real Obsidian vault** — auto-detects whatever Obsidian tool (MCP/CLI) is installed, and falls back to the filesystem if none.
+- 🗂️ **Notion index (optional)** — if a Notion tool is connected, it adds an index row (Obsidian = source of truth, Notion = one-way index).
+- ✋ **Always plan first → execute after approval** — never writes on its own.
+- 🔁 **Dedup** — the same material is captured once, via `source_hash`.
+- 🛡️ **Safe by design** — blocks paths outside the vault; treats text inside external materials as data, not commands (prompt-injection defense).
 
 ## Install (Claude Code)
 > ⚠️ Enter the **two commands one at a time** (don't paste both together, or the URL breaks).
@@ -15,22 +25,66 @@ Tell an AI agent "organize this," and it tidies scattered materials into **Obsid
 ```
 /plugin install wikimate@wikimate-marketplace
 ```
-Restart Claude Code, then check `/mcp` for `wikimate_collect`.
+Restart Claude Code and you're done. (To verify, check `/mcp` for `wikimate_collect`.)
+
+## When updates don't show up — the most common trap
+When a new version is pushed to GitHub, your local **marketplace cache does NOT update automatically.** So reinstalling alone may keep the old version. To get the latest:
+```
+/plugin marketplace update wikimate-marketplace
+/plugin install wikimate@wikimate-marketplace
+```
+If that still fails, in the `/plugin` menu **remove → re-add → install** the marketplace (this re-fetches a fresh copy).
 
 ## Usage
 Just ask in chat:
 > "Organize this into my Obsidian vault"
 
-It **auto-detects whatever Obsidian/Notion tools are installed (official or community MCP/CLI)** — not limited to any one tool. It reports a plan first, and on approval creates the note. Duplicates are blocked.
-> To use an Obsidian CLI (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). Otherwise it falls back to the filesystem.
+- To use an Obsidian **CLI** (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). Otherwise it falls back to the filesystem.
+- It shows a plan first (where, which tool, whether to index in Notion), then creates the note on approval.
 
-## Safety
-Writes run only **after human approval**. Instructions inside external materials are treated as data, not commands (prompt-injection defense).
+## Environment variables (optional)
+| Variable | Purpose |
+|---|---|
+| `OBSIDIAN_VAULT_PATH` | Absolute path to the vault folder (filesystem fallback + dedup check) |
+| `OBSIDIAN_VAULT_NAME` | Vault name registered in Obsidian (for the CLI) |
+| `NOTION_RESEARCH_DB_ID` | Pin the Notion index DB (otherwise it searches or asks) |
 
-## References
+Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.**
+
+## Folder structure
+```
+.claude-plugin/      Plugin & marketplace manifests
+mcp/server.mjs       Zero-dependency MCP server (stdio)
+mcp/lib/collect.mjs  Collect logic (name sanitizing, dedup)
+skills/              Skill that auto-triggers on natural language
+commands/            /wikimate command
+adapters/codex/      Codex setup guide
+templates/           Note template
+```
+
+## Safety & security
+- ✅ Writes run only **after human approval** (`dry_run` is the default — plan shown first).
+- ✅ Note titles/folders have **path separators, forbidden characters, and control characters stripped**, and **paths outside the vault are blocked** (traversal prevention).
+- ✅ Instructions inside external materials are treated as **data, not commands** (prompt-injection defense).
+- ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
+- ✅ The `.obsidian/` folder is never touched. Existing notes are never modified/deleted without approval.
+- ℹ️ Notion indexing only when a Notion tool is connected. Otherwise it organizes Obsidian only and reports honestly.
+
+## Current status (honest)
+- ✅ **Obsidian organizing**: verified note creation in a real vault (including natural-language auto-trigger).
+- 🟡 **Notion indexing**: works where a Notion tool (MCP/CLI) is connected and authenticated. If not connected, it is skipped automatically.
+- 🟡 **Codex**: an adapter lets it use the same MCP core (setup in `adapters/codex/SETUP.md`).
+
+## Troubleshooting
+- **Not showing in `/mcp`** → Restart Claude Code. If still missing, refresh the cache via "When updates don't show up" above.
+- **Note not visible in Obsidian** → Check you said the exact vault *name* (the filesystem fallback writes into the `OBSIDIAN_VAULT_PATH` folder).
+- **Notion isn't getting indexed** → Check that a Notion MCP/CLI is connected and authenticated. If not, only the Obsidian note is created (normal fallback).
+- **Some symbols disappeared from a title** → Filename-forbidden characters like `/ \ : * ? " < > |` are replaced with spaces for safety (intended behavior).
+
+## Reference tools
 [notesmd-cli](https://github.com/Yakitrak/notesmd-cli) · [mcp-obsidian](https://github.com/MarkusPfundstein/mcp-obsidian) · [notion-mcp-server](https://github.com/makenotion/notion-mcp-server) · [ntn CLI](https://developers.notion.com/cli/get-started/overview)
 
 ## License
-Apache-2.0
+Apache License 2.0 © 2026 SoDam AI Studio
 
-> For development, verification, and local install, see [DEVELOPMENT.md](./DEVELOPMENT.md).
+> For development, testing, and deployment, see [DEVELOPMENT.md](./DEVELOPMENT.md).
