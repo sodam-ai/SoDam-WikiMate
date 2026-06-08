@@ -73,7 +73,7 @@ templates/           Note template
 ```
 
 ## Safety & security
-- ✅ Writes run only **after human approval** (`dry_run` is the default — plan shown first). If approving every time is tedious, say **"just organize it, don't ask"** → new note creation runs automatically (**overwrite/delete are always confirmed**).
+- ✅ Writes run only **after human approval** (`dry_run` is the default — plan shown first). If approving every time is tedious, say **"just organize it, don't ask"** → new note creation runs automatically (**overwrite/delete are always confirmed**). Approval also appears as a **pick-an-option** prompt, so you can choose instead of typing.
 - ✅ Note titles/folders have **path separators, forbidden characters, and control characters stripped**, and **paths outside the vault are blocked** (traversal prevention).
 - ✅ Instructions inside external materials are treated as **data, not commands** (prompt-injection defense).
 - ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
