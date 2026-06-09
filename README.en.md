@@ -27,7 +27,25 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 ```
 Restart Claude Code and you're done. (To verify, check `/mcp` for `wikimate_collect`.)
 
-## When updates don't show up — the most common trap
+## Install (Codex)
+Codex has **no** `/plugin` marketplace. Instead, clone the repo and register it as an **MCP server**.
+
+**1) Clone**
+```
+git clone https://github.com/sodam-ai/wikimate.git
+```
+**2) Register the MCP server** (use your own vault/repo paths):
+```
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault/path -- node D:/your/cloned/wikimate/mcp/server.mjs
+```
+→ `codex mcp list` should show `wikimate`.
+
+**3) (Optional) Natural-language rules** — put the repo's `AGENTS.md` in your Codex working folder so "organize this" works too.
+**Update**: just `git pull` in the cloned folder (no marketplace-cache trap like Claude Code).
+
+> ⚠️ **Codex is a subset.** It gets the organize (write) MCP tool, but the *auto-trigger, ask/query, and multi-note synthesis* **skills are Claude Code only**, and Notion indexing needs a **separate Notion MCP** connected in Codex. (Details: [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md))
+
+## When updates don't show up — the most common trap (Claude Code)
 When a new version is pushed to GitHub, your local **marketplace cache does NOT update automatically.** So reinstalling alone may keep the old version. To get the latest:
 ```
 /plugin marketplace update wikimate-marketplace
