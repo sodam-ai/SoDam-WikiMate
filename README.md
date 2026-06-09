@@ -27,7 +27,25 @@ AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링
 ```
 설치 후 Claude Code를 재시작하면 끝. (확인하고 싶으면 `/mcp`에 `wikimate_collect`가 보이면 성공)
 
-## 업데이트가 안 될 때 — 가장 흔한 함정
+## 설치 (Codex)
+Codex엔 `/plugin` 마켓플레이스가 **없어요.** 대신 저장소를 받아 **MCP 서버로 등록**합니다.
+
+**1) 저장소 받기**
+```
+git clone https://github.com/sodam-ai/wikimate.git
+```
+**2) MCP 서버 등록** (볼트·저장소 경로는 본인 것으로 바꾸세요):
+```
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:/받은/경로/wikimate/mcp/server.mjs
+```
+→ `codex mcp list` 에 `wikimate`가 보이면 성공.
+
+**3) (선택) 자연어 규칙** — Codex 작업 폴더에 저장소의 `AGENTS.md`를 두면 "정리해줘" 같은 말도 따릅니다.
+**업데이트**: 받은 폴더에서 `git pull` 하면 끝(Claude Code 같은 캐시 함정 없음).
+
+> ⚠️ **Codex는 "축소판"이에요.** 정리(쓰기) MCP 도구까지 동작하지만, *자동 발동·물어보기·여러 노트 종합* 같은 **스킬은 Claude Code 전용**이고, 노션 색인은 Codex에 **별도 노션 MCP**가 연결돼 있어야 해요. (자세히: [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md))
+
+## 업데이트가 안 될 때 — 가장 흔한 함정 (Claude Code)
 GitHub에 새 버전이 올라가도, 내 PC의 **마켓플레이스 캐시는 자동으로 안 바뀌어요.** 그래서 재설치만으론 옛날 버전이 그대로일 수 있어요. 최신으로 갱신하려면:
 ```
 /plugin marketplace update wikimate-marketplace
