@@ -1,0 +1,65 @@
+Wikimate
+Copyright 2026 SoDam AI Studio
+
+This product is licensed under the Apache License, Version 2.0 (the "License").
+You may not use this file except in compliance with the License. A copy of the
+License is included in the file "LICENSE" and is also available at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied.
+
+================================================================================
+Trademarks
+================================================================================
+"Wikimate" and "SoDam AI Studio" are names used by the project author. The
+Apache-2.0 license does NOT grant trademark rights. Do not use these names to
+endorse or promote derived products without permission.
+
+================================================================================
+Third-Party Components (NOT bundled — installed separately by the user)
+================================================================================
+Wikimate's MCP server (mcp/server.mjs) is zero-dependency and bundles none of the
+tools below. They are optional and, when used, are installed by the user; each is
+governed by its own license and terms, not by this project's license.
+
+- Node.js
+  Runtime required to run the MCP server. License: MIT (and others for bundled
+  components). https://nodejs.org/
+
+- @modelcontextprotocol/sdk  (devDependency, used only by verification scripts)
+  Copyright Anthropic, PBC. License: MIT.
+  https://github.com/modelcontextprotocol/typescript-sdk
+
+- notesmd-cli  (optional — Obsidian CLI access)
+  Copyright Kunal Mandalia (Yakitrak). License: MIT.
+  https://github.com/Yakitrak/notesmd-cli
+
+- mcp-obsidian  (optional — Obsidian MCP access)
+  Copyright Markus Pfundstein. License: MIT.
+  https://github.com/MarkusPfundstein/mcp-obsidian
+
+- notion-mcp-server  (optional — Notion indexing)
+  Copyright Notion Labs, Inc. (makenotion). License: MIT.
+  https://github.com/makenotion/notion-mcp-server
+
+- Notion official CLI "ntn" / Notion API  (optional — Notion indexing)
+  Copyright Notion Labs, Inc. Use is subject to Notion's Developer Terms and
+  applicable terms of service. https://developers.notion.com/
+
+- Obsidian  (optional — to view notes in the app)
+  Copyright Dynalist, Inc. Personal use is free; commercial use may require a
+  Commercial license. Subject to Obsidian's terms. https://obsidian.md/
+
+================================================================================
+User Content
+================================================================================
+Material you organize (web pages, PDFs, chat logs, code, text) remains the
+property of its respective copyright holders. Wikimate stores organized notes
+locally on your machine and does not transmit them externally except to a Notion
+workspace that you explicitly connect. You are responsible for complying with the
+licenses and terms of any source material you collect or redistribute.
+
+This NOTICE file is provided for informational purposes and is not legal advice.

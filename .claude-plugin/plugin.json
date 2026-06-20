@@ -1,6 +1,6 @@
 {
   "name": "wikimate",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "AI 에이전트가 흩어진 자료를 옵시디언(원본)에 정리하고 노션(색인)에 색인하는 멀티 에이전트 도구. 이식 가능한 MCP 코어 + 안전 게이트.",
   "author": { "name": "SoDam AI Studio" },
   "license": "Apache-2.0",

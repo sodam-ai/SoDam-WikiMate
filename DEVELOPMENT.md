@@ -16,7 +16,11 @@ npm start          # MCP 서버(stdio) 실행
 | 스크립트 | 내용 |
 |---|---|
 | `scripts/verify-collect.mjs` | 수집 로직(이름 안전화·중복 차단·경로이탈 방지) 검증 |
-| `scripts/smoke-server.mjs` | MCP 프로토콜 e2e (initialize → tools/list → tools/call) |
+| `scripts/verify-lint.mjs` | 건강검진(중복·깨진링크·고아·frontmatter) 검증 |
+| `scripts/verify-fix.mjs` | 안전 수정(archive 이동·링크치환·백업·경로차단) 검증 |
+| `scripts/verify-runlog.mjs` | Run Log 기록·조회 + 백업 dot-dir 스킵 검증 |
+| `scripts/smoke-server.mjs` | MCP 프로토콜 e2e (initialize → tools/list → tools/call, collect) |
+| `scripts/smoke-tools.mjs` | MCP 프로토콜 e2e (lint·fix·runlog까지 서버 거쳐 호출·검증) |
 | `scripts/collect-real.mjs` | 실제 웹 자료 1건을 노트화하는 시연(샌드박스 볼트) |
 
 ```bash

@@ -4,7 +4,9 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 **[한국어](./README.md)**
 
-> Status: early stage (Phase 1a). Obsidian organizing is verified working; Notion indexing works in environments where a Notion tool is connected (see "Current status").
+> 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — install, use, troubleshooting, and license, all explained simply.
+
+> Status: **v0.6.0** — organize, query, vault health-check, and run log (4 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
 
 ## What it does
 - 🧹 **Organize in plain language** — just say "organize this link" and a note is created (no need to call any tool by hand).
@@ -13,6 +15,9 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 - ✋ **Always plan first → execute after approval** — never writes on its own.
 - 🔁 **Dedup** — the same material is captured once, via `source_hash`.
 - 🛡️ **Safe by design** — blocks paths outside the vault; treats text inside external materials as data, not commands (prompt-injection defense).
+- 🔎 **Ask your notes** — "find ~ from my vault" answers from your organized notes **with sources** (and says so honestly when something isn't there).
+- 🩺 **Vault health-check** — finds duplicates, broken `[[links]]`, orphan notes, and missing frontmatter and **reports**; on approval it fixes **without deleting** (archive + backup).
+- 🧾 **Run log** — auto-records what the AI did in your vault ("show recent activity").
 
 ## Install (Claude Code)
 > ⚠️ Enter the **two commands one at a time** (don't paste both together, or the URL breaks).
@@ -25,7 +30,7 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 ```
 /plugin install wikimate@wikimate-marketplace
 ```
-Restart Claude Code and you're done. (To verify, check `/mcp` for `wikimate_collect`.)
+Restart Claude Code and you're done. (To verify, check `/mcp` for the 4 tools: `wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`.)
 
 ## Install (Codex)
 Codex has **no** `/plugin` marketplace. Instead, clone the repo and register it as an **MCP server**.
@@ -70,6 +75,11 @@ Just ask in chat:
 - It searches the index (Notion) and originals (Obsidian) and answers **with the source**. It **verifies the original actually exists before answering**, and if a note was deleted (dangling index) it says so honestly (never cites a ghost).
 - 🔗 **Ask across multiple notes too**: "synthesize the relationship between RAG, embeddings, and vector DBs from my notes" → it gathers the related notes and **synthesizes with per-note sources** (showing which notes it will use first).
 
+**Health-check it too** (read — on the notes you already organized):
+> "Health-check my 'Vault' vault"
+
+- 🩺 It finds the structural rot that piles up over time — **orphan notes** (linked to nothing), **broken `[[links]]`**, **duplicates**, **missing frontmatter**, and (if you use Notion) **dangling index rows** (original deleted but the Notion row remains) — and only **reports** them by default. It **won't fix things on its own** — pick what to fix and approve, and only then does it act: duplicates are **moved to 99_Archive (never hard-deleted)**, and link fixes back up the note first (anything irreversible is confirmed once more).
+
 ## Environment variables (optional)
 | Variable | Purpose |
 |---|---|
@@ -81,13 +91,18 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 
 ## Folder structure
 ```
-.claude-plugin/      Plugin & marketplace manifests
-mcp/server.mjs       Zero-dependency MCP server (stdio)
-mcp/lib/collect.mjs  Collect logic (name sanitizing, dedup)
-skills/              Skill that auto-triggers on natural language
-commands/            /wikimate command
-adapters/codex/      Codex setup guide
-templates/           Note template
+.claude-plugin/        Plugin & marketplace manifests
+mcp/server.mjs         Zero-dependency MCP server (stdio) — 4 tools
+mcp/lib/collect.mjs    Collect (name sanitizing, dedup)
+mcp/lib/lint.mjs       Health-check (read-only)
+mcp/lib/fix.mjs        Safe fix (no delete, backup)
+mcp/lib/runlog.mjs     Run log
+skills/                Auto-triggering skills (organize, query, lint)
+commands/              /wikimate, /wikimate-lint
+adapters/codex/        Codex setup guide
+templates/             Note template
+scripts/               Verification scripts (verify-*, smoke-*)
+(in your vault) .wikimate/runlog.jsonl   Run log (hidden)
 ```
 
 ## Safety & security
@@ -97,11 +112,14 @@ templates/           Note template
 - ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
 - ✅ The `.obsidian/` folder is never touched. Existing notes are never modified/deleted without approval.
 - ℹ️ Notion indexing only when a Notion tool is connected. Otherwise it organizes Obsidian only and reports honestly.
+- 🧾 **Run Log** — every note actually created/moved/fixed is auto-recorded (one line each) in `.wikimate/runlog.jsonl` (hidden). Just say **"show recent activity"** to review what was done (read-only audit log — "what did the AI do to my vault").
 
 ## Current status (honest)
 - ✅ **Obsidian organizing**: verified note creation in a real vault (including natural-language auto-trigger).
+- ✅ **Health-check, safe fix, run log**: verified by unit tests + server protocol e2e (duplicate/broken-link/orphan detection, delete-free fixes, auto logging).
 - 🟡 **Notion indexing**: works where a Notion tool (MCP/CLI) is connected and authenticated. If not connected, it is skipped automatically.
 - 🟡 **Codex**: an adapter lets it use the same MCP core (setup in `adapters/codex/SETUP.md`).
+- ⚠️ **Live session not author-verified**: a real Claude Code `/mcp` session against your own vault is recommended (2 min; see Install above).
 
 ## Troubleshooting
 - **Not showing in `/mcp`** → Restart Claude Code. If still missing, refresh the cache via "When updates don't show up" above.

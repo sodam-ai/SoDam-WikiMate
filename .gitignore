@@ -18,3 +18,10 @@ Thumbs.db
 # logs
 *.log
 npm-debug.log*
+
+# 로컬 AI 도구 산출물 (공개 repo에 커밋 금지 — 이 프로젝트 코드 아님)
+.omc/
+.plugin-config/
+.complexity-log.md
+.pair-programming-session.md
+.todos-report.md/
