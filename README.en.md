@@ -4,6 +4,8 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 **[한국어](./README.md)**
 
+> 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — install, use, troubleshooting, and license, all explained simply.
+
 > Status: early stage (Phase 1a). Obsidian organizing is verified working; Notion indexing works in environments where a Notion tool is connected (see "Current status").
 
 ## What it does
