@@ -70,6 +70,11 @@ Just ask in chat:
 - It searches the index (Notion) and originals (Obsidian) and answers **with the source**. It **verifies the original actually exists before answering**, and if a note was deleted (dangling index) it says so honestly (never cites a ghost).
 - 🔗 **Ask across multiple notes too**: "synthesize the relationship between RAG, embeddings, and vector DBs from my notes" → it gathers the related notes and **synthesizes with per-note sources** (showing which notes it will use first).
 
+**Health-check it too** (read — on the notes you already organized):
+> "Health-check my 'Vault' vault"
+
+- 🩺 It finds the structural rot that piles up over time — **orphan notes** (linked to nothing), **broken `[[links]]`**, **duplicates**, **missing frontmatter**, and (if you use Notion) **dangling index rows** (original deleted but the Notion row remains) — and only **reports** them by default. It **won't fix things on its own** — pick what to fix and approve, and only then does it act: duplicates are **moved to 99_Archive (never hard-deleted)**, and link fixes back up the note first (anything irreversible is confirmed once more).
+
 ## Environment variables (optional)
 | Variable | Purpose |
 |---|---|
@@ -97,6 +102,7 @@ templates/           Note template
 - ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
 - ✅ The `.obsidian/` folder is never touched. Existing notes are never modified/deleted without approval.
 - ℹ️ Notion indexing only when a Notion tool is connected. Otherwise it organizes Obsidian only and reports honestly.
+- 🧾 **Run Log** — every note actually created/moved/fixed is auto-recorded (one line each) in `.wikimate/runlog.jsonl` (hidden). Just say **"show recent activity"** to review what was done (read-only audit log — "what did the AI do to my vault").
 
 ## Current status (honest)
 - ✅ **Obsidian organizing**: verified note creation in a real vault (including natural-language auto-trigger).

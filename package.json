@@ -1,6 +1,6 @@
 {
   "name": "wikimate",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Wikimate MCP 코어 — 자료를 옵시디언 노트로 수집/정리하는 이식 가능한 MCP 서버",
@@ -9,7 +9,7 @@
   "bin": { "wikimate-mcp": "mcp/server.mjs" },
   "scripts": {
     "start": "node mcp/server.mjs",
-    "verify": "node scripts/verify-collect.mjs"
+    "verify": "node scripts/verify-collect.mjs && node scripts/verify-lint.mjs && node scripts/verify-fix.mjs && node scripts/verify-runlog.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
