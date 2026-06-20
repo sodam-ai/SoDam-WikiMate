@@ -55,13 +55,17 @@ try {
   await writeFile(join(root, "30_Notes", "머리말없음.md"), note({ title: "머리말없음", fmOmit: true }), "utf8");
   // .obsidian 안 파일은 스캔에서 제외돼야 함
   await writeFile(join(root, ".obsidian", "설정메모.md"), note({ title: "설정", hash: "X" }), "utf8");
+  // 임베드(![[그림.png]])·첨부는 깨진링크 아님(오탐 방지)
+  await writeFile(join(root, "30_Notes", "임베드테스트.md"), "---\ntitle: 임베드테스트\nsource_hash: E1\ncreated: 2026-01-01\n---\n![[그림.png]]\n- [[연결대상]]", "utf8");
+  // 코드블록 속 링크 무시 + 본문 속 --- 가 frontmatter를 자르면 안 됨
+  await writeFile(join(root, "30_Notes", "코드프런트.md"), "---\ntitle: 코드프런트\nsource_hash: E2\ncreated: 2026-01-01\n---\n```\n[[코드속링크]]\n```\n\n---\n\n- [[연결대상]]", "utf8");
 
   const r = await lint({ vaultPath: root, now: NOW });
   console.log("\n=== lint 결과 요약 ===");
   console.log(r.summary, "| scanned:", r.scanned, "| notion_checked:", r.notion_checked);
   console.log("");
 
-  check(".obsidian 제외 (scanned=7)", r.scanned === 7);
+  check(".obsidian 제외 (scanned=9)", r.scanned === 9);
   check("중복 1그룹(DUPHASH, 2파일) 잡힘", r.duplicates.length === 1 && r.duplicates[0].files.length === 2);
   check("깨진 링크 '없는노트' 1건 잡힘", r.broken_links.some((b) => b.target === "없는노트"));
   check("존재하는 '연결대상'은 깨진링크 아님", !r.broken_links.some((b) => b.target === "연결대상"));
@@ -69,7 +73,11 @@ try {
   check("Inbox '새자료.md'는 고아 경보 제외", !r.orphans.some((o) => o.note.includes("새자료")));
   check("'연결대상.md'는 고아 아님(들어오는 링크 있음)", !r.orphans.some((o) => o.note.includes("연결대상")));
   check("frontmatter 누락 '머리말없음.md' 잡힘", r.malformed.some((m) => m.note.includes("머리말없음")));
-  check("basenames 반환(스킬 노션 대조용)", Array.isArray(r.basenames) && r.basenames.length === 7);
+  check("basenames 반환(스킬 노션 대조용)", Array.isArray(r.basenames) && r.basenames.length === 9);
+  check("임베드 ![[그림.png]]는 깨진링크 아님", !r.broken_links.some((b) => b.target.includes("그림")));
+  check("코드블록 속 [[코드속링크]]는 깨진링크 아님", !r.broken_links.some((b) => b.target === "코드속링크"));
+  check("깨진링크는 '없는노트' 1건뿐(오탐 0)", r.broken_links.length === 1 && r.broken_links[0].target === "없는노트");
+  check("본문 속 --- 가 frontmatter를 안 자름(코드프런트 정상)", !r.malformed.some((mm) => mm.note.includes("코드프런트")));
 
   // 볼트 미해결 시 ok:false 명시(조용히 통과 X)
   const r2 = await lint({ vaultPath: join(tmpdir(), "존재하지않는볼트XYZ_" + process.pid) });

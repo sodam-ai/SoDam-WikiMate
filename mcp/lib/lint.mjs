@@ -14,17 +14,15 @@ const RECENT_DAYS = 7;
 
 // frontmatter(머리말) 파싱 — 간단 key: value (+ aliases 배열)
 function parseFrontmatter(text) {
-  if (!text.startsWith("---")) return { fm: null, body: text };
-  const end = text.indexOf("\n---", 3);
-  if (end < 0) return { fm: null, body: text };
-  const raw = text.slice(3, end);
-  const body = text.slice(end + 4);
+  // 시작 --- 과 '자기 줄의' 닫는 --- 사이만 frontmatter. 본문 속 --- (수평선)에 안 속아야 함. CRLF·BOM 허용.
+  const m = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
+  if (!m) return { fm: null, body: text };
   const fm = {};
-  for (const line of raw.split(/\r?\n/)) {
-    const m = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
-    if (m) fm[m[1]] = m[2].trim();
+  for (const line of m[1].split(/\r?\n/)) {
+    const mm = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+    if (mm) fm[mm[1]] = mm[2].trim();
   }
-  return { fm, body };
+  return { fm, body: text.slice(m[0].length) };
 }
 
 // aliases: [a, b] → 소문자 배열
@@ -35,14 +33,22 @@ function parseAliases(val) {
     .map((s) => s.toLowerCase());
 }
 
-// 본문에서 [[위키링크]] 대상(앵커 #·^, 표시명 | 제거) 추출 — 소문자
+// 코드블록·인라인코드 제거 (그 안의 [[..]]는 실제 링크가 아니므로 오탐 방지)
+function stripCode(body) {
+  return String(body).replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
+}
+// 본문에서 노트 [[위키링크]] 대상 추출 — 임베드 ![[..]]·첨부파일(.png 등) 제외, 앵커 #·^·표시명 | 제거, 소문자
 function extractLinks(body) {
   const out = [];
-  const re = /\[\[([^\]]+)\]\]/g;
+  const re = /(!?)\[\[([^\]]+)\]\]/g;
+  const text = stripCode(body);
   let m;
-  while ((m = re.exec(body)) !== null) {
-    const t = m[1].split("|")[0].split("#")[0].split("^")[0].trim();
-    if (t) out.push(t.toLowerCase());
+  while ((m = re.exec(text)) !== null) {
+    if (m[1] === "!") continue; // 임베드(![[...]])는 노트 링크 아님
+    const t = m[2].split("|")[0].split("#")[0].split("^")[0].trim().replace(/\.md$/i, "");
+    if (!t) continue;
+    if (/\.[a-zA-Z0-9]{1,5}$/.test(t)) continue; // 첨부파일(.png/.pdf 등)은 노트 링크 아님
+    out.push(t.toLowerCase());
   }
   return out;
 }
@@ -116,7 +122,9 @@ export async function lint({ vault, vaultPath, now } = {}) {
   for (const n of notes) {
     const hasIncoming = targeted.has(n.baseLower) || n.aliases.some((a) => targeted.has(a));
     if (n.links.length === 0 && !hasIncoming) {
-      const benign = n.folder === "00_Inbox" || n.folder === "90_Templates" || daysSince(n.created, today) <= RECENT_DAYS;
+      const dAge = n.created ? daysSince(n.created, today) : 0;
+      const recent = !Number.isFinite(dAge) || dAge <= RECENT_DAYS; // created 없음/파싱불가 → 최근으로 간주(갓 만든 노트 오탐 방지)
+      const benign = ["00_Inbox", "90_Templates", "99_Archive"].includes(n.folder) || recent;
       if (!benign) orphans.push({ note: n.rel });
     }
   }

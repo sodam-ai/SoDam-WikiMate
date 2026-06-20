@@ -53,6 +53,35 @@ try {
   const t4 = await fix({ vaultPath: root, action: "delete", note: "30_Notes/링크원본.md", dryRun: true });
   check("미지원 action(delete) → ok:false (하드 삭제 경로 없음)", t4.ok === false);
 
+  // 9) ★보안: 절대경로/UNC/드라이브문자 차단(root 무시하고 볼트 밖 쓰기 시도)
+  const s1 = await fix({ vaultPath: root, action: "archive", note: "C:\\Windows\\System32\\evil.md", dryRun: true });
+  check("절대경로(C:\\) 차단 → ok:false", s1.ok === false);
+  const s2 = await fix({ vaultPath: root, action: "replace_link", note: "\\\\server\\share\\x.md", from: "a", dryRun: true });
+  check("UNC(\\\\server) 차단 → ok:false", s2.ok === false);
+  const s2b = await fix({ vaultPath: root, action: "archive", note: "/etc/passwd.md", dryRun: true });
+  check("루트절대경로(/) 차단 → ok:false", s2b.ok === false);
+
+  // 10) ★보안: .OBSIDIAN(대문자)·.wikimate(감사로그) 변조 차단
+  const s3 = await fix({ vaultPath: root, action: "archive", note: ".OBSIDIAN/app.json", dryRun: true });
+  check(".OBSIDIAN(대문자) 차단 → ok:false", s3.ok === false);
+  const s4 = await fix({ vaultPath: root, action: "replace_link", note: ".wikimate/runlog.jsonl", from: "a", dryRun: true });
+  check(".wikimate(감사로그) 변조 차단 → ok:false", s4.ok === false);
+
+  // 11) 표시명/앵커 있는 링크 [[옛이름|보임]] 치환(접미 보존)
+  await writeFile(join(root, "30_Notes", "표시링크.md"), "---\ntitle: 표시링크\n---\n- [[옛이름|보이는글]]\n- ![[그림.png]]", "utf8");
+  const d1 = await fix({ vaultPath: root, action: "replace_link", note: "30_Notes/표시링크.md", from: "옛이름", to: "새이름", dryRun: false, ts: TS });
+  const dispBody = await readFile(join(root, "30_Notes", "표시링크.md"), "utf8");
+  check("표시명 링크 [[옛이름|보이는글]]→[[새이름|보이는글]] 치환(접미 보존)", d1.replaced === 1 && dispBody.includes("[[새이름|보이는글]]"));
+
+  // 12) ★archive 이름충돌 시 절대 덮어쓰지 않음(데이터 손실 0)
+  await mkdir(join(root, "99_Archive"), { recursive: true });
+  await writeFile(join(root, "99_Archive", "충돌.md"), "기존-보존되어야함", "utf8");
+  await writeFile(join(root, "30_Notes", "충돌.md"), "새거", "utf8");
+  const c1 = await fix({ vaultPath: root, action: "archive", note: "30_Notes/충돌.md", dryRun: false, ts: TS });
+  const keep = await readFile(join(root, "99_Archive", "충돌.md"), "utf8");
+  const movedContent = await readFile(join(root, c1.moved_to), "utf8").catch(() => "");
+  check("archive 충돌 시 기존 보존 + 새 파일 별도 보관(덮어쓰기 0)", keep === "기존-보존되어야함" && movedContent === "새거");
+
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {
   await rm(root, { recursive: true, force: true }).catch(() => {});

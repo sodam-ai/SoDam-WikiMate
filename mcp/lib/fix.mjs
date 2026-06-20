@@ -8,20 +8,28 @@
 
 import { readFile, writeFile, rename, mkdir, copyFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join, resolve, relative, dirname, basename } from "node:path";
+import { join, resolve, relative, dirname, basename, isAbsolute } from "node:path";
 import { resolveVaultPath } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
+
+// 정규식 메타문자 이스케이프(링크 대상에 특수문자가 와도 리터럴로)
+function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
 function resolveRoot(vault, vaultPath) {
   return (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
 }
 
-// 볼트 내부 경로로 안전 해석 (traversal 차단, .obsidian 금지). 실패 시 null.
+// 볼트 내부 경로로 안전 해석. 실패 시 null.
+//  - 절대경로·드라이브문자(C:)·UNC(\\server) 거부 → root를 무시하고 볼트 밖으로 새는 것 차단
+//  - traversal(..) 차단
+//  - 점(.)으로 시작하는 경로 조각 전부 거부 → .obsidian/.OBSIDIAN(대소문자 무관)·.wikimate·.git 등 보호
 function safeInside(root, relPath) {
-  const abs = resolve(root, relPath);
+  const p = String(relPath || "");
+  if (!p || isAbsolute(p) || /^[a-zA-Z]:/.test(p) || /^[\\/]{2}/.test(p)) return null;
+  const abs = resolve(root, p);
   const rel = relative(resolve(root), abs);
   if (rel === "" || rel.startsWith("..")) return null;
-  if (rel.split(/[/\\]/).includes(".obsidian")) return null;
+  if (rel.split(/[/\\]/).some((seg) => seg.startsWith("."))) return null;
   return abs;
 }
 
@@ -49,7 +57,9 @@ export async function fix({ vault, vaultPath, action, note, from = "", to = "", 
     const name = basename(abs);
     let destRel = join("99_Archive", name);
     let dest = join(root, destRel);
-    if (existsSync(dest)) { destRel = join("99_Archive", `${stamp}_${name}`); dest = join(root, destRel); }
+    // 이름 충돌 시 절대 덮어쓰지 않는다(데이터 손실 방지) — 빈 자리 찾을 때까지 접미 증가
+    let i = 0;
+    while (existsSync(dest)) { i += 1; destRel = join("99_Archive", `${stamp}_${i}_${name}`); dest = join(root, destRel); }
     if (dryRun) return { ok: true, dry_run: true, action, note, would_move_to: destRel, reversible: true, note_kept: "삭제 아님 — 이동만" };
     await mkdir(join(root, "99_Archive"), { recursive: true });
     await rename(abs, dest);
@@ -61,15 +71,18 @@ export async function fix({ vault, vaultPath, action, note, from = "", to = "", 
   if (action === "replace_link") {
     if (!from) return { ok: false, reason: "replace_link에는 from(바꿀 [[링크]] 대상)이 필요해요." };
     const text = await readFile(abs, "utf8");
+    // [[from]], [[from|표시]], [[from#헤딩]], [[from^블록]], ![[from]] 모두 매칭. 대상만 교체(표시·앵커 보존), 임베드 '!'는 제거 시 함께 제거.
+    const re = new RegExp(`(!?)\\[\\[${escapeRe(from)}((?:[#^|])[^\\]]*)?\\]\\]`, "g");
+    const occurrences = (text.match(re) || []).length;
     const fromTok = `[[${from}]]`;
-    const toTok = to ? `[[${to}]]` : "";
-    const occurrences = text.split(fromTok).length - 1;
+    const toTok = to ? `[[${to}]]` : "(제거)";
     if (occurrences === 0) return { ok: false, reason: `노트에 [[${from}]] 링크가 없어요.` };
-    if (dryRun) return { ok: true, dry_run: true, action, note, from: fromTok, to: toTok || "(제거)", occurrences };
+    if (dryRun) return { ok: true, dry_run: true, action, note, from: fromTok, to: toTok, occurrences };
     const backup = await backupFile(root, abs, stamp);
-    await writeFile(abs, text.split(fromTok).join(toTok), "utf8");
-    await appendRunLog(root, { tool: "fix", action: "replace_link", request: note, changed: note, detail: `${fromTok} → ${toTok || "(제거)"} ×${occurrences}`, backup, result: "ok" });
-    return { ok: true, dry_run: false, action, note, replaced: occurrences, from: fromTok, to: toTok || "(제거)", backup };
+    const next = text.replace(re, (_m, bang, suffix) => (to ? `${bang}[[${to}${suffix || ""}]]` : ""));
+    await writeFile(abs, next, "utf8");
+    await appendRunLog(root, { tool: "fix", action: "replace_link", request: note, changed: note, detail: `${fromTok} → ${toTok} ×${occurrences}`, backup, result: "ok" });
+    return { ok: true, dry_run: false, action, note, replaced: occurrences, from: fromTok, to: toTok, backup };
   }
 
   return { ok: false, reason: `알 수 없는 action: ${action} (지원: archive | replace_link)` };
