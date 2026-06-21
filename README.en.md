@@ -4,9 +4,11 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 **[한국어](./README.md)**
 
-> 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — install, use, troubleshooting, and license, all explained simply.
+> 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — glossary, install, use, troubleshooting, and license, all explained simply.
 
 > Status: **v0.6.0** — organize, query, vault health-check, and run log (4 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
+
+> 📱 **Device note:** Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets**.
 
 ## What it does
 - 🧹 **Organize in plain language** — just say "organize this link" and a note is created (no need to call any tool by hand).
@@ -19,12 +21,23 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 - 🩺 **Vault health-check** — finds duplicates, broken `[[links]]`, orphan notes, and missing frontmatter and **reports**; on approval it fixes **without deleting** (archive + backup).
 - 🧾 **Run log** — auto-records what the AI did in your vault ("show recent activity").
 
+## 30-second glossary (for beginners)
+| Word | Plain meaning |
+|---|---|
+| **Plugin** | A new-feature part you plug into a program (like installing one more app) |
+| **Marketplace** | The app store you get plugins from |
+| **MCP / MCP tool** | The pipe connecting AI to tools / a feature button pressed through that pipe |
+| **Vault** | The folder in Obsidian that holds your notes (it has a name) |
+| **dry-run** | Showing "the plan" before actually doing it (a preview) |
+
+> More terms in [Beginner's Guide §1](./GUIDE.en.md).
+
 ## Install (Claude Code)
 > ⚠️ Enter the **two commands one at a time** (don't paste both together, or the URL breaks).
 
 **1) Add the marketplace** — enter, then confirm "added":
 ```
-/plugin marketplace add https://github.com/sodam-ai/wikimate.git
+/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) Install the plugin** — after step 1 finishes:
 ```
@@ -32,16 +45,19 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 ```
 Restart Claude Code and you're done. (To verify, check `/mcp` for the 4 tools: `wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`.)
 
+## How to run
+**There is nothing separate to "launch."** Once installed, Wikimate starts automatically together with Claude Code. "Running it" just means **opening Claude Code and asking in chat**. (Developers who want to run the server directly: `npm install` then `npm start` in the cloned folder.)
+
 ## Install (Codex)
 Codex has **no** `/plugin` marketplace. Instead, clone the repo and register it as an **MCP server**.
 
 **1) Clone**
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) Register the MCP server** (use your own vault/repo paths):
 ```
-codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault/path -- node D:/your/cloned/wikimate/mcp/server.mjs
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault/path -- node D:/your/cloned/SoDam-WikiMate/mcp/server.mjs
 ```
 → `codex mcp list` should show `wikimate`.
 
@@ -112,7 +128,7 @@ scripts/               Verification scripts (verify-*, smoke-*)
 - ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
 - ✅ The `.obsidian/` folder is never touched. Existing notes are never modified/deleted without approval.
 - ℹ️ Notion indexing only when a Notion tool is connected. Otherwise it organizes Obsidian only and reports honestly.
-- 🧾 **Run Log** — every note actually created/moved/fixed is auto-recorded (one line each) in `.wikimate/runlog.jsonl` (hidden). Just say **"show recent activity"** to review what was done (read-only audit log — "what did the AI do to my vault").
+- 🧾 **Run Log** — every note actually created/moved/fixed is auto-recorded (one line each) in `.wikimate/runlog.jsonl` (hidden). Just say **"show recent activity"** to review what was done (read-only audit log).
 
 ## Current status (honest)
 - ✅ **Obsidian organizing**: verified note creation in a real vault (including natural-language auto-trigger).
@@ -129,10 +145,16 @@ scripts/               Verification scripts (verify-*, smoke-*)
 - **Install fails with `EBUSY ... locked`** → Antivirus file lock. Quit and reopen Claude Code, then reinstall (see "When updates don't show up"). If it repeats, wait a moment and retry.
 - **An old version (e.g. 0.1.0) gets installed** → The marketplace cache is stale. Refresh via `marketplace update` (or remove → re-add) above.
 
+> More symptoms and fixes are tabulated in [Beginner's Guide §15](./GUIDE.en.md).
+
 ## Reference tools
 [notesmd-cli](https://github.com/Yakitrak/notesmd-cli) · [mcp-obsidian](https://github.com/MarkusPfundstein/mcp-obsidian) · [notion-mcp-server](https://github.com/makenotion/notion-mcp-server) · [ntn CLI](https://developers.notion.com/cli/get-started/overview)
 
-## License
-Apache License 2.0 © 2026 SoDam AI Studio
+## License · Copyright · Commercial use
+> ⚖️ This is general information, **not legal advice.** The authoritative notices are the `LICENSE` and `NOTICE` files.
 
-> For development, testing, and deployment, see [DEVELOPMENT.md](./DEVELOPMENT.md).
+- **Wikimate itself: Apache License 2.0** © 2026 SoDam AI Studio. Commercial use, modification, and distribution are allowed, but you must **include the copyright notice + a copy of the license**, **state changes**, and **keep NOTICE**. Provided **AS-IS, no warranty**, and **no trademark rights** (don't use the names "Wikimate" / "SoDam AI Studio" as your own).
+- **External tools are NOT bundled** — Node.js, @modelcontextprotocol/sdk, notesmd-cli, mcp-obsidian, notion-mcp-server are **MIT**; **Notion API/`ntn` follow Notion's terms**; **Obsidian is free for personal use but needs a separate commercial license**. Check each one's own terms.
+- **Content copyright** stays with the original authors. Respect each source's license/terms when collecting or redistributing. Notes are stored **locally on your computer** and not sent out (Notion indexing only when you enable it).
+
+> Full license table + disclaimer in [Beginner's Guide §17](./GUIDE.en.md) or `NOTICE`. For development/testing/deploy, see [DEVELOPMENT.md](./DEVELOPMENT.md).

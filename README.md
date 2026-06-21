@@ -4,9 +4,11 @@ AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링
 
 **[English](./README.en.md)**
 
-> 📘 **처음이세요?** 그대로 따라 하는 [왕초보 가이드](./GUIDE.ko.md) ([PDF](./GUIDE.ko.pdf))를 보세요 — 설치·사용·문제해결·라이선스까지 전부 쉽게 설명해요.
+> 📘 **처음이세요?** 그대로 따라 하는 [왕초보 가이드](./GUIDE.ko.md) ([PDF](./GUIDE.ko.pdf))를 보세요 — 용어 사전·설치·사용·문제해결·라이선스까지 전부 쉽게 설명해요.
 
 > 상태: **v0.6.0** — 정리·검색·볼트 건강검진·작업 로그(MCP 도구 4개) 동작·검증 완료. 노션 색인은 노션 도구가 연결된 환경에서 동작(아래 "현재 상태" 참고).
+
+> 📱 **기기 안내:** Wikimate는 **윈도우 PC(데스크톱·노트북) 전용**이에요. **스마트폰·태블릿에는 설치되지 않습니다.**
 
 ## 무엇을 해주나요?
 - 🧹 **자연어로 정리** — "이 링크 정리해줘" 한마디면 노트가 만들어져요(도구를 따로 안 불러도 됨).
@@ -19,12 +21,23 @@ AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링
 - 🩺 **볼트 건강검진** — 중복·깨진 `[[링크]]`·고아 노트·머리말 누락을 찾아 **보고**하고, 승인하면 **삭제 없이**(보관함 이동·백업) 고쳐요.
 - 🧾 **작업 로그** — AI가 내 볼트에서 한 일을 자동 기록("최근 작업 보여줘").
 
+## 30초 용어 (왕초보용)
+| 낱말 | 쉬운 뜻 |
+|---|---|
+| **플러그인** | 프로그램에 끼워 넣는 새 기능 부품 (앱 추가 설치 같은 것) |
+| **마켓플레이스** | 플러그인을 받아오는 앱 장터 |
+| **MCP / MCP 도구** | AI와 도구를 잇는 통로 / 그 통로로 누르는 기능 버튼 |
+| **볼트(Vault)** | 옵시디언에서 노트를 모아 두는 보관 폴더(이름이 있어요) |
+| **dry-run** | 실제로 하기 전에 "계획만" 미리보기 |
+
+> 더 많은 용어는 [왕초보 가이드 1번](./GUIDE.ko.md)에 있어요.
+
 ## 설치 (Claude Code)
 > ⚠️ 아래 **두 명령을 한 줄씩 따로** 입력하세요. (한꺼번에 붙여넣으면 URL이 깨져 실패해요.)
 
 **1) 마켓플레이스 추가** — 입력 후 Enter, "added" 확인:
 ```
-/plugin marketplace add https://github.com/sodam-ai/wikimate.git
+/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) 플러그인 설치** — 1)이 끝난 뒤:
 ```
@@ -32,16 +45,19 @@ AI 에이전트에게 **"정리해줘"** 라고 하면, 흩어진 자료(웹 링
 ```
 설치 후 Claude Code를 재시작하면 끝. (확인하고 싶으면 `/mcp`에 `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog` 4개가 보이면 성공)
 
+## 실행 방법
+**따로 "실행(켜기)"할 게 없어요.** 설치만 하면 Claude Code를 켤 때마다 자동으로 함께 켜져요. "실행"은 곧 **Claude Code를 켜고 대화창에 말로 시키는 것**이 전부예요. (개발자가 서버를 직접 돌리려면 받은 폴더에서 `npm install` 후 `npm start`.)
+
 ## 설치 (Codex)
 Codex엔 `/plugin` 마켓플레이스가 **없어요.** 대신 저장소를 받아 **MCP 서버로 등록**합니다.
 
 **1) 저장소 받기**
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) MCP 서버 등록** (볼트·저장소 경로는 본인 것으로 바꾸세요):
 ```
-codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:/받은/경로/wikimate/mcp/server.mjs
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:/받은/경로/SoDam-WikiMate/mcp/server.mjs
 ```
 → `codex mcp list` 에 `wikimate`가 보이면 성공.
 
@@ -112,7 +128,7 @@ scripts/               검증 스크립트(verify-*·smoke-*)
 - ✅ 옵시디언 CLI는 **셸 없이** 실행(명령 주입 방지). 키·토큰은 노트·배포물에 저장하지 않음.
 - ✅ `.obsidian/` 폴더는 건드리지 않음. 기존 노트는 승인 없이 수정·삭제하지 않음.
 - ℹ️ 노션 색인은 노션 도구가 연결돼 있을 때만. 안 되면 옵시디언만 정리하고 솔직히 보고해요.
-- 🧾 **작업 기록(Run Log)** — 실제로 만들거나·옮기거나·고친 노트는 자동으로 `.wikimate/runlog.jsonl`(숨김)에 한 줄씩 남아요. **"최근 작업 보여줘"** 라고 하면 무엇을 했는지 되짚어 드립니다(읽기 전용 안전 로그 — "AI가 내 볼트에 뭘 했는지" 확인용).
+- 🧾 **작업 기록(Run Log)** — 실제로 만들거나·옮기거나·고친 노트는 자동으로 `.wikimate/runlog.jsonl`(숨김)에 한 줄씩 남아요. **"최근 작업 보여줘"** 라고 하면 무엇을 했는지 되짚어 드립니다(읽기 전용 안전 로그).
 
 ## 현재 상태 (정직하게)
 - ✅ **옵시디언 정리**: 실제 볼트에 노트 생성 확인(자연어 자동 발동 포함).
@@ -129,10 +145,16 @@ scripts/               검증 스크립트(verify-*·smoke-*)
 - **설치가 `EBUSY ... locked` 로 실패해요** → 백신 파일 잠금이에요. Claude Code를 껐다 켠 뒤 다시 설치(위 "업데이트" 참고). 반복되면 잠시 뒤 재시도.
 - **옛날 버전(예: 0.1.0)이 깔려요** → 마켓플레이스 캐시가 옛것이에요. 위 "업데이트"의 `marketplace update`(또는 remove → 다시 add)로 갱신하세요.
 
+> 더 많은 증상·해결은 [왕초보 가이드 15번](./GUIDE.ko.md)에 표로 정리돼 있어요.
+
 ## 참고 도구
 [notesmd-cli](https://github.com/Yakitrak/notesmd-cli) · [mcp-obsidian](https://github.com/MarkusPfundstein/mcp-obsidian) · [notion-mcp-server](https://github.com/makenotion/notion-mcp-server) · [ntn CLI](https://developers.notion.com/cli/get-started/overview)
 
-## 라이선스
-Apache License 2.0 © 2026 SoDam AI Studio
+## 라이선스 · 저작권 · 상업적 이용
+> ⚖️ 아래는 일반 안내이며 **법률 자문이 아니에요.** 정확한 고지는 `LICENSE`·`NOTICE` 파일이 정본입니다.
 
-> 개발·테스트·배포 방법은 [DEVELOPMENT.md](./DEVELOPMENT.md) 참고.
+- **Wikimate 본체: Apache License 2.0** © 2026 SoDam AI Studio. 상업적 이용·수정·배포 허용, 단 **저작권 고지+라이선스 사본 포함**·**변경 표시**·**NOTICE 유지** 필요. **무보증(AS-IS)**, **상표 권리 미부여**("Wikimate"·"SoDam AI Studio" 이름 임의 사용 금지).
+- **외부 도구는 번들 아님** — Node.js·@modelcontextprotocol/sdk·notesmd-cli·mcp-obsidian·notion-mcp-server는 **MIT**, **Notion API/`ntn`은 Notion 약관**, **Obsidian은 개인 무료·상업용 별도 라이선스**. 각자 원문 약관을 직접 확인하세요.
+- **콘텐츠 저작권**은 원저작자에게 있어요. 수집·재배포 시 원저작물의 라이선스·약관을 지키세요. 노트는 **내 컴퓨터(로컬)** 에만 저장되고 외부로 보내지 않아요(노션 색인은 내가 켤 때만).
+
+> 전체 라이선스 표·면책은 [왕초보 가이드 17번](./GUIDE.ko.md) 또는 `NOTICE` 참고. 개발·테스트·배포 방법은 [DEVELOPMENT.md](./DEVELOPMENT.md).
