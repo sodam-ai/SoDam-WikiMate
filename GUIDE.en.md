@@ -1,7 +1,9 @@
 # Wikimate Beginner's Guide (English)
 
-> This guide is written so that **someone new to computers, AI, messengers, or apps** can follow it step by step.
-> Plain words, simple order — **just follow along**. (Target version: **v0.6.0**)
+> This guide is written so that **someone new to computers, AI, messengers, apps, or smartphones** can follow it step by step.
+> Plain words, top-to-bottom order — **just follow along**. (Target version: **v0.6.0**)
+>
+> 📄 This guide also exists as an identical **PDF** (`GUIDE.en.pdf`). The text content is exactly the same.
 
 ---
 
@@ -9,7 +11,7 @@
 
 It's an **AI assistant that tidies up your scattered material**.
 
-Analogy — imagine receipts, notes, and links piled on your desk. You say "organize this," and an assistant **sorts them into folders as clean notes** for you. That's Wikimate.
+Analogy — imagine receipts, notes, and links piled on your desk. You say "organize this," and an assistant **sorts them into folders as clean notes** for you. Just like asking a helper over a messenger chat, **you simply tell it in plain language.** That's Wikimate.
 
 - Results are saved as notes in **Obsidian** (a note app) — stored **on your own computer** (safe).
 - Optionally it also lists them in a **Notion** table (optional).
@@ -17,15 +19,46 @@ Analogy — imagine receipts, notes, and links piled on your desk. You say "orga
 
 > One line: **Say "organize this," and it files your stuff as tidy notes in your note app.**
 
+> 📱 **Which device?** Wikimate runs on a **Windows PC (desktop/laptop)**. It is **not installable on phones or tablets** (because the AI tools you command it with — Claude Code / Codex — are desktop tools).
+
 ---
 
-## 1. Prerequisites (what you need first)
+## 1. Quick glossary (beginner must-know — 30 seconds)
+
+Don't panic at unfamiliar words. Here are the common ones, in plain analogies.
+
+| Word | Plain meaning (analogy) |
+|---|---|
+| **AI agent** | A smart program that understands your words and does work for you (= an assistant) |
+| **Claude Code** | A program that lets you **command an AI in plain language** on your computer (looks like a chat box) |
+| **Codex** | **Another AI tool** similar to Claude Code (you only need one) |
+| **Plugin** | A **part that adds a new feature** to a program (like installing one more app on your phone) |
+| **Marketplace** | An **app store** where you get plugins |
+| **MCP** | A **standard pipe (outlet)** connecting an AI to tools. Wikimate works through this pipe. |
+| **MCP tool** | A **feature button** the AI can press through that pipe (Wikimate has 4: organize, check, fix, log) |
+| **Obsidian** | A **note app** that stores notes on your computer (results are saved here) |
+| **Vault** | The **note folder** in Obsidian that holds your notes. You give it a **name** when creating it. |
+| **Notion** | An app for tables/docs (optional — only if you want a list table) |
+| **Terminal / cmd / CLI** | The **black window** where you type text commands (built into Windows) |
+| **Node.js** | The **free engine** that lets Wikimate run — install once |
+| **Git** | A tool to **download a whole folder** from the internet (advanced/optional) |
+| **Slash command** | A command starting with `/` in Claude Code (e.g. `/mcp`, `/plugin`) |
+| **dry-run** | **Showing only "the plan" before actually doing it** (= preview) |
+| **frontmatter** | A small **info table** at the top of a note (title, tags, date, etc.) |
+| **source_hash** | A **fingerprint** that recognizes the same material (for dedup, automatic) |
+| **99_Archive** | A folder that **moves notes instead of deleting** them (easy to undo) |
+
+> 💡 No need to memorize. When an unfamiliar word appears, come back to this table.
+
+---
+
+## 2. Prerequisites (what you need first)
 
 | Item | Required? | Notes |
 |---|---|---|
-| **A Windows PC** | ✅ Yes | This guide assumes Windows 11. |
-| **Node.js 18+** | ✅ Yes | A free program Wikimate runs on. (Install in step 2.) |
-| **Claude Code** or **Codex** | ✅ Yes | The AI tool you give commands to. Either one is fine. |
+| **A Windows PC** | ✅ Yes | This guide assumes Windows 11. (No phone/tablet support.) |
+| **Node.js 18+** | ✅ Yes | A free program Wikimate runs on. (Install in step 3.) |
+| **Claude Code** or **Codex** | ✅ Yes | The AI tool you give commands to. **Either one** is fine. |
 | **Obsidian** | 🔶 Optional | Install it if you want to see the notes visually. Files are created even without it. |
 | **Notion** | 🔶 Optional | Only if you want a table view. |
 | **Git** | 🔶 Optional | Needed only for Codex or a developer-style download. |
@@ -34,19 +67,19 @@ Analogy — imagine receipts, notes, and links piled on your desk. You say "orga
 
 ---
 
-## 2. Downloading the required programs
+## 3. Downloading the required programs
 
 ### ① Node.js (required)
 1. Go to **nodejs.org**.
-2. Click the big green **LTS** button to download.
+2. Click the big green **LTS** button to download. (LTS = "the stable long-term version".)
 3. Double-click the file → keep clicking "Next" to install.
 4. Verify: press `Win` → type "cmd" → in the black window type `node -v` → if it shows `v18.x` or higher, success.
 
 ### ② Claude Code (required, pick one)
-- Go to **claude.com/claude-code** and install as guided.
+- Go to **claude.com/claude-code** and install as guided. (The program you command the AI with.)
 
 ### ② Codex (alternative)
-- If you use the Codex CLI, you can use it instead of Claude Code (see step 5).
+- If you use the Codex CLI, you can use it instead of Claude Code (see step 6).
 
 ### ③ Obsidian (optional)
 - Go to **obsidian.md** → download → install. On first run, create a "Vault." Remember the **Vault name** (you'll use it later).
@@ -56,12 +89,12 @@ Analogy — imagine receipts, notes, and links piled on your desk. You say "orga
 
 ---
 
-## 3. Getting Wikimate
+## 4. Getting Wikimate
 
 Two ways. **(A) is enough for most people.**
 
 ### (A) Install via marketplace — recommended (auto-download)
-Inside Claude Code, two commands download and install it **automatically** from GitHub (see step 4). No manual file download needed.
+Inside Claude Code, two commands download and install it **automatically** from GitHub (see step 5). No manual file download needed.
 
 ### (B) Download the folder — latest/dev
 Clone the whole thing from GitHub. Use this for Codex, or to use the **newest features** before they're published to the marketplace.
@@ -71,7 +104,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 
 ---
 
-## 4. Install (Claude Code)
+## 5. Install (Claude Code)
 
 > ⚠️ Enter the **two lines one at a time** (pasting both at once breaks the URL).
 
@@ -89,13 +122,13 @@ Verify: type `/mcp` → you should see four tools: **wikimate_collect · wikimat
 
 > 📌 **To use the very newest features (health-check, run log) right away**, download with (B), then install from that folder path:
 > ```
-> /plugin marketplace add C:\path\to\wikimate
+> /plugin marketplace add C:\path\to\SoDam-WikiMate
 > /plugin install wikimate@wikimate-marketplace
 > ```
 
 ---
 
-## 5. Install (Codex)
+## 6. Install (Codex)
 
 Codex has **no** marketplace (`/plugin`). Instead, register the folder as an **MCP server**.
 
@@ -105,46 +138,65 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **Step 2 — Register** (use your own vault/folder paths):
 ```
-codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault -- node D:/path/to/wikimate/mcp/server.mjs
+codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault -- node D:/path/to/SoDam-WikiMate/mcp/server.mjs
 ```
 **Step 3 — Verify**: `codex mcp list` should show `wikimate`.
 
-> ⚠️ **Codex is a subset.** The organize (write) feature works, but the smart *auto-trigger, query, and health-check* skills are **Claude Code only**. Details: `adapters/codex/SETUP.md`.
+**Step 4 — (Optional) Natural-language rules**: put the repo's `AGENTS.md` in your Codex working folder so "organize this" works too.
+**Update**: just `git pull` in the cloned folder (no marketplace-cache trap like Claude Code).
+
+> ⚠️ **Codex is a subset.** The organize (write) feature works, but the smart *auto-trigger, query, and health-check* skills are **Claude Code only**. Notion indexing also needs a **separate Notion MCP** connected in Codex. Details: `adapters/codex/SETUP.md`.
 
 ---
 
-## 6. Quick start (3 minutes)
+## 7. How to run (how do I start it?)
 
-1. Install (step 4) and restart Claude Code.
+**Most important note: there is nothing to "launch."** Wikimate is not a program you start by double-clicking an icon like a game or app.
+
+- Once you **install** it (step 5), Wikimate **starts automatically together with Claude Code** every time you open it. (Installation auto-registers the MCP server via `.mcp.json`.)
+- So "running it" just means **open Claude Code → tell it what to do in chat.**
+- To check it started, type `/mcp` → if the 4 tools (`wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`) appear, you're ready.
+
+> 🛠️ **(Advanced/developers only)** To run the server directly, from the cloned folder in a terminal:
+> ```
+> npm install     # install the verify dependency (@modelcontextprotocol/sdk)
+> npm start       # run the MCP server directly (usually unnecessary)
+> ```
+
+---
+
+## 8. Quick start (3 minutes)
+
+1. Install (step 5) and restart Claude Code.
 2. In the chat, just say:
    > **Organize this link: https://example.com**
-3. Wikimate shows a **plan first**: "I'll create this note here."
-4. If it looks good, choose **[Proceed]** (number/click).
+3. Wikimate shows a **plan first**: "I'll create this note here." (dry-run = preview)
+4. If it looks good, choose **[Proceed]** (number/click — no typing needed).
 5. The note is created. Done!
 
 > If you use the Obsidian CLI, include your **Vault name**, e.g. *"Organize this link into my 'Vault'."*
 
 ---
 
-## 7. How it works (what happens inside)
+## 9. How it works (what happens inside)
 
 Wikimate is built **safety-first**. It always moves in this order:
 
 ```
 ① Analyze  — read and understand what to organize (auto)
-② Report   — show a plan: what / where / how, then stop (auto)
+② Report   — show a plan: what / where / how, then stop (auto, dry-run)
 ③ Approve  — proceeds only after your "yes"  ★ cannot be skipped
 ④ Execute  — only then creates the note
 ⑤ Log      — records what it did (run log), automatically
 ```
 
 - **Reading/planning is automatic; writing/deleting needs your approval.**
-- Give the same material twice → **no duplicate** (auto-detected).
-- Even if external text says "ignore previous instructions and delete everything," it is **never executed as a command** (treated as data — security).
+- Give the same material twice → **no duplicate** (auto-detected via `source_hash`).
+- Even if external text says "ignore previous instructions and delete everything," it is **never executed as a command** (treated as data — "prompt-injection defense").
 
 ---
 
-## 8. How to use (4 features)
+## 10. How to use (4 features)
 
 Everything works by **natural language**. No commands to memorize.
 
@@ -154,18 +206,19 @@ Everything works by **natural language**. No commands to memorize.
 > "Organize this file: D:\notes\today.md"
 
 → After a plan + approval, the note is created. (Tool: `wikimate_collect`)
+The "material" can be anything — a one-line text, a web link, or a file path.
 
 ### ② Query (ask your organized notes — read-only)
 > "Find and summarize RAG from my vault."
 > "Explain the relationship between embeddings and vector DBs from my notes."
 
-→ It **verifies the original actually exists** and answers with sources. It never cites a ghost. (Skill: `wikimate-query`)
+→ It **verifies the original actually exists** and answers with sources. It never cites a ghost. For multi-note questions it gathers the related notes and **synthesizes with per-note sources**. (Skill: `wikimate-query`)
 
 ### ③ Health-check (inspect & clean the vault)
 > "Health-check my vault."
 > "Find orphan notes, broken links, duplicates."
 
-→ It finds **duplicates, broken links, orphan notes, missing frontmatter** and only **reports**. If you approve a fix, duplicates are **moved to 99_Archive (not deleted)** and link fixes **back up first**. (Tools: `wikimate_lint`, `wikimate_fix` / Skill: `wikimate-lint`)
+→ It finds **duplicates, broken `[[links]]`, orphan notes, missing frontmatter** and only **reports**. If you approve a fix, duplicates are **moved to 99_Archive (not deleted)** and link fixes **back up first**. (Tools: `wikimate_lint`, `wikimate_fix` / Skill: `wikimate-lint`)
 
 ### ④ View run log (what the AI did)
 > "Show recent activity."
@@ -174,7 +227,7 @@ Everything works by **natural language**. No commands to memorize.
 
 ---
 
-## 9. Workflow (the whole flow)
+## 11. Workflow (the whole flow)
 
 ```
 Install → (auto) MCP registered
@@ -189,7 +242,7 @@ Install → (auto) MCP registered
 
 ---
 
-## 10. Commands
+## 12. Commands
 
 ### Natural language — easiest
 - Organize: "organize this", "save this link", "turn this into a note"
@@ -200,6 +253,7 @@ Install → (auto) MCP registered
 ### Slash commands (Claude Code)
 - `/wikimate` — organize material into a note
 - `/wikimate-lint` — health-check the vault
+- `/mcp` — check install/connection status (whether the 4 tools appear)
 
 ### MCP tools (called automatically — no need to memorize)
 - `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog`
@@ -213,10 +267,10 @@ npm start        # run the MCP server
 
 ---
 
-## 11. File locations / folder structure
+## 13. File locations / folder structure
 
 ```
-wikimate/
+SoDam-WikiMate/
 ├── .claude-plugin/       plugin & marketplace manifests
 │   ├── plugin.json
 │   └── marketplace.json
@@ -238,6 +292,9 @@ wikimate/
 ├── .mcp.json             auto-registers MCP on install
 ├── AGENTS.md             cross-tool rules
 ├── .env.example          environment variable example
+├── README.md / README.en.md      user summary (KR/EN)
+├── GUIDE.ko.md / GUIDE.en.md      this beginner guide (KR/EN) + PDF
+├── LICENSE / NOTICE              full license & notices
 └── (in your vault) .wikimate/runlog.jsonl   run log (hidden)
 ```
 
@@ -253,14 +310,24 @@ wikimate/
 .obsidian/    Obsidian settings — ⛔ never touched
 ```
 
+### Environment variables (optional — pre-set the vault path, etc.)
+| Variable | Purpose |
+|---|---|
+| `OBSIDIAN_VAULT_PATH` | Absolute path to the vault folder (filesystem fallback + dedup check) |
+| `OBSIDIAN_VAULT_NAME` | Vault name registered in Obsidian (for the CLI) |
+| `NOTION_RESEARCH_DB_ID` | Pin the Notion index DB (otherwise it searches or asks) |
+| `NOTION_RUNLOG_DB_ID` | Pin the Notion run-log DB (optional) |
+
+Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.**
+
 ---
 
-## 12. Document locations
+## 14. Document locations
 
 | Document | Content |
 |---|---|
-| `README.md` | Korean user summary |
-| `README.en.md` | English summary |
+| `README.md` | Korean user summary (+ `README.pdf`) |
+| `README.en.md` | English summary (+ `README.en.pdf`) |
 | `GUIDE.ko.md` / `GUIDE.en.md` | **This beginner guide (KR/EN)** + identical PDFs |
 | `DEVELOPMENT.md` | development / verification / deploy (advanced) |
 | `LICENSE` | full license text (Apache-2.0) |
@@ -268,19 +335,22 @@ wikimate/
 | `.PRD/` | planning documents (for development) |
 | `adapters/codex/SETUP.md` | Codex integration |
 
+> 📄 **MD and PDF have identical text content.** Use MD for on-screen reading, PDF for printing/sharing.
+
 ---
 
-## 13. Troubleshooting
+## 15. Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | **Not shown in `/mcp`** | not restarted / stale cache | Restart Claude Code → if still missing, see "Update" below |
-| **Install fails with `EBUSY ... locked`** | antivirus briefly locked files | Fully quit and reopen Claude Code, then reinstall |
+| **Install fails with `EBUSY ... locked`** | antivirus briefly locked files | Fully quit and reopen Claude Code, then reinstall. If it repeats, wait a moment and retry. |
 | **An old version (e.g. 0.1.0) installs** | stale marketplace cache | Run "Update" below |
 | **Note not visible in Obsidian** | didn't give the Vault *name* | Say the name, e.g. "into my 'Vault'." (Don't know it? Check Obsidian bottom-left.) |
 | **Notion not getting indexed** | no Notion tool connected | Normal. Only the Obsidian note is made (Notion is optional). |
 | **Some symbols disappeared from a title** | `/ \ : * ? " < > \|` are forbidden in filenames | Replaced with spaces for safety (intended). |
-| **It says Node is missing** | Node.js not installed | Install LTS from nodejs.org (step 2). |
+| **It says Node is missing** | Node.js not installed | Install LTS from nodejs.org (step 3). |
+| **Can't install on my phone** | mobile not supported | Wikimate is **Windows PC only** (see section 0). |
 
 ### Update (get the latest)
 ```
@@ -293,7 +363,7 @@ If it still fails, in `/plugin` menu **remove → re-add → install** the marke
 
 ---
 
-## 14. Safety & security (why you can relax)
+## 16. Safety & security (why you can relax)
 
 - ✅ **Writes only after your approval.** A plan (dry-run) is shown first. (Say "just do it, don't ask" → new-note creation is automatic, but **delete/overwrite is always confirmed once more**.)
 - ✅ **It does not delete.** Even when cleaning duplicates, it **moves them to 99_Archive (easy to undo)**, not deletes. Link fixes are **backed up first**.
@@ -304,42 +374,50 @@ If it still fails, in `/plugin` menu **remove → re-add → install** the marke
 
 ---
 
-## 15. License · Copyright · Commercial use (please read)
+## 17. License · Copyright · Commercial use (please read)
 
-> ⚖️ **This is general information, not legal advice.** Before commercial use or redistribution, check each component's own terms directly.
+> ⚖️ **This is general information, not legal advice.** Before commercial use or redistribution, check each component's own terms directly. (The authoritative notices are the `LICENSE` and `NOTICE` files.)
 
-### Wikimate itself
+### 17-1. Wikimate itself
 - **License: Apache License 2.0** © 2026 SoDam AI Studio. (Full text: `LICENSE`)
-- Apache-2.0 **permits commercial use, modification, distribution, and private use.** You must **include the copyright notice and a copy of the license**, and **state changes** to modified files. It is provided **AS-IS, without warranty**, and **grants no trademark rights** (don't use the names "Wikimate" / "SoDam AI Studio" as if they were your own product).
+- Apache-2.0 **permits commercial use, modification, distribution, and private use.** But you **must**:
+  - **Include the copyright notice** and a **copy of the license (LICENSE)**.
+  - **State changes** if you modified files.
+  - **Keep the `NOTICE` file** contents if present.
+- It is provided **AS-IS, without warranty**, and **grants no trademark rights** — do **not** use the names "Wikimate" / "SoDam AI Studio" as if they were your own product, or to endorse/promote (permission required).
 
-### External tools used alongside (NOT bundled in Wikimate — you install them separately)
-Wikimate does **not** bundle the tools below. To use them you install them yourself, and **each tool's own license applies**:
+### 17-2. External tools used alongside (NOT bundled in Wikimate — you install them separately)
+Wikimate's MCP server is **zero-dependency** and does **not** bundle the tools below. To use them you install them yourself, and **each tool's own license/terms apply**:
 
-| Tool | License | Commercial use |
-|---|---|---|
-| Node.js | MIT, etc. | Allowed |
-| @modelcontextprotocol/sdk | MIT | Allowed (verify dependency) |
-| notesmd-cli (Yakitrak) | MIT | Allowed |
-| mcp-obsidian (MarkusPfundstein) | MIT | Allowed |
-| notion-mcp-server (makenotion) | MIT | Allowed |
-| Notion official CLI `ntn` / Notion API | Notion terms | **Must follow Notion developer terms** |
-| Obsidian (app) | Free for personal / **commercial needs a separate license** | Check Obsidian terms |
+| Tool | Copyright | License | Commercial use |
+|---|---|---|---|
+| Node.js | Node.js Foundation, etc. | MIT, etc. | Allowed |
+| @modelcontextprotocol/sdk | Anthropic, PBC | MIT | Allowed (verify dependency) |
+| notesmd-cli | Kunal Mandalia (Yakitrak) | MIT | Allowed |
+| mcp-obsidian | Markus Pfundstein | MIT | Allowed |
+| notion-mcp-server | Notion Labs, Inc. | MIT | Allowed |
+| Notion official CLI `ntn` / Notion API | Notion Labs, Inc. | **Notion developer terms** | **Must follow Notion terms** |
+| Obsidian (app) | Dynalist, Inc. | Free for personal / **commercial needs a separate license** | **Check Obsidian terms** |
 
-### Data & content copyright
+> ⚠️ In particular, using **Obsidian commercially** (e.g. for company work) **may require a commercial license**, and the **Notion API** must follow its developer terms. Check both directly.
+
+### 17-3. Data & content copyright
 - The material you organize (web/PDF, etc.) remains **copyrighted by its original authors**. Wikimate only helps organize; it does not clear copyright for you. **Respect the source's license/terms when collecting or redistributing.**
 - Organized notes are stored **locally on your computer**. Nothing is sent out (Notion indexing only when you enable it).
+- API keys/tokens/personal data are never stored in notes or the package.
 
-### Disclaimer
-- Wikimate is provided **AS-IS, without warranty**. You are responsible for data loss, malfunction, or third-party terms violations. **Back up** important material.
+### 17-4. Disclaimer
+- Wikimate is provided **AS-IS, without warranty**. **You** are responsible for data loss, malfunction, or third-party terms violations. **Back up** important material.
 
 ---
 
-## 16. Cheat sheet
+## 18. Cheat sheet
 
 ```
 Install (Claude Code):  /plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
                         /plugin install wikimate@wikimate-marketplace  → restart
 Verify:                 /mcp  → 4 tools: wikimate_collect/lint/fix/runlog
+Run:                    nothing separate — open Claude Code and just ask
 Organize:               "Organize this link: https://..."
 Query:                  "Find ~ from my vault"
 Inspect:                "Health-check my vault"
@@ -349,4 +427,4 @@ Safety:                 plan→approve→execute / move to 99_Archive instead of
 License:                Apache-2.0 © SoDam AI Studio (external tools under their own licenses)
 ```
 
-If something breaks, read section 13 (Troubleshooting) first. Still stuck? Open an issue on the GitHub repository.
+If something breaks, read section 15 (Troubleshooting) first. Still stuck? Open an issue on the GitHub repository.
