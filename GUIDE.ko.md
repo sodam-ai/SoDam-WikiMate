@@ -66,7 +66,7 @@ Claude Code 안에서 명령어 두 줄만 입력하면 GitHub에서 **자동으
 ### (B) 폴더로 직접 받기 — 최신/개발용
 GitHub에서 통째로 받는 방법이에요. Codex로 쓰거나, 아직 마켓플레이스에 안 올라간 **최신 기능**을 바로 쓰고 싶을 때.
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 
 ---
@@ -77,7 +77,7 @@ git clone https://github.com/sodam-ai/wikimate.git
 
 **1단계 — 마켓플레이스 추가** (입력 후 Enter, "added" 확인):
 ```
-/plugin marketplace add https://github.com/sodam-ai/wikimate.git
+/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2단계 — 플러그인 설치** (1단계 끝난 뒤):
 ```
@@ -101,7 +101,7 @@ Codex에는 마켓플레이스(`/plugin`)가 **없어요.** 대신 받은 폴더
 
 **1단계 — 받기**
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2단계 — 등록** (볼트·폴더 경로는 본인 것으로):
 ```
@@ -337,7 +337,7 @@ Wikimate는 아래 도구를 **번들로 포함하지 않아요.** 쓰려면 직
 ## 16. 한눈 요약 (치트시트)
 
 ```
-설치(Claude Code):  /plugin marketplace add https://github.com/sodam-ai/wikimate.git
+설치(Claude Code):  /plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
                     /plugin install wikimate@wikimate-marketplace  → 재시작
 확인:               /mcp  → wikimate_collect/lint/fix/runlog 4개
 정리:               "이 링크 정리해줘: https://..."

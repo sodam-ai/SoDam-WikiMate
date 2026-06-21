@@ -66,7 +66,7 @@ Inside Claude Code, two commands download and install it **automatically** from 
 ### (B) Download the folder — latest/dev
 Clone the whole thing from GitHub. Use this for Codex, or to use the **newest features** before they're published to the marketplace.
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 
 ---
@@ -77,7 +77,7 @@ git clone https://github.com/sodam-ai/wikimate.git
 
 **Step 1 — Add the marketplace** (Enter, confirm "added"):
 ```
-/plugin marketplace add https://github.com/sodam-ai/wikimate.git
+/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **Step 2 — Install the plugin** (after step 1):
 ```
@@ -101,7 +101,7 @@ Codex has **no** marketplace (`/plugin`). Instead, register the folder as an **M
 
 **Step 1 — Clone**
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **Step 2 — Register** (use your own vault/folder paths):
 ```
@@ -337,7 +337,7 @@ Wikimate does **not** bundle the tools below. To use them you install them yours
 ## 16. Cheat sheet
 
 ```
-Install (Claude Code):  /plugin marketplace add https://github.com/sodam-ai/wikimate.git
+Install (Claude Code):  /plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
                         /plugin install wikimate@wikimate-marketplace  → restart
 Verify:                 /mcp  → 4 tools: wikimate_collect/lint/fix/runlog
 Organize:               "Organize this link: https://..."

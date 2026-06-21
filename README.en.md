@@ -24,7 +24,7 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 **1) Add the marketplace** — enter, then confirm "added":
 ```
-/plugin marketplace add https://github.com/sodam-ai/wikimate.git
+/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) Install the plugin** — after step 1 finishes:
 ```
@@ -37,7 +37,7 @@ Codex has **no** `/plugin` marketplace. Instead, clone the repo and register it 
 
 **1) Clone**
 ```
-git clone https://github.com/sodam-ai/wikimate.git
+git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **2) Register the MCP server** (use your own vault/repo paths):
 ```
