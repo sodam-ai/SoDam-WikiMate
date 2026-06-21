@@ -7,7 +7,7 @@
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, relative } from "node:path";
-import { walkVault, resolveVaultPath } from "./collect.mjs";
+import { walkVault, resolveVaultPath, listVaults } from "./collect.mjs";
 
 // 며칠 이내 생성된 노트는 '아직 정리 전'으로 보고 고아 경보에서 제외(노이즈 방지)
 const RECENT_DAYS = 7;
@@ -64,7 +64,8 @@ export async function lint({ vault, vaultPath, now } = {}) {
   // 볼트 해석: 이름 우선(resolveVaultPath), 폴백은 '실존하는' vault_path. collect와 동일 기준.
   const root = (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
   if (!root) {
-    return { ok: false, reason: "볼트 경로를 못 찾았어요. vault(볼트 이름) 또는 vault_path를 확인해주세요.", vault: vault || null, vault_path: vaultPath || null };
+    const cand = listVaults();
+    return { ok: false, reason: "볼트 경로를 못 찾았어요. 아래 후보에서 vault(이름) 또는 vault_path를 골라주세요(현재 열린 볼트 우선).", vault: vault || null, vault_path: vaultPath || null, open_vault: cand.open_vault, ambiguous_names: cand.ambiguous_names, vault_candidates: cand.vaults };
   }
   const today = typeof now === "number" ? now : Date.now();
 

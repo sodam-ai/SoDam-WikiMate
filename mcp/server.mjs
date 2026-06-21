@@ -3,14 +3,14 @@
 // 옵시디언 접근: notesmd-cli(공식 옵시디언 CLI) 자동 감지·사용. 없으면 파일시스템 폴백.
 
 import { existsSync } from "node:fs";
-import { collect, resolveVaultPath } from "./lib/collect.mjs";
+import { collect, resolveVaultPath, listVaults } from "./lib/collect.mjs";
 import { lint } from "./lib/lint.mjs";
 import { fix } from "./lib/fix.mjs";
 import { readRunLog } from "./lib/runlog.mjs";
 
 const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH || "";
 const VAULT_NAME = process.env.OBSIDIAN_VAULT_NAME || "";
-const SERVER_INFO = { name: "wikimate", version: "0.6.0" };
+const SERVER_INFO = { name: "wikimate", version: "0.7.0" };
 const DEFAULT_PROTOCOL = "2024-11-05";
 
 const collectTool = {
@@ -91,6 +91,19 @@ const runlogTool = {
   }
 };
 
+const vaultsTool = {
+  name: "wikimate_vaults",
+  description:
+    "옵시디언에 등록된 볼트 목록을 읽기 전용으로 보여줍니다. obsidian.json을 읽어 각 볼트의 이름·경로·열림 여부(open)·폴더 존재 여부를 돌려줍니다. " +
+    "⚠️ 이 도구는 **고르지 않습니다** — 후보만 제안하며(현재 열린 볼트 open 우선), 실제 정리/수정은 사용자가 볼트를 고른 뒤 wikimate_collect/lint/fix로 진행합니다. " +
+    "파일을 생성·수정·삭제하지 않습니다(순수 조회). 같은 이름 볼트가 둘 이상이면 ambiguous_names로 표시하니 이름 대신 vault_path로 지정하세요.",
+  inputSchema: {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  }
+};
+
 // vault 이름/경로 → 실제 볼트 루트 (lint/fix와 동일 기준)
 function resolveVaultRoot(args = {}) {
   const name = args.vault || VAULT_NAME;
@@ -107,6 +120,11 @@ async function runCollect(args = {}) {
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const dryRun = args.dry_run !== false; // 기본 true
   try {
+    // 볼트가 전혀 안 정해졌으면 collect가 throw하기 전에 친절히 후보를 제시(★자동 선택 안 함)
+    if (!args.vault && !args.vault_path && !VAULT_NAME && !VAULT_PATH) {
+      const v = listVaults();
+      return { content: [{ type: "text", text: JSON.stringify({ ok: false, reason: "어느 볼트에 정리할지 못 정했어요. 아래 후보에서 골라 vault(이름) 또는 vault_path로 알려주세요(현재 열린 볼트 우선). ★자동 선택하지 않아요.", open_vault: v.open_vault, ambiguous_names: v.ambiguous_names, vault_candidates: v.vaults }, null, 2) }] };
+    }
     const res = await collect({
       vault: args.vault || VAULT_NAME,
       vaultPath: args.vault_path || VAULT_PATH,
@@ -159,9 +177,17 @@ async function runRunlog(args = {}) {
   }
 }
 
+async function runVaults() {
+  try {
+    return { content: [{ type: "text", text: JSON.stringify(listVaults(), null, 2) }] };
+  } catch (e) {
+    return { content: [{ type: "text", text: `오류: ${e.message}` }], isError: true };
+  }
+}
+
 // 도구 레지스트리 — 새 도구는 여기에 등록(이름 → 핸들러)
-const TOOLS = [collectTool, lintTool, fixTool, runlogTool];
-const TOOL_HANDLERS = { wikimate_collect: runCollect, wikimate_lint: runLint, wikimate_fix: runFix, wikimate_runlog: runRunlog };
+const TOOLS = [collectTool, lintTool, fixTool, runlogTool, vaultsTool];
+const TOOL_HANDLERS = { wikimate_collect: runCollect, wikimate_lint: runLint, wikimate_fix: runFix, wikimate_runlog: runRunlog, wikimate_vaults: runVaults };
 
 async function dispatch(msg) {
   const { id, method, params } = msg;

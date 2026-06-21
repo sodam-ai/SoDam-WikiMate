@@ -9,7 +9,7 @@
 import { readFile, writeFile, rename, mkdir, copyFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, resolve, relative, dirname, basename, isAbsolute } from "node:path";
-import { resolveVaultPath } from "./collect.mjs";
+import { resolveVaultPath, listVaults } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
 
 // 정규식 메타문자 이스케이프(링크 대상에 특수문자가 와도 리터럴로)
@@ -45,7 +45,7 @@ async function backupFile(root, abs, ts) {
 // 안전 수정 메인. action: "archive" | "replace_link"
 export async function fix({ vault, vaultPath, action, note, from = "", to = "", dryRun = true, ts } = {}) {
   const root = resolveRoot(vault, vaultPath);
-  if (!root) return { ok: false, reason: "볼트 경로를 못 찾았어요. vault(볼트 이름) 또는 vault_path를 확인해주세요." };
+  if (!root) { const cand = listVaults(); return { ok: false, reason: "볼트 경로를 못 찾았어요. 아래 후보에서 vault(이름) 또는 vault_path를 골라주세요(현재 열린 볼트 우선).", open_vault: cand.open_vault, ambiguous_names: cand.ambiguous_names, vault_candidates: cand.vaults }; }
   if (!note) return { ok: false, reason: "대상 note(볼트 내 상대경로)가 필요해요." };
   const abs = safeInside(root, note);
   if (!abs) return { ok: false, reason: "볼트 밖 경로이거나 .obsidian이라 수정할 수 없어요(차단)." };
