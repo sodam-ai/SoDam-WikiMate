@@ -4,7 +4,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { dirname, join, basename } from "node:path";
 import { mkdir, writeFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
@@ -23,7 +23,11 @@ await writeFile(join(vault, "30_Notes", "dupY.md"), note("dupY", "DUP"), "utf8")
 await writeFile(join(vault, "30_Notes", "linker.md"), note("linker", "L1", "- [[target]]\n- [[broken]]"), "utf8");
 await writeFile(join(vault, "30_Notes", "target.md"), note("target", "T1", "- [[linker]]"), "utf8");
 
-const transport = new StdioClientTransport({ command: "node", args: [join(root, "mcp", "server.mjs")] });
+// 가짜 obsidian.json(이 임시 볼트를 'open'으로 등록) → wikimate_vaults 결정론적 검증용
+const cfgFile = join(tmpdir(), `wikimate_smoke_cfg_${process.pid}.json`);
+await writeFile(cfgFile, JSON.stringify({ vaults: { id1: { path: vault, open: true } } }), "utf8");
+
+const transport = new StdioClientTransport({ command: "node", args: [join(root, "mcp", "server.mjs")], env: { ...process.env, OBSIDIAN_CONFIG_PATH: cfgFile } });
 const client = new Client({ name: "smoke-tools", version: "1.0.0" }, { capabilities: {} });
 
 try {
@@ -32,7 +36,7 @@ try {
 
   // 1) 도구 4개 노출
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-  check("도구 4개 노출(collect/fix/lint/runlog)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog"].every((n) => tools.includes(n)));
+  check("도구 5개 노출(collect/fix/lint/runlog/vaults)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog", "wikimate_vaults"].every((n) => tools.includes(n)));
 
   // 2) lint를 서버 통해 호출 → 중복·깨진링크 탐지
   const lintR = parse(await client.callTool({ name: "wikimate_lint", arguments: { vault_path: vault } }));
@@ -54,10 +58,15 @@ try {
   const acts = (logR.entries || []).map((e) => `${e.tool}:${e.action}`);
   check("서버경유 runlog: collect·archive 기록 확인", logR.ok === true && acts.includes("collect:create") && acts.includes("fix:archive"));
 
+  // 6) vaults를 서버 통해 조회 → 등록 볼트 후보 제시(읽기 전용·자동 선택 X)
+  const vaultsR = parse(await client.callTool({ name: "wikimate_vaults", arguments: {} }));
+  check("서버경유 vaults: ok + open 볼트 제시", vaultsR.ok === true && vaultsR.open_vault === basename(vault) && (vaultsR.vaults || []).some((v) => v.path === vault));
+
   await client.close();
   console.log("종료 ✅");
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {
   await rm(vault, { recursive: true, force: true }).catch(() => {});
+  await rm(cfgFile, { force: true }).catch(() => {});
 }
 process.exit(fail === 0 ? 0 : 1);
