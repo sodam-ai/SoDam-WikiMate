@@ -1,6 +1,6 @@
 // 수집 도구 핵심 로직 검증 (MCP/SDK 없이 node로 직접 실행 — 증거 기반 검증)
 // 사용: node scripts/verify-collect.mjs
-import { collect, sourceHash } from "../mcp/lib/collect.mjs";
+import { collect, sourceHash, buildNoteContent } from "../mcp/lib/collect.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { stat, mkdir, writeFile, rm } from "node:fs/promises";
@@ -77,4 +77,13 @@ try {
   delete process.env.OBSIDIAN_CONFIG_PATH;
   await rm(vDir, { recursive: true, force: true }).catch(() => {});
   await rm(cfgDir, { recursive: true, force: true }).catch(() => {});
+}
+
+// === 6) frontmatter 필드 정합 (template ↔ collect) ===
+console.log("\n=== 6) frontmatter 필드 정합 (template ↔ collect) ===");
+{
+  const fmText = buildNoteContent({ title: "정합테스트", date: "2026-06-22" });
+  for (const key of ["project:", "related:", "notion_id:"]) {
+    console.log(`buildNoteContent에 ${key} 포함 -> ${fmText.includes(key) ? "PASS ✅" : "FAIL ❌"}`);
+  }
 }
