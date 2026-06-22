@@ -1,7 +1,7 @@
 # Wikimate Beginner's Guide (English)
 
 > This guide is written so that **someone new to computers, AI, messengers, apps, or smartphones** can follow it step by step.
-> Plain words, top-to-bottom order — **just follow along**. (Target version: **v0.6.0**)
+> Plain words, top-to-bottom order — **just follow along**. (Target version: **v0.7.1**)
 >
 > 📄 This guide also exists as an identical **PDF** (`GUIDE.en.pdf`). The text content is exactly the same.
 
@@ -35,7 +35,8 @@ Don't panic at unfamiliar words. Here are the common ones, in plain analogies.
 | **Plugin** | A **part that adds a new feature** to a program (like installing one more app on your phone) |
 | **Marketplace** | An **app store** where you get plugins |
 | **MCP** | A **standard pipe (outlet)** connecting an AI to tools. Wikimate works through this pipe. |
-| **MCP tool** | A **feature button** the AI can press through that pipe (Wikimate has 4: organize, check, fix, log) |
+| **MCP tool** | A **feature button** the AI can press through that pipe (Wikimate has 5: organize, check, fix, log, find-vault) |
+| **Slash command `/wikimate`** | A **direct command** to run it reliably when "organize this" doesn't auto-fire (works 100%) |
 | **Obsidian** | A **note app** that stores notes on your computer (results are saved here) |
 | **Vault** | The **note folder** in Obsidian that holds your notes. You give it a **name** when creating it. |
 | **Notion** | An app for tables/docs (optional — only if you want a list table) |
@@ -118,7 +119,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **Step 3 — Restart Claude Code.** Done!
 
-Verify: type `/mcp` → you should see four tools: **wikimate_collect · wikimate_lint · wikimate_fix · wikimate_runlog**.
+Verify: type `/mcp` → you should see five tools: **wikimate_collect · wikimate_lint · wikimate_fix · wikimate_runlog · wikimate_vaults**.
 
 > 📌 **To use the very newest features (health-check, run log) right away**, download with (B), then install from that folder path:
 > ```
@@ -155,7 +156,7 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault -- node D:/path/t
 
 - Once you **install** it (step 5), Wikimate **starts automatically together with Claude Code** every time you open it. (Installation auto-registers the MCP server via `.mcp.json`.)
 - So "running it" just means **open Claude Code → tell it what to do in chat.**
-- To check it started, type `/mcp` → if the 4 tools (`wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`) appear, you're ready.
+- To check it started, type `/mcp` → if the 5 tools (`wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`, `wikimate_vaults`) appear, you're ready.
 
 > 🛠️ **(Advanced/developers only)** To run the server directly, from the cloned folder in a terminal:
 > ```
@@ -174,7 +175,13 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault -- node D:/path/t
 4. If it looks good, choose **[Proceed]** (number/click — no typing needed).
 5. The note is created. Done!
 
-> If you use the Obsidian CLI, include your **Vault name**, e.g. *"Organize this link into my 'Vault'."*
+> 💡 **You don't have to say the vault name** — Wikimate finds your registered vaults and proposes "organize into here?" (v0.7.1, tool `wikimate_vaults`). You can still name it, e.g. *"into my 'Vault'."*
+
+> ⭐ **The reliable way** — plain "organize this" sometimes only **summarizes** instead of making a note (the AI's judgment varies). Then use the **slash command** for a 100% result:
+> ```
+> /wikimate https://example.com
+> ```
+> `/wikimate` is a direct command (not a request), so the AI always runs Wikimate.
 
 ---
 
@@ -205,8 +212,10 @@ Everything works by **natural language**. No commands to memorize.
 > "Organize this link: https://..."
 > "Organize this file: D:\notes\today.md"
 
-→ After a plan + approval, the note is created. (Tool: `wikimate_collect`)
+→ After a plan + approval, the note is created. (Tool: `wikimate_collect` + `wikimate_vaults`, which finds & proposes the vault.)
 The "material" can be anything — a one-line text, a web link, or a file path.
+
+> ⭐ **If "organize this" doesn't fire** (it only summarizes), use **`/wikimate <link/text>`** — the slash command fires 100%.
 
 ### ② Query (ask your organized notes — read-only)
 > "Find and summarize RAG from my vault."
@@ -250,13 +259,13 @@ Install → (auto) MCP registered
 - Inspect: "health-check my vault", "find duplicates"
 - Log: "show recent activity"
 
-### Slash commands (Claude Code)
-- `/wikimate` — organize material into a note
+### Slash commands (Claude Code) — ⭐ the reliable way
+- `/wikimate <link/text>` — organize material into a note. **Use this when plain "organize this" doesn't auto-fire — it works 100%.**
 - `/wikimate-lint` — health-check the vault
-- `/mcp` — check install/connection status (whether the 4 tools appear)
+- `/mcp` — check install/connection status (whether the 5 tools appear)
 
 ### MCP tools (called automatically — no need to memorize)
-- `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog`
+- `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog` · `wikimate_vaults` (find/propose vault)
 
 ### Dev/verify (terminal, advanced)
 ```
@@ -343,6 +352,9 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| **Said "organize this" but it only summarized (no note)** | natural auto-trigger is unreliable (AI mistakes it for a summary request) | **Pin it with a slash command**: `/wikimate <link>` (a direct command, fires 100%) |
+| **`marketplace ... not found`** | the marketplace isn't **added** yet (`update` only refreshes an added one) | **`add` first**: `/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git` → then `/plugin install wikimate@wikimate-marketplace` |
+| **Can't decide which vault to organize into** | multiple/no vaults found in Obsidian | Say the vault *name* (e.g. "into my 'Vault'"), or **pick from the candidate list** Wikimate shows |
 | **Not shown in `/mcp`** | not restarted / stale cache | Restart Claude Code → if still missing, see "Update" below |
 | **Install fails with `EBUSY ... locked`** | antivirus briefly locked files | Fully quit and reopen Claude Code, then reinstall. If it repeats, wait a moment and retry. |
 | **An old version (e.g. 0.1.0) installs** | stale marketplace cache | Run "Update" below |
@@ -416,9 +428,10 @@ Wikimate's MCP server is **zero-dependency** and does **not** bundle the tools b
 ```
 Install (Claude Code):  /plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
                         /plugin install wikimate@wikimate-marketplace  → restart
-Verify:                 /mcp  → 4 tools: wikimate_collect/lint/fix/runlog
+Verify:                 /mcp  → 5 tools: wikimate_collect/lint/fix/runlog/vaults
 Run:                    nothing separate — open Claude Code and just ask
-Organize:               "Organize this link: https://..."
+Organize (natural):     "Organize this link: https://..."
+Organize (reliable):    /wikimate https://...     ← when natural doesn't fire (100%)
 Query:                  "Find ~ from my vault"
 Inspect:                "Health-check my vault"
 Log:                    "Show recent activity"

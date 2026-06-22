@@ -1,7 +1,7 @@
 # Wikimate 왕초보 가이드 (한국어)
 
 > 이 문서는 **컴퓨터·AI·메신저·앱·스마트폰을 처음 다루는 분**도 그대로 따라 할 수 있게 만든 안내서예요.
-> 어려운 말은 전부 풀어 썼고, **위에서부터 순서대로 따라만 하면** 됩니다. (대상 버전: **v0.6.0**)
+> 어려운 말은 전부 풀어 썼고, **위에서부터 순서대로 따라만 하면** 됩니다. (대상 버전: **v0.7.1**)
 >
 > 📄 이 가이드는 같은 내용의 **PDF**(`GUIDE.ko.pdf`)로도 있어요. 글자 내용은 완전히 동일합니다.
 
@@ -35,7 +35,8 @@
 | **플러그인 (plugin)** | 프로그램에 **새 기능을 끼워 넣는 부품** (스마트폰에 앱 하나 더 까는 것과 비슷) |
 | **마켓플레이스 (marketplace)** | 플러그인을 받아오는 **앱 장터** (앱스토어 같은 것) |
 | **MCP** | AI와 도구를 이어 주는 **표준 통로(콘센트)**. Wikimate는 이 통로를 통해 일해요. |
-| **MCP 도구** | 그 통로로 AI가 누를 수 있는 **기능 버튼** (Wikimate엔 4개: 정리·점검·수정·기록) |
+| **MCP 도구** | 그 통로로 AI가 누를 수 있는 **기능 버튼** (Wikimate엔 5개: 정리·점검·수정·기록·보관함찾기) |
+| **슬래시 명령 `/wikimate`** | "정리해줘"가 가끔 안 들을 때 **확실하게 시키는 직접 명령** (100% 발동) |
 | **옵시디언 (Obsidian)** | 내 컴퓨터에 메모를 쌓는 **노트 앱** (정리 결과가 여기 저장돼요) |
 | **볼트 (Vault, 보관함)** | 옵시디언에서 노트를 모아 두는 **노트 보관 폴더**. 만들 때 **이름**을 붙여요. |
 | **노션 (Notion)** | 표·문서를 정리하는 앱 (선택 — 목록표를 원할 때만) |
@@ -118,7 +119,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 ```
 **3단계 — Claude Code를 껐다 켜기**(재시작). 끝!
 
-설치 확인: `/mcp` 입력 → 목록에 **wikimate_collect · wikimate_lint · wikimate_fix · wikimate_runlog** 네 개가 보이면 성공이에요.
+설치 확인: `/mcp` 입력 → 목록에 **wikimate_collect · wikimate_lint · wikimate_fix · wikimate_runlog · wikimate_vaults** 다섯 개가 보이면 성공이에요.
 
 > 📌 **가장 최신 기능(건강검진·작업기록 등)을 바로 쓰려면** (B) 폴더로 받은 뒤, 그 폴더 경로로 설치하세요:
 > ```
@@ -155,7 +156,7 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:
 
 - 5번대로 **설치만 하면**, Claude Code를 켤 때마다 Wikimate가 **자동으로 같이 켜져요.** (설치 시 `.mcp.json`이 MCP 서버를 자동 등록하기 때문)
 - 그래서 "실행"은 곧 **Claude Code를 켜고 → 대화창에 말로 시키는 것**이 전부예요.
-- 잘 켜졌는지 보고 싶으면 `/mcp` 를 입력 → `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog` 4개가 보이면 준비 완료.
+- 잘 켜졌는지 보고 싶으면 `/mcp` 를 입력 → `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults` 5개가 보이면 준비 완료.
 
 > 🛠️ **(고급/개발자만)** 서버를 따로 직접 돌려 보고 싶다면, 받은 폴더에서 터미널로:
 > ```
@@ -174,7 +175,13 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:
 4. 마음에 들면 **[진행]** 을 골라요(숫자/클릭 — 타자 안 쳐도 돼요).
 5. 노트가 만들어집니다. 끝!
 
-> 옵시디언 CLI를 쓰는 경우엔 **보관함 이름**을 같이 말해 주세요. 예: *"이 링크를 내 'Vault' 보관함에 정리해줘"*
+> 💡 **보관함 이름은 안 말해도 돼요** — Wikimate가 옵시디언에 등록된 보관함을 **자동으로 찾아 "여기에 정리할까요?"** 하고 제안해줘요(v0.7.1 새 기능 `wikimate_vaults`). 물론 *"내 'Vault' 보관함에"* 처럼 콕 집어 말해도 됩니다.
+
+> ⭐ **가장 확실한 방법** — 그냥 "정리해줘"라고만 하면 AI가 가끔 **그냥 요약만** 하고 노트를 안 만들 때가 있어요(자연어 자동 발동은 AI 판단이라 들쭉날쭉). 그럴 땐 **슬래시 명령**으로 콕 찍어 시키면 **100% 작동**해요:
+> ```
+> /wikimate https://example.com
+> ```
+> `/wikimate`는 "부탁"이 아니라 "직접 명령"이라, AI가 무조건 Wikimate를 실행합니다.
 
 ---
 
@@ -205,8 +212,10 @@ Wikimate는 **안전을 가장 중요하게** 만들었어요. 항상 이 순서
 > "이 링크 정리해줘: https://..."
 > "이 파일 정리해줘: D:\메모\오늘.md"
 
-→ 계획 보고 후 승인하면 노트 생성. (도구: `wikimate_collect`)
+→ 계획 보고 후 승인하면 노트 생성. (도구: `wikimate_collect` + 어디에 정리할지 보관함을 찾아 제안하는 `wikimate_vaults`)
 정리할 "자료"는 무엇이든 돼요 — 한 문장 텍스트, 웹 링크, 파일 경로 모두 OK.
+
+> ⭐ **자연어 "정리해줘"가 가끔 안 들으면**(노트는 안 만들고 채팅에 요약만 하면) **`/wikimate <링크/텍스트>` 슬래시 명령**을 쓰세요 — 이건 직접 명령이라 100% 발동해요.
 
 ### ② 찾기 (정리해 둔 노트에서 묻기 — 읽기 전용)
 > "내 볼트에서 RAG 찾아서 요약해줘"
@@ -250,13 +259,13 @@ Wikimate는 **안전을 가장 중요하게** 만들었어요. 항상 이 순서
 - 점검: "내 볼트 건강검진해줘", "중복 찾아줘"
 - 기록: "최근 작업 보여줘"
 
-### 슬래시 명령 (Claude Code)
-- `/wikimate` — 자료를 노트로 정리
+### 슬래시 명령 (Claude Code) — ⭐ 가장 확실한 방법
+- `/wikimate <링크/텍스트>` — 자료를 노트로 정리. **자연어 "정리해줘"가 안 들을 때 이걸로 쓰면 100% 발동해요.**
 - `/wikimate-lint` — 볼트 건강검진
-- `/mcp` — 설치/연결 상태 확인 (도구 4개가 보이는지)
+- `/mcp` — 설치/연결 상태 확인 (도구 5개가 보이는지)
 
 ### MCP 도구 (안에서 자동 호출됨 — 외울 필요 없음)
-- `wikimate_collect` (정리) · `wikimate_lint` (점검) · `wikimate_fix` (수정) · `wikimate_runlog` (기록)
+- `wikimate_collect` (정리) · `wikimate_lint` (점검) · `wikimate_fix` (수정) · `wikimate_runlog` (기록) · `wikimate_vaults` (보관함 찾기·제안)
 
 ### 개발·검증용 (터미널, 고급)
 ```
@@ -343,6 +352,9 @@ SoDam-WikiMate/
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
+| **"정리해줘" 했는데 노트는 안 만들고 그냥 요약만 해요** | 자연어 자동 발동이 들쭉날쭉(AI가 "요약 요청"으로 오해) | **슬래시 명령으로 콕 찍기**: `/wikimate <링크>` (직접 명령이라 100% 발동) |
+| **`marketplace ... not found`(마켓플레이스 못 찾음)** | 마켓플레이스가 아직 **등록(add) 안 됨**(`update`는 등록된 것만 갱신) | **`add`부터**: `/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git` → 그다음 `/plugin install wikimate@wikimate-marketplace` |
+| **정리할 보관함(볼트)을 못 정해요** | 옵시디언에 보관함이 여러 개거나 못 찾음 | 보관함 *이름*을 같이 말하거나(예 "내 'Vault'에"), Wikimate가 보여주는 **후보 목록에서 고르기** |
 | **`/mcp`에 안 보여요** | 재시작 안 함 / 캐시 옛것 | Claude Code 껐다 켜기 → 그래도 없으면 아래 "업데이트" |
 | **설치가 `EBUSY ... locked`로 실패** | 백신(Defender)이 파일을 잠깐 잠금 | Claude Code 완전히 끄고 다시 켠 뒤 재설치. 반복되면 잠시 뒤 재시도 |
 | **옛날 버전(예 0.1.0)이 깔려요** | 마켓플레이스 캐시가 옛것 | 아래 "업데이트" 실행 |
@@ -416,9 +428,10 @@ Wikimate의 MCP 서버는 **무의존(zero-dependency)** 이라 아래 도구를
 ```
 설치(Claude Code):  /plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git
                     /plugin install wikimate@wikimate-marketplace  → 재시작
-확인:               /mcp  → wikimate_collect/lint/fix/runlog 4개
+확인:               /mcp  → wikimate_collect/lint/fix/runlog/vaults 5개
 실행:               따로 없음 — Claude Code 켜고 말로 시키면 됨
-정리:               "이 링크 정리해줘: https://..."
+정리(자연어):       "이 링크 정리해줘: https://..."
+정리(확실·권장):    /wikimate https://...     ← 자연어가 안 들으면 이걸로(100%)
 찾기:               "내 볼트에서 ~ 찾아줘"
 점검:               "내 볼트 건강검진해줘"
 기록:               "최근 작업 보여줘"

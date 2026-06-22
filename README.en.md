@@ -6,12 +6,13 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 > 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — glossary, install, use, troubleshooting, and license, all explained simply.
 
-> Status: **v0.6.0** — organize, query, vault health-check, and run log (4 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
+> Status: **v0.7.1** — organize, query, vault health-check, run log, and **vault auto-discovery** (5 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
 
 > 📱 **Device note:** Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets**.
 
 ## What it does
-- 🧹 **Organize in plain language** — just say "organize this link" and a note is created (no need to call any tool by hand).
+- 🧹 **Organize in plain language** — just say "organize this link" and a note is created. (If auto-trigger misses, run **`/wikimate <link>`** to fire it 100%.)
+- 🧭 **Vault auto-discovery (v0.7.1)** — finds the vaults registered in Obsidian and proposes **"organize into here?"** (you don't have to say the name; tool `wikimate_vaults`).
 - 📒 **Into your real Obsidian vault** — auto-detects whatever Obsidian tool (MCP/CLI) is installed, and falls back to the filesystem if none.
 - 🗂️ **Notion index (optional)** — if a Notion tool is connected, it adds an index row (Obsidian = source of truth, Notion = one-way index).
 - ✋ **Always plan first → execute after approval** — never writes on its own.
@@ -43,7 +44,7 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 ```
 /plugin install wikimate@wikimate-marketplace
 ```
-Restart Claude Code and you're done. (To verify, check `/mcp` for the 4 tools: `wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`.)
+Restart Claude Code and you're done. (To verify, check `/mcp` for the 5 tools: `wikimate_collect`, `wikimate_lint`, `wikimate_fix`, `wikimate_runlog`, `wikimate_vaults`.)
 
 ## How to run
 **There is nothing separate to "launch."** Once installed, Wikimate starts automatically together with Claude Code. "Running it" just means **opening Claude Code and asking in chat**. (Developers who want to run the server directly: `npm install` then `npm start` in the cloned folder.)
@@ -81,8 +82,10 @@ If that still fails, in the `/plugin` menu **remove → re-add → install** the
 Just ask in chat:
 > "Organize this into my 'Vault' vault"
 
+> ⭐ **The reliable way (recommended)** — natural "organize this" is the AI's judgment call, so it **sometimes just summarizes** instead of creating a note. When that happens, use the **slash command** `/wikimate <link/text>` — it fires **100%** (a direct command). e.g. `/wikimate https://example.com`
+
 - 📎 **The "material" can be anything** — a one-line text, a web link (`organize this link: https://...`), or a file path (`organize this file: D:\notes\today.md`). Nothing to prepare.
-- 🏷️ To use an Obsidian **CLI** (e.g. notesmd-cli), tell it the **vault name** (e.g. "into my 'Vault' vault"). If you don't know it, check Obsidian's vault switcher (bottom-left). Otherwise it falls back to the filesystem.
+- 🧭 **You don't have to name the vault (v0.7.1)** — Wikimate finds your registered vaults and asks "organize into here?". You can still name it explicitly (e.g. "into my 'Vault'"; the name is in Obsidian's vault switcher, bottom-left).
 - It shows a plan first (where, which tool, whether to index in Notion), then creates the note on approval.
 
 **Ask it too** (read — from notes you already organized):
@@ -108,7 +111,7 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 ## Folder structure
 ```
 .claude-plugin/        Plugin & marketplace manifests
-mcp/server.mjs         Zero-dependency MCP server (stdio) — 4 tools
+mcp/server.mjs         Zero-dependency MCP server (stdio) — 5 tools (collect·lint·fix·runlog·vaults)
 mcp/lib/collect.mjs    Collect (name sanitizing, dedup)
 mcp/lib/lint.mjs       Health-check (read-only)
 mcp/lib/fix.mjs        Safe fix (no delete, backup)
@@ -138,6 +141,8 @@ scripts/               Verification scripts (verify-*, smoke-*)
 - ⚠️ **Live session not author-verified**: a real Claude Code `/mcp` session against your own vault is recommended (2 min; see Install above).
 
 ## Troubleshooting
+- **Said "organize this" but it only summarized (no note created)** → Natural auto-trigger is unreliable. Use the **`/wikimate <link>`** slash command to fire it 100% (most reliable).
+- **`marketplace ... not found`** → The marketplace isn't registered. Not `update` — run **`/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git`** first, then `/plugin install wikimate@wikimate-marketplace`.
 - **Not showing in `/mcp`** → Restart Claude Code. If still missing, refresh the cache via "When updates don't show up" above.
 - **Note not visible in Obsidian** → Check you said the exact vault *name* (the filesystem fallback writes into the `OBSIDIAN_VAULT_PATH` folder).
 - **Notion isn't getting indexed** → Check that a Notion MCP/CLI is connected and authenticated. If not, only the Obsidian note is created (normal fallback).
