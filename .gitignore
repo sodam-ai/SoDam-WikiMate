@@ -25,3 +25,6 @@ npm-debug.log*
 .complexity-log.md
 .pair-programming-session.md
 .todos-report.md/
+
+# PDF 빌드 산출물(임시 — 커밋 안 함)
+.pdfbuild/
