@@ -3,6 +3,13 @@
 > Show Me The PRD로 생성 (2026-06-07) · **버전: v2**
 > **Wikimate (위키메이트)**: AI 에이전트(Claude Code·Codex·Gemini)에게 명령하면 흩어진 자료를 옵시디언(장기 기억)에 정리하고 노션(색인·로그)에 색인하는 **멀티 에이전트 도구**. 핵심은 **이식 가능한 MCP 코어**, Claude Code에선 **마켓플레이스 플러그인**으로 제공.
 
+## 현재 구현 상태 (2026-06-22 · v0.7.0) — ★ 아래 PRD 본문보다 이게 최신
+> 본문 PRD는 *원래 계획*(v2, 2026-06-07)이고 실제 구현은 더 린하게 진행됐어요. **작업 시 코드가 진실원본.**
+- ✅ **빌드됨**: 무의존 MCP 코어 + 도구 5개 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`(볼트 자동탐지·읽기전용). 스킬 3(organize·query·lint)·커맨드 2·Codex 어댑터.
+- ❌ **계획했으나 미구현**: SessionStart hook(자동연결)·서브에이전트·별도 "분류" 도구(7폴더 자동분류)·요약/원자노트·자동링크/MOC·Python 추출·Gemini 어댑터.
+- 🟡 **옵시디언 쓰기 기본 = 검증된 filesystem(`vault_path`)**; notesmd-cli(이름) 경로는 ⚠️미검증 옵션.
+- 🟡 **노션 색인 = 코어 밖**(스킬 + 외부 노션 MCP/CLI 연결 시에만). 구조적 한계로 "신뢰성"보다 **정직성**(한계 고지·삽입 전 best-effort 중복확인). 라이브 미검증.
+
 ## 한눈에 보는 구조
 
 ```

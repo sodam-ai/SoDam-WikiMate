@@ -1,7 +1,7 @@
 ---
 name: Wikimate Organize
 description: This skill should be used when the user asks to "자료 정리해줘", "이거 정리해줘", "inbox 정리해줘", "옵시디언에 정리", "노트로 만들어줘", "이 링크 저장해줘", "organize this", "save this to my notes/Obsidian", or wants to turn scattered materials (web links, PDFs, chat logs, code, text) into Obsidian notes (and a Notion index). It auto-detects whatever Obsidian/Notion tools are installed (official or community MCP/CLI) and uses them — never raw file writes.
-version: 0.4.0
+version: 0.5.0
 ---
 
 # Wikimate Organize
@@ -22,11 +22,16 @@ version: 0.4.0
 3. **옵시디언 CLI(notesmd-cli) — 선택·고급** — `wikimate_collect`에 `vault`(볼트 *이름*)를 넘기면 notesmd-cli로 등록 볼트에 생성. ⚠️ **현재 실쓰기 미검증 경로**라 기본으로 쓰지 말고, 사용자가 명시하거나 별도 검증이 끝난 뒤에만 사용한다.
 
 ### 노션 색인 (우선순위)
-1. **Notion MCP**(공식 `mcp.notion.com` / notion-mcp-server) — 연결돼 있으면 옵시디언 노트 생성 **직후** 색인행을 추가한다:
-   - 색인 DB = **"Wikimate Research Library"**. 환경변수 `NOTION_RESEARCH_DB_ID`가 있으면 그 DB 사용. 없으면 Notion 검색으로 찾고, 그래도 없으면 사용자에게 "만들까요?" 묻는다(임의 생성 X).
-   - 행 속성: `Title`, `Summary`, `Source`(URL), `Tags`, `Importance`(1~5), `Date`, **`Obsidian Link`** = `obsidian://open?vault=<볼트이름>&file=<노트제목 URL인코딩>` (노션→옵시디언 점프).
-2. **노션 CLI**(`ntn`) — 로그인돼 있으면 CLI로.
-3. **없으면 건너뜀** — 옵시디언 노트만 만들고 "노션 도구가 없어 색인 생략"이라 보고(graceful).
+> ⚠️ **연결 여부를 환경변수로 추측하지 마라(B2).** `NOTION_RESEARCH_DB_ID` 유무만 보고 "노션 미연결 → 생략"으로 단정 금지 — **실제 노션 도구(MCP/CLI)를 호출/조회해** 연결을 확인한 뒤에만 색인 시도/생략을 판단한다. (이 env는 코어가 읽지 않으니 어시스턴트가 직접 확인·사용.)
+1. **Notion MCP**(공식 `mcp.notion.com` / notion-mcp-server) — 연결 확인되면 옵시디언 노트 생성 **직후** 색인행을 추가한다:
+   - 색인 DB = **"Wikimate Research Library"**. `NOTION_RESEARCH_DB_ID`가 주어지면 그 DB, 없으면 Notion 검색으로 찾고, 그래도 없으면 "만들까요?" 묻는다(임의 생성 X).
+   - **삽입 전 중복 확인(B4)**: `notion-search`로 같은 `Source`(URL) 행이 이미 있는지 best-effort로 찾아, 있으면 사용자에게 알리고 건너뛸지 묻는다. ⚠️ **노션은 완전 중복 차단을 보장 못 한다**(행 단위 조회 API가 환경에 따라 막힘) → "같은 링크를 두 번 정리하면 노션 행이 2개가 될 수 있어요"라고 고지(옵시디언은 source_hash로 막지만 노션은 아님).
+   - 행 속성: `Title`, `Summary`, `Source`(URL), `Tags`(노트 태그가 노션 select 옵션에 없으면 *비우지 말고* 옵션 추가 또는 `Topic`에 반영 — C2), `Importance`(1~5), `Date`, **`Obsidian Link`** = `obsidian://open?vault=<볼트이름>&file=<노트제목>`.
+   - **`obsidian://` URL 인코딩 시 괄호도 인코딩(C6)**: `encodeURIComponent`는 `()`를 안 바꾸니, 결과에서 `(`→`%28`·`)`→`%29`로 직접 치환(일부 핸들러에서 괄호로 링크가 깨짐).
+   - **주관 등급은 임의로 정하지 마라(C4)**: `Importance`·`Reliability`·`Topic`은 사용자에게 묻거나 "자동추정(확인 필요)"로 표시(폴더는 물으면서 등급만 임의 결정 = 불일치).
+   - **프라이버시(C5)**: `Source`·`Obsidian Link`에 로컬 경로·개인정보가 노션 클라우드로 올라갈 수 있음 — 민감하면 색인을 끄도록 안내.
+2. **노션 CLI**(`ntn`) — 로그인 확인되면 CLI로.
+3. **없으면 건너뜀** — 옵시디언 노트만 만들고 "노션 도구가 없어 색인 생략"이라 보고(graceful). **단 '미연결' 판단은 실제 확인 후에만(B2).**
 
 ### 감지 방법
 - 현재 세션에서 사용 가능한 MCP 도구 목록을 보고 obsidian/notion 관련 도구가 있는지 확인.
@@ -41,7 +46,7 @@ version: 0.4.0
    - 사용자가 **사전 승인**하면(예: "묻지 말고 바로 정리해줘", "이번 세션 자동 승인") → **신규 생성**(옵시디언 노트 + 노션 색인 행 *추가*)은 계획만 짧게 보여주고 **승인 대기 없이 바로 실행**.
    - 단 **덮어쓰기·삭제·기존 노트/행 수정 같은 '비가역' 작업은 사전 승인과 무관하게 항상 한 번 더 개별 확인**(끌 수 없는 안전선).
 5. **실행**: 감지된 도구로 노트 생성 + (가능하면) 노션 색인. 같은 자료는 `source_hash`로 중복 차단.
-6. **결과 보고 + 검증**: 만든 노트를 실제 도구로 다시 조회해 생겼는지 확인까지("파일 썼다"≠"보인다").
+6. **결과 보고 + 검증 (B3 — 허위 완료 금지)**: 만든 노트를 실제 도구로 다시 조회해 생겼는지 확인한 뒤에만 "완료"라 말한다("파일 썼다"≠"보인다"). **노션 색인은 만든 행을 DB에서 재조회해 확인되면만 "색인 완료"**, 못 했으면 "노션 색인 실패/생략(미연결 등)"이라 정직히. "✅완료" 선언 전 워크플로 전 단계 이행을 점검한다(노션 누락·외부 삭제 가능성을 '완료'로 덮지 말 것).
 
 ## 도구: wikimate_collect (CLI/파일시스템 경로용)
 - 인자: `title`(필수), `vault_path`(**기본 — 검증된 파일시스템 경로·중복검사**), `vault`(볼트 이름 — notesmd-cli용·⚠️미검증), `folder`, `url`, `text`, `summary`, `tags[]`, `importance`, `dry_run`.

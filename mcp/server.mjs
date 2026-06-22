@@ -10,7 +10,7 @@ import { readRunLog } from "./lib/runlog.mjs";
 
 const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH || "";
 const VAULT_NAME = process.env.OBSIDIAN_VAULT_NAME || "";
-const SERVER_INFO = { name: "wikimate", version: "0.7.0" };
+const SERVER_INFO = { name: "wikimate", version: "0.7.1" };
 const DEFAULT_PROTOCOL = "2024-11-05";
 
 const collectTool = {
