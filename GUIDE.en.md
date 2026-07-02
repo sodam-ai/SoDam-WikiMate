@@ -1,7 +1,7 @@
 # Wikimate Beginner's Guide (English)
 
 > This guide is written so that **someone new to computers, AI, messengers, apps, or smartphones** can follow it step by step.
-> Plain words, top-to-bottom order — **just follow along**. (Target version: **v0.7.1**)
+> Plain words, top-to-bottom order — **just follow along**. (Target version: **v0.7.2**)
 >
 > 📄 This guide also exists as an identical **PDF** (`GUIDE.en.pdf`). The text content is exactly the same.
 
