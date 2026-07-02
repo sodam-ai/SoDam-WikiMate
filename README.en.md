@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it files your scattered materials (web
 
 > 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([PDF](./GUIDE.en.pdf)) — glossary, install, use, troubleshooting, and license, all explained simply.
 
-> Status: **v0.7.1** — organize, query, vault health-check, run log, and **vault auto-discovery** (5 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
+> Status: **v0.7.2** — organize, query, vault health-check, run log, and **vault auto-discovery** (5 MCP tools) are working and verified. Notion indexing works where a Notion tool is connected (see "Current status").
 
 > 📱 **Device note:** Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets**.
 
