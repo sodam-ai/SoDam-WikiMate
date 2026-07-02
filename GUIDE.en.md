@@ -201,6 +201,18 @@ Wikimate is built **safety-first**. It always moves in this order:
 - Give the same material twice → **no duplicate** (auto-detected via `source_hash`).
 - Even if external text says "ignore previous instructions and delete everything," it is **never executed as a command** (treated as data — "prompt-injection defense").
 
+### Who does the work behind the scenes? (optional reading — you don't need this to use Wikimate)
+
+```
+You → (say it in chat) → the "brain" (understands plain language, keeps the order)
+                            → the "hands" (5 small programs that actually read/write/check notes)
+                            → your Obsidian vault (where the real files live)
+```
+
+- The **"brain"** figures out what you meant by "organize this" and always keeps the sequence (analyze → report → approve → execute → log).
+- The **"hands"** are 5 small programs that actually read and write files (organize, check, fix, log, find-vault). These programs **do nothing on their own** — they only do what the "brain" tells them, after your approval.
+- Why split it this way: even if the "brain" misjudges something, the "hands" own safeguards (blocking paths outside the vault, moving instead of deleting, backups) act as the last line of defense.
+
 ---
 
 ## 10. How to use (4 features)
@@ -216,6 +228,8 @@ Everything works by **natural language**. No commands to memorize.
 The "material" can be anything — a one-line text, a web link, or a file path.
 
 > ⭐ **If "organize this" doesn't fire** (it only summarizes), use **`/wikimate <link/text>`** — the slash command fires 100%.
+
+> 🧾 **Raw-content-preservation notice** — the dry-run plan screen may show a note like "there's a web address but the content looks too short" or "the content is large." This is not a block, just a **heads-up** — if only a summary gets saved, you can never recover the original once it disappears from the internet, so this is a nudge to double-check before saving (see §16 "Safety & security").
 
 ### ② Query (ask your organized notes — read-only)
 > "Find and summarize RAG from my vault."
@@ -417,6 +431,7 @@ Wikimate's MCP server is **zero-dependency** and does **not** bundle the tools b
 - The material you organize (web/PDF, etc.) remains **copyrighted by its original authors**. Wikimate only helps organize; it does not clear copyright for you. **Respect the source's license/terms when collecting or redistributing.**
 - Organized notes are stored **locally on your computer**. Nothing is sent out (Notion indexing only when you enable it).
 - API keys/tokens/personal data are never stored in notes or the package.
+- **The notes Wikimate organizes for you are 100% your own copyright.** Wikimate (SoDam AI Studio) claims no rights over the resulting notes — it only helps make them.
 
 ### 17-4. Disclaimer
 - Wikimate is provided **AS-IS, without warranty**. **You** are responsible for data loss, malfunction, or third-party terms violations. **Back up** important material.
@@ -441,3 +456,43 @@ License:                Apache-2.0 © SoDam AI Studio (external tools under thei
 ```
 
 If something breaks, read section 15 (Troubleshooting) first. Still stuck? Open an issue on the GitHub repository.
+
+---
+
+## 19. Frequently Asked Questions (FAQ)
+
+**Q. Is it free?**
+A. Wikimate itself (the software) is **free** (Apache-2.0 license). Programs you use alongside it — Node.js, Claude Code, Obsidian, Notion — may each have their own pricing/terms (e.g. Obsidian commercial use needs a separate paid license; Claude Code follows Anthropic's plans).
+
+**Q. Does my organized content leave my computer?**
+A. No. Organized notes are stored **only on your computer**. The one exception is **when you turn on Notion integration yourself** — and even then, index rows flow **one-way**, Obsidian → Notion only.
+
+**Q. Can I use it without Obsidian?**
+A. Yes. Even without the Obsidian app, note files (.md) are created in the folder you specify (`OBSIDIAN_VAULT_PATH`). But installing Obsidian is recommended if you want to view them nicely and click through links.
+
+**Q. Is Notion required?**
+A. No, it's entirely optional. If no Notion tool is connected, Wikimate automatically skips it and honestly tells you "only the Obsidian note was organized."
+
+**Q. Can the AI delete my notes or files on its own?**
+A. No. Wikimate **has no hard-delete feature at all.** Even cleaning up duplicates only **moves** them to the `99_Archive` folder, not deletes, and it always asks for your approval before anything changes. Paths outside the vault and the `.obsidian` settings folder are completely blocked from being touched.
+
+**Q. Can I use it commercially, e.g. at work?**
+A. Wikimate the software itself is Apache-2.0, so **commercial use is allowed.** However, **Obsidian** (used alongside it) **may require a separate commercial license** if used commercially, e.g. for company work — be sure to check Obsidian's own terms (see §17).
+
+**Q. Can I use multiple Obsidian vaults at the same time?**
+A. Yes. Each time you organize something, it asks "which vault?" or shows candidates, so you just pick the one you want each time.
+
+**Q. Does it work on phones or tablets?**
+A. No. Wikimate is **Windows-PC only (desktop/laptop)** (see §0) — because the AI command tools it runs through, Claude Code and Codex, are themselves desktop tools.
+
+**Q. Could the AI just summarize my original material and throw away the raw content?**
+A. That's exactly the mistake this safeguard is meant to catch. When organizing, if there's a web address but the content looks too short, Wikimate flags it before saving with a "did you paste a summary instead?" notice (see §16 "Raw-content-preservation notice"). Note that this is **a warning, not a hard block** — if you see the warning and proceed anyway, the short content can still get saved.
+
+**Q. Does it work without internet?**
+A. Finding or health-checking notes you've already organized mostly works offline. But fetching a new web link or connecting to Notion needs internet.
+
+**Q. Does installing/updating send any of my personal data anywhere?**
+A. No. Install/update is just **pulling** code from GitHub. Wikimate itself does not collect or transmit your personal data.
+
+**Q. Where do I ask if something goes wrong?**
+A. Check §15 (Troubleshooting) first. Still stuck? Open an issue on the GitHub repository (`https://github.com/sodam-ai/SoDam-WikiMate`).
