@@ -63,7 +63,7 @@
 | source_hash | **중복 방지 키** (URL·내용 해시) | 9f2a… | O |
 | captured_at | 가져온 날짜 (자동) | 2026-06-07 | O |
 | status | 처리 상태 | `inbox` / `done` / `skipped` | O |
-| raw_ref | 원본 보관 위치(선택) | 20_Resources/_files/a.pdf | X |
+| raw_ref | 원본 보관 위치(선택, 현재 미구현) | 20_Resources/_files/a.pdf | X |
 
 ### Note (노트, .md) — 옵시디언 원본
 정리되어 만들어지는 옵시디언 노트 1개. **사람도 AI도 읽는 frontmatter(머리말)** 를 가진다.
@@ -157,8 +157,11 @@
 
 ---
 
+## 결정됨 (Decided)
+
+- [x] **원본 파일 보관 위치** — **기본값: 링크/경로만 저장, 바이너리 복사 안 함.** `source`(frontmatter)에 URL/파일 경로를 남기고, `text`에는 추출 가능한 원문 전체(웹페이지 텍스트·PDF 텍스트 레이어 등)를 반드시 그대로 저장한다(요약 금지 — `wikimate_collect`가 저신뢰 시 advisory로 알림). PDF 등 바이너리 자체를 `20_Resources/_files`에 복사하는 기능은 만들지 않는다(범위 밖, zero-dependency 원칙 유지). 필요하면 사용자가 직접 `_files`에 보관.
+
 ## [NEEDS CLARIFICATION]
 
-- [ ] **원본 파일 보관 위치** — `20_Resources/_files`에 PDF 원본까지 복사 vs 경로/링크만. (추천: 링크만, 필요 시 첨부)
 - [ ] **신뢰도(Reliability) 자동 판정 기준** — 에이전트가 출처 도메인으로 추정 vs 사용자가 수동 지정. (추천: 자동 추정 + 수동 덮어쓰기 허용)
 - [ ] **태그 체계** — 자유 태그 vs 미리 정한 태그 사전. (추천: 자유 시작, 누적되면 정리)
