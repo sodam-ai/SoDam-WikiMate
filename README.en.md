@@ -126,6 +126,7 @@ scripts/               Verification scripts (verify-*, smoke-*)
 
 ## Safety & security
 - ✅ Writes run only **after human approval** (`dry_run` is the default — plan shown first). If approving every time is tedious, say **"just organize it, don't ask"** → new note creation runs automatically (**overwrite/delete are always confirmed**). Approval also appears as a **pick-an-option** prompt, so you can choose instead of typing.
+- 🧾 **Raw-content-preservation notice** — if the material has a web address but the content looks too short ("did you paste a summary instead of the original?"), or is unusually large, the dry-run plan shown before saving will flag it. This is a **notice, not a block** — you can proceed as-is, or re-prepare the full original and organize again.
 - ✅ Note titles/folders have **path separators, forbidden characters, and control characters stripped**, and **paths outside the vault are blocked** (traversal prevention).
 - ✅ Instructions inside external materials are treated as **data, not commands** (prompt-injection defense).
 - ✅ The Obsidian CLI runs **without a shell** (command-injection safe). Keys/tokens are never stored in notes or the package.
@@ -161,5 +162,6 @@ scripts/               Verification scripts (verify-*, smoke-*)
 - **Wikimate itself: Apache License 2.0** © 2026 SoDam AI Studio. Commercial use, modification, and distribution are allowed, but you must **include the copyright notice + a copy of the license**, **state changes**, and **keep NOTICE**. Provided **AS-IS, no warranty**, and **no trademark rights** (don't use the names "Wikimate" / "SoDam AI Studio" as your own).
 - **External tools are NOT bundled** — Node.js, @modelcontextprotocol/sdk, notesmd-cli, mcp-obsidian, notion-mcp-server are **MIT**; **Notion API/`ntn` follow Notion's terms**; **Obsidian is free for personal use but needs a separate commercial license**. Check each one's own terms.
 - **Content copyright** stays with the original authors. Respect each source's license/terms when collecting or redistributing. Notes are stored **locally on your computer** and not sent out (Notion indexing only when you enable it).
+- **The notes Wikimate organizes for you are 100% your own copyright.** Wikimate (SoDam AI Studio) claims no rights over the resulting notes — Wikimate is only software; it is not the author of the notes it helps create.
 
 > Full license table + disclaimer in [Beginner's Guide §17](./GUIDE.en.md) or `NOTICE`. For development/testing/deploy, see [DEVELOPMENT.md](./DEVELOPMENT.md).
