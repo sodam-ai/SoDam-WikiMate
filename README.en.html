@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wikimate — README (English)</title>
+<style>
+:root { color-scheme: light dark; }
+body { font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; line-height: 1.7; word-break: keep-all; }
+@media (prefers-color-scheme: dark) { body { background: #1a1a1a; color: #e8e8e8; } a { color: #6fb3ff; } code, pre { background: #2a2a2a !important; } th { background: #2a2a2a !important; } table, th, td { border-color: #444 !important; } blockquote { border-left-color: #555 !important; color: #bbb !important; } hr { border-color: #444 !important; } }
+@media (prefers-color-scheme: light) { body { background: #fff; color: #222; } }
+h1 { font-size: 1.9em; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; }
+h2 { font-size: 1.4em; margin-top: 2em; border-bottom: 1px solid #ddd; padding-bottom: 0.25em; }
+h3 { font-size: 1.15em; margin-top: 1.5em; }
+code { background: #f2f2f2; padding: 0.15em 0.4em; border-radius: 4px; font-family: Consolas, "D2Coding", monospace; font-size: 0.9em; }
+pre { background: #f2f2f2; padding: 12px 14px; border-radius: 6px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; overflow-x: auto; display: block; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #f5f5f5; }
+blockquote { border-left: 4px solid #ccc; margin: 1em 0; padding: 0.3em 1em; color: #555; }
+details { border: 1px solid #ccc; border-radius: 6px; padding: 0.6em 1em; margin: 1em 0; }
+summary { cursor: pointer; font-weight: 600; }
+a { color: #0969da; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+li { margin: 0.2em 0; }
+</style>
+</head>
+<body>
+<h1>Wikimate</h1>
+<p>Tell an AI agent <strong>"organize this,"</strong> and it takes your scattered materials (web links, PDFs, chat logs, text), <strong>organizes them into notes in your Obsidian vault</strong>, <strong>links</strong> related notes together, even <strong>classifies</strong> them, and if you want, <strong>indexes them in Notion</strong> — a <strong>Claude Code plugin</strong>. (Codex has no "plugin install (<code>/plugin</code>)" — instead, you clone the repo and register it as an <strong>MCP server</strong> via <code>codex mcp add</code>: see <a href="./adapters/codex/SETUP.md"><code>adapters/codex/SETUP.md</code></a>.)</p>
+<p><strong><a href="./README.md">한국어</a></strong></p>
+<blockquote><p>📘 <strong>New here?</strong> See the step-by-step <a href="./GUIDE.en.md">Beginner's Guide</a> (<a href="./GUIDE.en.html">HTML</a>) — glossary, install, use, troubleshooting, FAQ, and license, all explained simply.</p></blockquote>
+<blockquote><p>Status: <strong>v0.7.1 (stable release)</strong> — organize, query, vault health-check, run log, and vault auto-discovery (5 MCP tools) are working and verified. <strong>+ 3 new features planned for the next version</strong> (auto-link/MOC and auto-classify, adding 2 more MCP tools for 7 total — implemented and verified in this repo, with 119 automated tests passing; live confirmation that the Obsidian graph view actually reflects this and that behavior survives a session restart is still pending user confirmation). See "What's new" below. Notion indexing works in environments where a Notion tool is connected (see "Current status" below).</p></blockquote>
+<blockquote><p>📱 <strong>Device note:</strong> Wikimate is <strong>Windows-PC only (desktop/laptop)</strong>. It is <strong>not installable on phones or tablets</strong>.</p></blockquote>
+<h2>What it does</h2>
+<ul>
+<li>🧹 <strong>Organize in plain language</strong> — just say "organize this link" and a note is created. (If auto-trigger sometimes doesn't fire, run <strong><code>/wikimate &lt;link&gt;</code></strong> — the slash command fires it 100%.)</li>
+<li>🧭 <strong>Vault auto-discovery</strong> — automatically finds the vaults registered in Obsidian and proposes <strong>"organize into here?"</strong> (you don't have to say the name; tool <code>wikimate_vaults</code>).</li>
+<li>📒 <strong>Into your real Obsidian vault</strong> — auto-detects whatever Obsidian tool (MCP/CLI) is installed, and falls back to the filesystem if none.</li>
+<li>🗂️ <strong>Notion index (optional)</strong> — if a Notion tool is connected, it adds an index row (Obsidian = source of truth, Notion = one-way index).</li>
+<li>✋ <strong>Always plan first → execute after approval</strong> — it never writes on its own.</li>
+<li>🔁 <strong>Dedup</strong> — the same material is captured once, via <code>source_hash</code>.</li>
+<li>🛡️ <strong>Safe by design</strong> — blocks paths outside the vault; treats text inside external materials as data, not commands (prompt-injection defense).</li>
+<li>🔎 <strong>Ask your notes</strong> — "find ~ from my vault" answers from your organized notes <strong>with sources</strong> (and says so honestly when something isn't there).</li>
+<li>🩺 <strong>Vault health-check</strong> — finds duplicates, broken <code>[[links]]</code>, orphan notes, and missing frontmatter and <strong>reports</strong> them; on approval it fixes things <strong>without deleting</strong> (moves to archive + backup).</li>
+<li>🧾 <strong>Run log</strong> — auto-records what the AI did in your vault ("show recent activity").</li>
+<li>🆕 🔗 <strong>Auto-link · MOC</strong> — links related notes together with <code>[[links]]</code> (up to 5 per note, to prevent over-linking), and groups notes on the same topic into a table-of-contents note (MOC).</li>
+<li>🆕 🗂️ <strong>Auto-classify</strong> — judges and proposes a folder, tags, and importance for unclassified notes, and applies them on approval.</li>
+<li>🆕 🔔 <strong>Session-start notice</strong> — when you start Claude Code, it auto-detects the Obsidian tool and any registered vaults and notifies you (read-only).</li>
+<li>🆕 🕵️ <strong>Review subagent</strong> — after a note is actually written, before reporting "done," a separate-perspective AI double-checks once more for distortion of the source content, injection contamination, and damage to existing notes.</li>
+</ul>
+<details>
+<summary><b>📋 What's new — summary (expand to view)</b></summary>
+
+<p><strong>✅ v0.7.1 (stable release)</strong></p>
+<li><code>wikimate_collect</code> (organize) · <code>wikimate_lint</code> (health-check) · <code>wikimate_fix</code> (safe fix) · <code>wikimate_runlog</code> (run log) · <code>wikimate_vaults</code> (vault discovery) — 5 MCP tools</li>
+<li>Optional Notion indexing, 3 skills (organize/query/lint)</li>
+
+<p><strong>🆕 Planned for the next version (implemented and verified in this repo, not yet a stable release)</strong></p>
+<li><code>wikimate_link</code> (auto-link · MOC) · <code>wikimate_classify</code> (auto-classify) — 2 more MCP tools (7 total)</li>
+<li>SessionStart hook (automatic session-start detection) · <code>wikimate-reviewer</code> review subagent</li>
+<li>All 119 automated tests pass (unit tests + real server-protocol + real vault-fixture E2E); 5 defects found during the run (self-linking, duplicate input, unvalidated importance values, etc.) were all fixed and locked in with regression tests</li>
+<li>⚠️ Remaining unverified items: actually seeing this in the real Obsidian graph view/backlinks screen, and the SessionStart notification after restarting Claude Code — both need to be confirmed directly in the user's own environment (areas automation cannot confirm)</li>
+
+</details>
+<h2>30-second glossary (for beginners)</h2>
+<table>
+<thead>
+<tr><th>Word</th><th>Plain meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Plugin</strong></td><td>A new-feature part you plug into a program (like installing one more app)</td></tr>
+<tr><td><strong>Marketplace</strong></td><td>The app store you get plugins from</td></tr>
+<tr><td><strong>MCP / MCP tool</strong></td><td>The pipe connecting AI to tools / a feature button pressed through that pipe</td></tr>
+<tr><td><strong>Vault</strong></td><td>The folder in Obsidian that holds your notes (it has a name)</td></tr>
+<tr><td><strong>dry-run</strong></td><td>Showing "the plan" before actually doing it (a preview)</td></tr>
+<tr><td><strong>🆕 MOC</strong></td><td>A table-of-contents note that gathers notes on the same topic</td></tr>
+</tbody>
+</table>
+<blockquote><p>More terms in <a href="./GUIDE.en.md">Beginner's Guide §1</a>.</p></blockquote>
+<h2>Install (Claude Code)</h2>
+<blockquote><p>⚠️ Enter the <strong>two commands one at a time</strong> (don't paste both together, or the URL breaks).</p></blockquote>
+<p><strong>1) Add the marketplace</strong> — enter, then confirm "added":</p>
+<pre><code>/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git</code></pre>
+<p><strong>2) Install the plugin</strong> — after step 1 finishes:</p>
+<pre><code>/plugin install wikimate@wikimate-marketplace</code></pre>
+<p>Restart Claude Code and you're done. (To verify, check <code>/mcp</code> — success means you see all 5 tools: <code>wikimate_collect</code>, <code>wikimate_lint</code>, <code>wikimate_fix</code>, <code>wikimate_runlog</code>, <code>wikimate_vaults</code>. 🆕 If you installed from a folder that includes the new features, you'll see 7, including <code>wikimate_link</code> and <code>wikimate_classify</code>.)</p>
+<h2>How to run</h2>
+<p><strong>There is nothing separate to "launch."</strong> Once installed, Wikimate starts automatically together with Claude Code every time. "Running it" just means <strong>opening Claude Code and asking in chat</strong>. (Developers who want to run the server directly: <code>npm install</code> then <code>npm start</code> in the cloned folder. For the full automated verification, run <code>npm run verify</code>.)</p>
+<h2>Install (Codex)</h2>
+<p>Codex has <strong>no</strong> <code>/plugin</code> marketplace. Instead, clone the repo and register it as an <strong>MCP server</strong>.</p>
+<p><strong>1) Clone</strong></p>
+<pre><code>git clone https://github.com/sodam-ai/SoDam-WikiMate.git</code></pre>
+<p><strong>2) Register the MCP server</strong> (use your own vault/repo paths):</p>
+<pre><code>codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault/path -- node D:/your/cloned/SoDam-WikiMate/mcp/server.mjs</code></pre>
+<p>→ <code>codex mcp list</code> should show <code>wikimate</code>.</p>
+<p><strong>3) (Optional) Natural-language rules</strong> — put the repo's <code>AGENTS.md</code> in your Codex working folder so "organize this" works too.</p>
+<p><strong>Update</strong>: just <code>git pull</code> in the cloned folder (no cache trap like Claude Code).</p>
+<blockquote><p>⚠️ <strong>Codex is a "cut-down" version.</strong> It gets the organize (write) MCP tool working too, but the <em>auto-trigger, ask/query, and multi-note synthesis</em> <strong>skills are Claude Code only</strong>, and Notion indexing needs a <strong>separate Notion MCP</strong> connected in Codex. (Details: <a href="./adapters/codex/SETUP.md"><code>adapters/codex/SETUP.md</code></a>)</p></blockquote>
+<h2>When updates don't show up — the most common trap (Claude Code)</h2>
+<p>When a new version is pushed to GitHub, your local <strong>marketplace cache does NOT update automatically.</strong> So reinstalling alone may leave you on the old version. To get the latest:</p>
+<pre><code>/plugin marketplace update wikimate-marketplace
+/plugin install wikimate@wikimate-marketplace</code></pre>
+<p>If that still fails, in the <code>/plugin</code> menu <strong>remove → re-add → install</strong> the marketplace (this re-fetches the cache entirely afresh).</p>
+<blockquote><p>💡 <strong>"Do I need to push to GitHub?" → No.</strong> Install/update <em>pulls from</em> GitHub, so you never need to push anything yourself. (Pushing is only for when a developer changes the code.)<br>⚠️ <strong>If install fails with <code>EBUSY: resource busy or locked</code></strong> → Windows antivirus (Defender) briefly locked the just-written files. <strong>Fully quit and reopen Claude Code</strong>, then re-run the commands above — that usually clears it.</p></blockquote>
+<h2>Usage</h2>
+<p>Just ask in chat:</p>
+<blockquote><p>"Organize this into my 'Vault' vault"</p></blockquote>
+<blockquote><p>⭐ <strong>The reliable way (recommended)</strong> — natural "organize this" is an AI judgment call, so it <strong>sometimes just summarizes</strong> instead of creating a note. When that happens, use the <strong>slash command</strong> <code>/wikimate &lt;link/text&gt;</code> — it fires <strong>100%</strong> (a direct command). e.g. <code>/wikimate https://example.com</code></p></blockquote>
+<ul>
+<li>📎 <strong>The "material" can be anything</strong> — a one-line text, a web link (<code>organize this link: https://...</code>), or a file path (<code>organize this file: D:\notes\today.md</code>) all work. Nothing to prepare beforehand.</li>
+<li>🧭 <strong>You don't have to name the vault</strong> — Wikimate finds your registered vaults and asks "organize into here?". You can also name it explicitly, e.g. <em>"into my 'Vault'"</em> (the name is in Obsidian's vault switcher, bottom-left).</li>
+<li>It shows a plan first (where, with which tool, whether to index in Notion), then creates the note on approval.</li>
+</ul>
+<p><strong>Ask it too</strong> (read — from notes you already organized):</p>
+<blockquote><p>"Find and summarize RAG from my vault"</p></blockquote>
+<ul>
+<li>It searches the index (Notion) and the original (Obsidian) and answers <strong>with the source</strong>. It <strong>checks whether the original actually still exists before answering</strong>, and if the note was deleted (a dangling index), it honestly tells you "no original" (it never claims something exists when it doesn't).</li>
+<li>🔗 <strong>You can also ask across a bundle of notes</strong>: "using my notes, synthesize the relationship between RAG, embeddings, and vector DBs" → it gathers the related notes and answers with a <strong>synthesis, sourced note by note</strong> (it shows which notes it will use, first).</li>
+</ul>
+<p><strong>Ask about organize health too</strong> (health-check — read):</p>
+<blockquote><p>"Health-check my 'Vault' vault"</p></blockquote>
+<ul>
+<li>🩺 It finds the <strong>orphan notes</strong> (linked to nothing), <strong>broken <code>[[links]]</code></strong>, <strong>duplicates</strong>, and <strong>missing frontmatter</strong> that build up over time, and — if you use Notion — <strong>dangling index rows</strong> (the original was deleted but the Notion row remains), and <strong>reports</strong> them. <strong>It never fixes things on its own</strong> — pick what to fix and approve it, and only then does it touch anything: duplicates are <strong>moved to the archive (99_Archive) instead of being deleted</strong> (easy to undo); link fixes get an <strong>automatic backup before the fix</strong> (anything irreversible is confirmed once more).</li>
+</ul>
+<p><strong>🆕 Link related notes and build a table of contents too, in chat</strong>:</p>
+<blockquote><p>"Link this note to related notes" / "Group MCP-related notes into a table of contents"</p></blockquote>
+<ul>
+<li>It searches the whole vault for candidates, judges relevance by looking only at <strong>title, summary, and tags</strong> (never the body), and proposes matches — only the ones you approve get linked (up to 5 per note). For a table-of-contents request, it creates/updates a per-topic table-of-contents note (MOC) (any existing user-written content is preserved).</li>
+</ul>
+<p><strong>🆕 Auto-classify too, in chat</strong>:</p>
+<blockquote><p>"Organize these unclassified notes"</p></blockquote>
+<ul>
+<li>It proposes a folder, tags, and importance, and applies them on approval. On a filename conflict, it never overwrites.</li>
+</ul>
+<h2>Environment variables (optional)</h2>
+<table>
+<thead>
+<tr><th>Variable</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>OBSIDIAN_VAULT_PATH</code></td><td>Absolute path to the vault folder (filesystem fallback + dedup check)</td></tr>
+<tr><td><code>OBSIDIAN_VAULT_NAME</code></td><td>Vault name registered in Obsidian (for the CLI)</td></tr>
+<tr><td><code>NOTION_RESEARCH_DB_ID</code></td><td>Pin the Notion index DB (otherwise it searches or asks)</td></tr>
+</tbody>
+</table>
+<p>Copy <code>.env.example</code> to <code>.env</code>. <strong>Never commit real values (tokens, etc.) to git.</strong></p>
+<h2>Folder structure</h2>
+<pre><code>.claude-plugin/        Plugin &amp; marketplace manifests
+mcp/server.mjs         Zero-dependency MCP server (stdio) — 7 tools (collect·lint·fix·runlog·vaults·link·classify)
+mcp/lib/shared.mjs     🆕 Shared helpers (path-safety check, backup, frontmatter parsing)
+mcp/lib/collect.mjs    Collect (name sanitizing, dedup)
+mcp/lib/lint.mjs       Health-check (read-only)
+mcp/lib/fix.mjs        Safe fix (no delete, backup)
+mcp/lib/runlog.mjs     Run log
+mcp/lib/link.mjs       🆕 Auto-link · MOC
+mcp/lib/classify.mjs   🆕 Auto-classify
+skills/                Auto-triggering natural-language skills (organize·query·lint·link·classify)
+commands/              /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify commands
+hooks/                 🆕 Automatic session-start detection
+agents/                🆕 Review subagent (wikimate-reviewer)
+adapters/codex/        Codex setup guide
+templates/             Note template
+scripts/               Verification scripts (verify-*·smoke-*·e2e-*)
+(in your vault) .wikimate/runlog.jsonl   Run log (hidden)</code></pre>
+<h2>Architecture (in short)</h2>
+<pre><code>[You] --spoken command--&gt; [Claude Code/Codex] --MCP--&gt; [Wikimate server] --&gt; [collect/link/classify etc.] --&gt; [Your Obsidian vault]</code></pre>
+<p>Relevance and classification judgments are made <strong>directly by the AI (Claude)</strong>; the server only supplies candidate information and does the safe file writing (no separate similarity engine — to avoid duplicate development). For a detailed diagram, see <a href="./GUIDE.en.md">Beginner's Guide §14</a>.</p>
+<h2>Safety &amp; security</h2>
+<ul>
+<li>✅ Writes run only <strong>after human approval</strong> (<code>dry_run</code> is the default — the plan is shown first). If approving every single time feels like a hassle, say <strong>"just organize it, don't ask"</strong> → new note creation then runs automatically (but <strong>overwrite/delete are always confirmed once more</strong>). Also, approval appears as a <strong>pick-an-option prompt (number/click)</strong>, so you can choose instead of typing "go ahead."</li>
+<li>✅ <strong>Strips path separators, forbidden characters, and control characters</strong> from note titles/folders, and <strong>blocks paths outside the vault</strong> (path-traversal prevention).</li>
+<li>✅ Instructions found inside external materials are treated <strong>only as data, never as commands</strong> (prompt-injection defense).</li>
+<li>✅ The Obsidian CLI runs <strong>without a shell</strong> (command-injection prevention). Keys/tokens are never stored in notes or in the released package.</li>
+<li>✅ The <code>.obsidian/</code> folder is never touched. Existing notes are never modified or deleted without approval.</li>
+<li>✅ 🆕 Related links per note are <strong>capped at 5</strong>, enforced directly in code (to prevent over-linking — prompt instructions alone weren't sufficient, so this is validated at the code level).</li>
+<li>✅ 🆕 Numeric input values (e.g., importance) are range/type-validated and replaced with a safe default if invalid (found and fixed via actual testing on 2026-07-11).</li>
+<li>ℹ️ Notion indexing only happens when a Notion tool is connected. If not, it organizes into Obsidian only and reports that honestly.</li>
+<li>🧾 <strong>Run Log</strong> — every note actually created, moved, or fixed is automatically recorded, one line at a time, in <code>.wikimate/runlog.jsonl</code> (hidden). Just say <strong>"show recent activity"</strong> and it will recap what it did (a read-only, safe audit log).</li>
+</ul>
+<p>For detailed security and data flow, see <a href="./GUIDE.en.md">Beginner's Guide §15</a>.</p>
+<h2>Current status (honest)</h2>
+<ul>
+<li>✅ <strong>Obsidian organizing</strong>: verified note creation in a real vault (including natural-language auto-trigger).</li>
+<li>✅ <strong>Health-check, safe fix, run log</strong>: verified by unit tests + server-protocol e2e (duplicate/broken-link/orphan detection, delete-free fixes, auto logging).</li>
+<li>✅ 🆕 <strong>Auto-link · MOC · auto-classify</strong>: all 119 automated tests pass, E2E-verified with real vault fixtures (injection defense, the 5-link cap, preservation of existing content, etc., all confirmed by actual runs). 5 real defects found during the run were all fixed and locked in with regression tests.</li>
+<li>🟡 🆕 <strong>Graph-view reflection · live hook loading</strong>: code and automated tests can only confirm so much — the user needs to confirm this directly, by restarting the real Obsidian app / Claude Code.</li>
+<li>🟡 <strong>Notion indexing</strong>: works in environments where a Notion tool (MCP/CLI) is connected and authenticated. Depending on the environment, if it's not connected, this is skipped automatically.</li>
+<li>🟡 <strong>Codex</strong>: an adapter is provided so it can use the same MCP core (setup in <code>adapters/codex/SETUP.md</code>). Skills (auto-trigger) are Claude Code only.</li>
+<li>⚠️ <strong>Live session not verified</strong>: a real Claude Code <code>/mcp</code> session against your own real vault is recommended in your own environment (2 minutes; see Install above).</li>
+</ul>
+<h2>Troubleshooting</h2>
+<ul>
+<li><strong>Said "organize this" but it only summarized (no note created)</strong> → Natural-language auto-trigger is inconsistent. Pin it down with the <strong><code>/wikimate &lt;link&gt;</code></strong> slash command to make it fire 100% (the most reliable way).</li>
+<li><strong><code>marketplace ... not found</code></strong> → The marketplace isn't registered. Start with <strong><code>/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git</code></strong>, not <code>update</code>, then <code>/plugin install wikimate@wikimate-marketplace</code>.</li>
+<li><strong>Not showing in <code>/mcp</code></strong> → Restart Claude Code. If still missing, refresh the cache using the "When updates don't show up" method above.</li>
+<li><strong>Note not visible in Obsidian</strong> → Check that you said the exact vault <em>name</em> (the filesystem fallback creates the note inside the <code>OBSIDIAN_VAULT_PATH</code> folder).</li>
+<li><strong>Notion isn't getting indexed</strong> → Check that a Notion MCP/CLI is connected and authenticated. If not, only the Obsidian note gets created (normal fallback).</li>
+<li><strong>Some symbols disappeared from a title</strong> → Filename-forbidden characters like <code>/ \ : * ? " &lt; &gt; |</code> are cleaned up into spaces for safety (intended behavior).</li>
+<li><strong>Install fails with <code>EBUSY ... locked</code></strong> → Antivirus file lock. Quit and reopen Claude Code, then reinstall (see "When updates don't show up" above). If it keeps happening, wait a moment and retry.</li>
+<li><strong>An old version (e.g. 0.1.0) gets installed</strong> → The marketplace cache is stale. Refresh it via <code>marketplace update</code> above (or remove → re-add).</li>
+<li><strong>🆕 It won't link more than 5 notes</strong> → That's an intentional safeguard (to prevent over-linking).</li>
+</ul>
+<blockquote><p>More symptoms, fixes, and FAQ are tabulated in <a href="./GUIDE.en.md">Beginner's Guide §16-17</a>.</p></blockquote>
+<h2>Reference tools</h2>
+<p><a href="https://github.com/Yakitrak/notesmd-cli">notesmd-cli</a> · <a href="https://github.com/MarkusPfundstein/mcp-obsidian">mcp-obsidian</a> · <a href="https://github.com/makenotion/notion-mcp-server">notion-mcp-server</a> · <a href="https://developers.notion.com/cli/get-started/overview">ntn CLI</a></p>
+<h2>License · Copyright · Commercial use</h2>
+<blockquote><p>⚖️ This is general information, <strong>not legal advice.</strong> The authoritative notices are the <code>LICENSE</code> and <code>NOTICE</code> files.</p></blockquote>
+<ul>
+<li><strong>Wikimate itself: Apache License 2.0</strong> © 2026 SoDam AI Studio. Commercial use, modification, and distribution are allowed, but you must <strong>include the copyright notice + a copy of the license</strong>, <strong>state changes</strong>, and <strong>keep NOTICE</strong>. Provided <strong>AS-IS, no warranty</strong>, and <strong>no trademark rights</strong> (don't use the names "Wikimate" / "SoDam AI Studio" as your own).</li>
+<li><strong>External tools are not bundled</strong> — Node.js, @modelcontextprotocol/sdk, notesmd-cli, mcp-obsidian, notion-mcp-server are <strong>MIT</strong>; <strong>the Notion API/<code>ntn</code> follow Notion's terms</strong>; <strong>Obsidian is free for personal use but requires a separate commercial license</strong>. Check each one's own original terms directly.</li>
+<li><strong>Content copyright</strong> stays with the original authors. When collecting or redistributing, respect the original work's license/terms. Notes are stored only <strong>on your own computer (locally)</strong> and are never sent out (Notion indexing happens only when you turn it on).</li>
+</ul>
+<blockquote><p>Full license table and disclaimer: <a href="./GUIDE.en.md">Beginner's Guide §19</a> or <code>NOTICE</code>. For development/testing/deployment methods, see <a href="./DEVELOPMENT.md">DEVELOPMENT.md</a>.</p></blockquote>
+</body>
+</html>
