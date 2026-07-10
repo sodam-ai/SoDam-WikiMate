@@ -79,11 +79,52 @@ try {
   await rm(cfgDir, { recursive: true, force: true }).catch(() => {});
 }
 
+// === 5.5) 파일명 충돌(다른 자료가 같은 제목) → 절대 덮어쓰지 않고 접미 부여 (안전 패치 회귀 테스트) ===
+console.log("\n=== 5.5) 파일명 충돌 시 덮어쓰기 방지 ===");
+{
+  const vName2 = `wikimate_collision_test_${process.pid}`;
+  const vDir2 = join(tmpdir(), vName2);
+  await mkdir(vDir2, { recursive: true });
+  const first = await collect({ vaultPath: vDir2, title: "충돌테스트", url: "https://a.example.com", text: "원본 A 내용", dryRun: false, date });
+  const second = await collect({ vaultPath: vDir2, title: "충돌테스트", url: "https://b.example.com", text: "완전히 다른 B 내용(다른 source_hash)", dryRun: false, date });
+  const firstText = await import("node:fs/promises").then((fs) => fs.readFile(first.path, "utf8").catch(() => ""));
+  const pass1 = first.path !== second.path;
+  const pass2 = firstText.includes("원본 A 내용");
+  console.log(`서로 다른 경로에 저장(충돌 회피) -> ${pass1 ? "PASS ✅" : "FAIL ❌"}`);
+  console.log(`원본 파일 내용 보존(덮어쓰기 안 됨) -> ${pass2 ? "PASS ✅" : "FAIL ❌"}`);
+  await rm(vDir2, { recursive: true, force: true }).catch(() => {});
+}
+
 // === 6) frontmatter 필드 정합 (template ↔ collect) ===
 console.log("\n=== 6) frontmatter 필드 정합 (template ↔ collect) ===");
 {
   const fmText = buildNoteContent({ title: "정합테스트", date: "2026-06-22" });
   for (const key of ["project:", "related:", "notion_id:"]) {
     console.log(`buildNoteContent에 ${key} 포함 -> ${fmText.includes(key) ? "PASS ✅" : "FAIL ❌"}`);
+  }
+}
+
+// === 7) importance 검증 (실측으로 발견한 결함 회귀 방지) ===
+// classify.mjs와 같은 결함 클래스: 이전엔 Number(importance)||3이라 NaN만 우연히 3으로 걸러지고
+// 범위밖 숫자(예:999,-5)는 그대로 통과했음. 이 파일은 다른 verify-*.mjs와 달리 PASS/FAIL 집계·exit(1) 게이트가
+// 없어(구조적 허점, 실측 확인) 이 섹션만이라도 스스로 게이트한다.
+console.log("\n=== 7) importance 범위 검증 (실측 결함 회귀 방지) ===");
+{
+  let sectionFail = false;
+  const cases = [
+    { importance: "abc", expect: 3, label: "비숫자 문자열('abc') → 안전값 3" },
+    { importance: 999, expect: 3, label: "범위 밖(999) → 안전값 3" },
+    { importance: -5, expect: 3, label: "범위 밖(-5) → 안전값 3" },
+    { importance: 4, expect: 4, label: "정상 범위(4) → 그대로 4" },
+  ];
+  for (const c of cases) {
+    const text = buildNoteContent({ title: "중요도테스트", date: "2026-06-22", importance: c.importance });
+    const ok = text.includes(`importance: ${c.expect}`);
+    console.log(`${c.label} -> ${ok ? "PASS ✅" : "FAIL ❌"}`);
+    if (!ok) sectionFail = true;
+  }
+  if (sectionFail) {
+    console.error("\n=== 7) FAIL — importance 검증 회귀 발생, exit 1 ===");
+    process.exit(1);
   }
 }
