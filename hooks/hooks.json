@@ -1,0 +1,17 @@
+{
+  "description": "Wikimate 세션 시작 시 옵시디언 CLI·등록된 볼트를 감지해 안내(읽기전용, 실패해도 세션을 막지 않음)",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PLUGIN_ROOT/hooks/session-start.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
