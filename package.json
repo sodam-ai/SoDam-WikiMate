@@ -9,7 +9,7 @@
   "bin": { "wikimate-mcp": "mcp/server.mjs" },
   "scripts": {
     "start": "node mcp/server.mjs",
-    "verify": "node scripts/verify-collect.mjs && node scripts/verify-lint.mjs && node scripts/verify-fix.mjs && node scripts/verify-runlog.mjs && node scripts/verify-vaults.mjs"
+    "verify": "node scripts/verify-collect.mjs && node scripts/verify-lint.mjs && node scripts/verify-fix.mjs && node scripts/verify-runlog.mjs && node scripts/verify-vaults.mjs && node scripts/verify-link.mjs && node scripts/verify-classify.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
