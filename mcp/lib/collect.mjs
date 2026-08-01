@@ -13,6 +13,10 @@ import { safeComponent } from "./shared.mjs";
 
 const execFileP = promisify(execFile);
 
+// 원문 보존 advisory 임계값(차단 아님, 정보 제공용) — url은 있는데 text가 이보다 짧으면 저신뢰 경고, 이보다 크면 대용량 알림
+const LOW_FIDELITY_TEXT_CHARS = 200;
+const LARGE_TEXT_CHARS = 20000;
+
 // 중복 방지 키
 export function sourceHash(origin = "", content = "") {
   return createHash("sha256").update(`${origin}\n${content}`).digest("hex");
@@ -174,6 +178,14 @@ export async function collect({ vault, vaultPath, folder = "", title, url = "", 
 
   const origin = url || "(직접 입력 텍스트)";
   const content = text || "";
+  // 원문 보존 advisory(정보 제공용, 차단 아님) — 사람이 dry-run 승인 전에 보고 판단
+  const advisories = [];
+  if (url && content.length < LOW_FIDELITY_TEXT_CHARS) {
+    advisories.push(`저신뢰: url은 있는데 원문(text)이 ${content.length}자뿐이에요. 요약만 넣은 건 아닌지 확인하세요 — text에는 원문 전체를 넣어야 나중에 원본이 사라져도 정보가 보존돼요(summary는 별도 필드).`);
+  }
+  if (content.length > LARGE_TEXT_CHARS) {
+    advisories.push(`대용량 원문: ${content.length}자예요. 자르지 않고 그대로 저장하지만, 볼트 용량이 신경 쓰이면 나중에 직접 정리하세요.`);
+  }
   const hash = sourceHash(origin, content);
   const cliAvailable = await hasNotesmdCli();
   const useCli = !!vault && cliAvailable;
@@ -198,6 +210,8 @@ export async function collect({ vault, vaultPath, folder = "", title, url = "", 
     duplicate_check: dedupChecked ? "done" : "skipped (볼트 경로를 못 찾아 중복 검사 못 함)",
     vault_path_used: dedupPath || null,
     source_hash: hash,
+    text_length: content.length,
+    advisories,
   };
 
   if (dryRun) return { dry_run: true, ...plan };

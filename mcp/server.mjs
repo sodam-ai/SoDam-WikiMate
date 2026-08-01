@@ -12,7 +12,7 @@ import { classify } from "./lib/classify.mjs";
 
 const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH || "";
 const VAULT_NAME = process.env.OBSIDIAN_VAULT_NAME || "";
-const SERVER_INFO = { name: "wikimate", version: "0.7.1" };
+const SERVER_INFO = { name: "wikimate", version: "0.7.2" };
 const DEFAULT_PROTOCOL = "2024-11-05";
 
 const collectTool = {
@@ -28,7 +28,7 @@ const collectTool = {
     properties: {
       title: { type: "string", description: "노트 제목" },
       url: { type: "string", description: "원본 출처 URL(있으면)" },
-      text: { type: "string", description: "원문 내용(추출된 텍스트)" },
+      text: { type: "string", description: "원문 내용(추출된 텍스트) — 반드시 전체 원문 그대로. 요약이 아님(summary는 별도 필드이며 text의 대체가 아님). 원문을 요약해 여기 넣으면 나중에 원본이 사라졌을 때 정보가 영구 손실됨." },
       summary: { type: "string", description: "한 줄 요약" },
       tags: { type: "array", items: { type: "string" }, description: "태그 목록" },
       importance: { type: "integer", minimum: 1, maximum: 5, description: "중요도 1~5" },

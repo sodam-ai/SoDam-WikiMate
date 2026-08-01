@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it takes your scattered materials (web
 
 > 📘 **New here?** See the step-by-step [Beginner's Guide](./GUIDE.en.md) ([HTML](./GUIDE.en.html)) — glossary, install, use, troubleshooting, FAQ, and license, all explained simply.
 
-> Status: **v0.7.1 (stable release)** — organize, query, vault health-check, run log, and vault auto-discovery (5 MCP tools) are working and verified. **+ 3 new features planned for the next version** (auto-link/MOC and auto-classify, adding 2 more MCP tools for 7 total — implemented and verified in this repo, with 119 automated tests passing; live confirmation that the Obsidian graph view actually reflects this and that behavior survives a session restart is still pending user confirmation). See "What's new" below. Notion indexing works in environments where a Notion tool is connected (see "Current status" below).
+> Status: **based on v0.7.2 + 3 new features planned for the next version** (auto-link/MOC and auto-classify, adding 2 more MCP tools for 7 total — implemented and verified in this repo, with 119 automated tests passing; live confirmation that the Obsidian graph view actually reflects this and that behavior survives a session restart is still pending user confirmation). Organize, query, vault health-check, run log, and vault auto-discovery are working and verified. See "What's new" below. Notion indexing works in environments where a Notion tool is connected (see "Current status" below).
 
 > 📱 **Device note:** Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets**.
 
@@ -167,6 +167,7 @@ Relevance and classification judgments are made **directly by the AI (Claude)**;
 
 ## Safety & security
 - ✅ Writes run only **after human approval** (`dry_run` is the default — the plan is shown first). If approving every single time feels like a hassle, say **"just organize it, don't ask"** → new note creation then runs automatically (but **overwrite/delete are always confirmed once more**). Also, approval appears as a **pick-an-option prompt (number/click)**, so you can choose instead of typing "go ahead."
+- 🧾 **Raw-content-preservation notice** — if the material has a web address but the content looks too short ("did you paste a summary instead of the original?"), or is unusually large, the dry-run plan shown before saving will flag it. This is a **notice, not a block** — you can proceed as-is, or re-prepare the full original and organize again.
 - ✅ **Strips path separators, forbidden characters, and control characters** from note titles/folders, and **blocks paths outside the vault** (path-traversal prevention).
 - ✅ Instructions found inside external materials are treated **only as data, never as commands** (prompt-injection defense).
 - ✅ The Obsidian CLI runs **without a shell** (command-injection prevention). Keys/tokens are never stored in notes or in the released package.
@@ -207,7 +208,8 @@ For detailed security and data flow, see [Beginner's Guide §15](./GUIDE.en.md).
 > ⚖️ This is general information, **not legal advice.** The authoritative notices are the `LICENSE` and `NOTICE` files.
 
 - **Wikimate itself: Apache License 2.0** © 2026 SoDam AI Studio. Commercial use, modification, and distribution are allowed, but you must **include the copyright notice + a copy of the license**, **state changes**, and **keep NOTICE**. Provided **AS-IS, no warranty**, and **no trademark rights** (don't use the names "Wikimate" / "SoDam AI Studio" as your own).
-- **External tools are not bundled** — Node.js, @modelcontextprotocol/sdk, notesmd-cli, mcp-obsidian, notion-mcp-server are **MIT**; **the Notion API/`ntn` follow Notion's terms**; **Obsidian is free for personal use but requires a separate commercial license**. Check each one's own original terms directly.
-- **Content copyright** stays with the original authors. When collecting or redistributing, respect the original work's license/terms. Notes are stored only **on your own computer (locally)** and are never sent out (Notion indexing happens only when you turn it on).
+- **External tools are NOT bundled** — Node.js, @modelcontextprotocol/sdk, notesmd-cli, mcp-obsidian, notion-mcp-server are **MIT**; **Notion API/`ntn` follow Notion's terms**; **Obsidian is free for personal use but needs a separate commercial license**. Check each one's own terms.
+- **Content copyright** stays with the original authors. Respect each source's license/terms when collecting or redistributing. Notes are stored **locally on your computer** and not sent out (Notion indexing only when you enable it).
+- **The notes Wikimate organizes for you are 100% your own copyright.** Wikimate (SoDam AI Studio) claims no rights over the resulting notes — Wikimate is only software; it is not the author of the notes it helps create.
 
 > Full license table and disclaimer: [Beginner's Guide §19](./GUIDE.en.md) or `NOTICE`. For development/testing/deployment methods, see [DEVELOPMENT.md](./DEVELOPMENT.md).
