@@ -3,10 +3,11 @@
 > Show Me The PRD로 생성 (2026-06-07) · **버전: v2**
 > **Wikimate (위키메이트)**: AI 에이전트(Claude Code·Codex·Gemini)에게 명령하면 흩어진 자료를 옵시디언(장기 기억)에 정리하고 노션(색인·로그)에 색인하는 **멀티 에이전트 도구**. 핵심은 **이식 가능한 MCP 코어**, Claude Code에선 **마켓플레이스 플러그인**으로 제공.
 
-## 현재 구현 상태 (2026-06-22 · v0.7.0) — ★ 아래 PRD 본문보다 이게 최신
+## 현재 구현 상태 (2026-08-02 갱신 · main=v0.7.2) — ★ 아래 PRD 본문보다 이게 최신
 > 본문 PRD는 *원래 계획*(v2, 2026-06-07)이고 실제 구현은 더 린하게 진행됐어요. **작업 시 코드가 진실원본.**
-- ✅ **빌드됨**: 무의존 MCP 코어 + 도구 5개 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`(볼트 자동탐지·읽기전용). 스킬 3(organize·query·lint)·커맨드 2·Codex 어댑터.
-- ❌ **계획했으나 미구현**: SessionStart hook(자동연결)·서브에이전트·별도 "분류" 도구(7폴더 자동분류)·요약/원자노트·자동링크/MOC·Python 추출·Gemini 어댑터.
+- ✅ **main(이 브랜치, v0.7.2) 빌드됨**: 무의존 MCP 코어 + 도구 5개 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`(볼트 자동탐지·읽기전용). 스킬 3(organize·query·lint)·커맨드 2·Codex 어댑터. v0.7.2에서 `collect`에 **원문 보존 advisory**(저신뢰·대용량 경고, 비차단) 추가됨.
+- 🟢 **별도 브랜치 `feat/v0.8-connect`(미병합)에서 추가 구현·자동테스트 완료**: 도구 2개 추가(`wikimate_link`·`wikimate_classify`, 총 7개) + SessionStart hook(자동연결) + 검수 서브에이전트(`wikimate-reviewer`, 보고전용) + 스킬 2개 추가(link·classify). `npm run verify` **119 PASS/0 FAIL**(2026-08-02 재검증). **main에는 아직 병합 안 됨** — 병합 전 라이브 확인 2건(SessionStart hook 실제 로드 여부, 옵시디언 그래프뷰 반영 여부) **사람 확인 대기 중**(코드·자동테스트만으론 확인 불가).
+- ❌ **아직 미구현(양쪽 브랜치 공통)**: 요약/원자노트, Python 추출, Gemini 어댑터.
 - 🟡 **옵시디언 쓰기 기본 = 검증된 filesystem(`vault_path`)**; notesmd-cli(이름) 경로는 ⚠️미검증 옵션.
 - 🟡 **노션 색인 = 코어 밖**(스킬 + 외부 노션 MCP/CLI 연결 시에만). 구조적 한계로 "신뢰성"보다 **정직성**(한계 고지·삽입 전 best-effort 중복확인). 라이브 미검증.
 
@@ -39,11 +40,13 @@ MCP 코어 = 정리 로직 1개를 모든 에이전트가 공유 (모델 비종�
 | [03_PHASES.md](./03_PHASES.md) | Phase -1 손시뮬 → 1a(MCP코어)→1b→2→3 | 개발 순서 |
 | [04_PROJECT_SPEC.md](./04_PROJECT_SPEC.md) | 기술 스택·배포·플러그인 구조·**절대 하지 마** | 에이전트에 명령할 때마다 |
 
-## 다음 단계 (강력 추천 순서)
+## 다음 단계 (강력 추천 순서 — 2026-08-02 갱신)
 
-1. **Phase -1 손 시뮬레이션** — 자료 3개로 `obsidian`/`ntn` CLI를 손으로 써보며 흐름 확인. (코드 0)
-2. 통과하면 [03_PHASES.md](./03_PHASES.md)의 **"Phase 1a 시작 프롬프트"** 복사 → Claude Code에 붙여넣기.
-3. 명령 시 [04_PROJECT_SPEC.md](./04_PROJECT_SPEC.md)를 항상 함께 공유.
+> ⚠️ 아래 "Phase -1부터 시작" 안내는 **낡은 정보**입니다(Phase 1a~2 대부분 이미 구현·검증됨, 위 "현재 구현 상태" 참고). 실제 다음 단계는 다음과 같습니다.
+
+1. **사람 확인 2건(최우선, AI 대행 불가)** — `feat/v0.8-connect` 브랜치를 main에 병합하기 전에: ① Claude Code 완전 재시작 후 SessionStart hook 메시지가 실제로 뜨는지, ② 실제 옵시디언 앱에서 M1이 연결한 노트의 그래프뷰/백링크가 보이는지. 둘 다 자동테스트로 확인 불가.
+2. 위 2건이 확인되면 → `feat/v0.8-connect`를 main에 병합 → 요약·원자노트(M3) 착수.
+3. (참고, 낡았지만 완전히 무의미하진 않음) 아직 Phase -1 손 시뮬레이션을 직접 해본 적 없다면 [03_PHASES.md](./03_PHASES.md) 참고. 단, 이미 자료 다수가 실제로 정리·검증된 상태라 필수는 아님.
 
 ## 핵심 설계 결정 (v2)
 
