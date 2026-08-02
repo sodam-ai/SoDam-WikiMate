@@ -9,8 +9,8 @@ import { readFile } from "node:fs/promises";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const vault = join(root, "sandbox-vault");
 
-console.log("=== 1) suggest: 'Notion MCP Server' (related 키 없음, 최초 제안) ===");
-const s1 = await link({ vaultPath: vault, action: "suggest", note: "00_Inbox/Notion MCP Server.md" });
+console.log("=== 1) suggest: 'Notion MCP Server' (classify E2E가 20_Resources로 이미 이동시킴) ===");
+const s1 = await link({ vaultPath: vault, action: "suggest", note: "20_Resources/Notion MCP Server.md" });
 console.log(JSON.stringify(s1, null, 2));
 
 console.log("\n=== 2) suggest: '검증_수집 도구 테스트' (본문에 인젝션 문구 있음) ===");
@@ -20,15 +20,15 @@ console.log("인젝션 문구 없이 응답에 candidates만 있는지:", !JSON.
 
 // "MCP 연결 기본 구조"는 s1.candidates 안에 있는 실제 노트 — 스킬이 판단했다고 가정하고 연결 실행
 console.log("\n=== 3) add_links dry-run: Notion MCP Server → [[MCP 연결 기본 구조]] ===");
-const a3 = await link({ vaultPath: vault, action: "add_links", note: "00_Inbox/Notion MCP Server.md", targets: ["MCP 연결 기본 구조"], dryRun: true });
+const a3 = await link({ vaultPath: vault, action: "add_links", note: "20_Resources/Notion MCP Server.md", targets: ["MCP 연결 기본 구조"], dryRun: true });
 console.log(JSON.stringify(a3, null, 2));
 
 console.log("\n=== 4) add_links 실제 실행 ===");
-const a4 = await link({ vaultPath: vault, action: "add_links", note: "00_Inbox/Notion MCP Server.md", targets: ["MCP 연결 기본 구조"], dryRun: false });
+const a4 = await link({ vaultPath: vault, action: "add_links", note: "20_Resources/Notion MCP Server.md", targets: ["MCP 연결 기본 구조"], dryRun: false });
 console.log(JSON.stringify(a4, null, 2));
 
 console.log("\n=== 5) 파일 실제 반영 확인 ===");
-const text5 = await readFile(join(vault, "00_Inbox", "Notion MCP Server.md"), "utf8");
+const text5 = await readFile(join(vault, "20_Resources", "Notion MCP Server.md"), "utf8");
 console.log(text5.split("\n").slice(0, 14).join("\n"));
 console.log("related 반영:", text5.includes(`related: ["[[MCP 연결 기본 구조]]"]`) ? "PASS" : "FAIL");
 
