@@ -8,50 +8,10 @@ import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, relative } from "node:path";
 import { walkVault, resolveVaultPath, listVaults } from "./collect.mjs";
+import { parseFrontmatter, parseAliases, stripCode, extractLinks } from "./shared.mjs";
 
 // 며칠 이내 생성된 노트는 '아직 정리 전'으로 보고 고아 경보에서 제외(노이즈 방지)
 const RECENT_DAYS = 7;
-
-// frontmatter(머리말) 파싱 — 간단 key: value (+ aliases 배열)
-function parseFrontmatter(text) {
-  // 시작 --- 과 '자기 줄의' 닫는 --- 사이만 frontmatter. 본문 속 --- (수평선)에 안 속아야 함. CRLF·BOM 허용.
-  const m = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
-  if (!m) return { fm: null, body: text };
-  const fm = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const mm = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
-    if (mm) fm[mm[1]] = mm[2].trim();
-  }
-  return { fm, body: text.slice(m[0].length) };
-}
-
-// aliases: [a, b] → 소문자 배열
-function parseAliases(val) {
-  if (!val) return [];
-  return val.replace(/^\[/, "").replace(/\]$/, "")
-    .split(",").map((s) => s.trim().replace(/^["']|["']$/g, "")).filter(Boolean)
-    .map((s) => s.toLowerCase());
-}
-
-// 코드블록·인라인코드 제거 (그 안의 [[..]]는 실제 링크가 아니므로 오탐 방지)
-function stripCode(body) {
-  return String(body).replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
-}
-// 본문에서 노트 [[위키링크]] 대상 추출 — 임베드 ![[..]]·첨부파일(.png 등) 제외, 앵커 #·^·표시명 | 제거, 소문자
-function extractLinks(body) {
-  const out = [];
-  const re = /(!?)\[\[([^\]]+)\]\]/g;
-  const text = stripCode(body);
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    if (m[1] === "!") continue; // 임베드(![[...]])는 노트 링크 아님
-    const t = m[2].split("|")[0].split("#")[0].split("^")[0].trim().replace(/\.md$/i, "");
-    if (!t) continue;
-    if (/\.[a-zA-Z0-9]{1,5}$/.test(t)) continue; // 첨부파일(.png/.pdf 등)은 노트 링크 아님
-    out.push(t.toLowerCase());
-  }
-  return out;
-}
 
 function daysSince(dateStr, now) {
   const d = Date.parse(dateStr);

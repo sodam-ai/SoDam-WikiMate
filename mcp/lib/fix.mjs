@@ -6,40 +6,18 @@
 //  - 볼트 밖 경로·.obsidian 차단(경로 이탈 방지), 한 번에 한 노트만
 //  - 노트 내용은 데이터로만(인젝션 방어) — 본문 속 지시문을 명령으로 실행하지 않음
 
-import { readFile, writeFile, rename, mkdir, copyFile } from "node:fs/promises";
+import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join, resolve, relative, dirname, basename, isAbsolute } from "node:path";
+import { join, basename } from "node:path";
 import { resolveVaultPath, listVaults } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
+import { safeInside, backupFile } from "./shared.mjs";
 
 // 정규식 메타문자 이스케이프(링크 대상에 특수문자가 와도 리터럴로)
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
 function resolveRoot(vault, vaultPath) {
   return (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
-}
-
-// 볼트 내부 경로로 안전 해석. 실패 시 null.
-//  - 절대경로·드라이브문자(C:)·UNC(\\server) 거부 → root를 무시하고 볼트 밖으로 새는 것 차단
-//  - traversal(..) 차단
-//  - 점(.)으로 시작하는 경로 조각 전부 거부 → .obsidian/.OBSIDIAN(대소문자 무관)·.wikimate·.git 등 보호
-function safeInside(root, relPath) {
-  const p = String(relPath || "");
-  if (!p || isAbsolute(p) || /^[a-zA-Z]:/.test(p) || /^[\\/]{2}/.test(p)) return null;
-  const abs = resolve(root, p);
-  const rel = relative(resolve(root), abs);
-  if (rel === "" || rel.startsWith("..")) return null;
-  if (rel.split(/[/\\]/).some((seg) => seg.startsWith("."))) return null;
-  return abs;
-}
-
-// 수정 전 원본을 .wikimate-backup/<ts>/<상대경로>로 복사 → 되돌릴 수 있게
-async function backupFile(root, abs, ts) {
-  const rel = relative(root, abs);
-  const dest = join(root, ".wikimate", "backups", ts, rel);
-  await mkdir(dirname(dest), { recursive: true });
-  await copyFile(abs, dest);
-  return relative(root, dest);
 }
 
 // 안전 수정 메인. action: "archive" | "replace_link"

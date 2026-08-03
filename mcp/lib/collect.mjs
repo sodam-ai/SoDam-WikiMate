@@ -9,6 +9,7 @@ import { join, resolve, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { appendRunLog } from "./runlog.mjs";
+import { safeComponent } from "./shared.mjs";
 
 const execFileP = promisify(execFile);
 
@@ -21,17 +22,6 @@ export function sourceHash(origin = "", content = "") {
   return createHash("sha256").update(`${origin}\n${content}`).digest("hex");
 }
 
-// 파일명 안전화 (경로 조작 방지: 경로 구분자·금지문자·제어문자 제거, '..' 무력화)
-function safeComponent(name) {
-  const s = String(name ?? "")
-    .replace(/[/\\:*?"<>|\u0000-]/g, " ")
-    .replace(/\.{2,}/g, ".")
-    .replace(/^\.+/, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 120);
-  return s || "untitled";
-}
 // 하위폴더 안전화: 경로 구분자로 쪼개 각 조각 안전화, '.'·'..' 제거
 function safeFolder(folder) {
   return String(folder ?? "")
@@ -125,6 +115,11 @@ export function listVaults() {
 // 표준 노트 내용(frontmatter + 본문) 생성
 export function buildNoteContent({ title, source = "", summary = "", importance = 3, tags = [], hash = "", date, body = "" }) {
   const tagList = (tags || []).map((t) => String(t)).join(", ");
+  // 스키마 선언(1~5)을 server.mjs가 강제하지 않으므로 여기서 직접 검증한다(classify.mjs에서 실측으로 발견한
+  // 같은 결함 클래스 — 이전엔 Number(importance)||3이라 NaN만 우연히 3으로 걸러지고 범위밖 숫자(예:999)는 그대로 통과했음).
+  // 여기는 노트 신규 생성(선택 필드)이라 classify.apply처럼 거부하지 않고 안전값(3)으로 대체한다(생성 흐름 차단 방지).
+  const impNum = Number(importance);
+  const safeImportance = Number.isInteger(impNum) && impNum >= 1 && impNum <= 5 ? impNum : 3;
   return [
     "---",
     `title: ${JSON.stringify(String(title))}`,
@@ -133,7 +128,7 @@ export function buildNoteContent({ title, source = "", summary = "", importance 
     'project: ""',
     `source: ${JSON.stringify(String(source))}`,
     `summary: ${JSON.stringify(String(summary))}`,
-    `importance: ${Number(importance) || 3}`,
+    `importance: ${safeImportance}`,
     `tags: [${tagList}]`,
     "related: []",
     `source_hash: ${JSON.stringify(hash)}`,
@@ -239,12 +234,23 @@ export async function collect({ vault, vaultPath, folder = "", title, url = "", 
 
   // 파일시스템 폴백 (경로 조작 방지: 안전화 이름 + 볼트 내부 확인)
   const dir = join(vaultPath, cleanFolder);
-  const fp = join(dir, `${safeTitle}.md`);
+  let fp = join(dir, `${safeTitle}.md`);
   if (relative(resolve(vaultPath), resolve(fp)).startsWith("..")) {
     throw new Error("경로 이탈 차단(볼트 밖 경로)");
   }
   await mkdir(dir, { recursive: true });
+  // 안전 패치: 제목이 우연히 같은 '다른' 자료(source_hash 다름 → 위 dup 체크를 이미 통과)가 파일명을 선점했으면
+  // 절대 덮어쓰지 않는다(fix.mjs archive·classify.mjs apply와 동일한 충돌-시-접미 패턴). 침묵 덮어쓰기 금지.
+  let renamed = false;
+  if (existsSync(fp)) {
+    renamed = true;
+    let i = 0;
+    do {
+      i += 1;
+      fp = join(dir, `${safeTitle}_dup${i}.md`);
+    } while (existsSync(fp));
+  }
   await writeFile(fp, noteBody, "utf8");
-  await appendRunLog(dedupPath || vaultPath, { tool: "collect", action: "create", method: "filesystem", request: title, changed: fp, result: "ok", source_hash: hash });
+  await appendRunLog(dedupPath || vaultPath, { tool: "collect", action: "create", method: "filesystem", request: title, changed: fp, result: "ok", source_hash: hash, detail: renamed ? "파일명 충돌 — 다른 자료가 같은 이름을 선점해 접미 부여(덮어쓰기 없음)" : undefined });
   return { dry_run: false, written: true, method: "filesystem", path: fp, source_hash: hash };
 }

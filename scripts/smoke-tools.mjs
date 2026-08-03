@@ -34,9 +34,9 @@ try {
   await client.connect(transport);
   console.log("연결 ✅");
 
-  // 1) 도구 4개 노출
+  // 1) 도구 6개 노출
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-  check("도구 5개 노출(collect/fix/lint/runlog/vaults)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog", "wikimate_vaults"].every((n) => tools.includes(n)));
+  check("도구 6개 노출(collect/fix/lint/runlog/vaults/link)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog", "wikimate_vaults", "wikimate_link"].every((n) => tools.includes(n)));
 
   // 2) lint를 서버 통해 호출 → 중복·깨진링크 탐지
   const lintR = parse(await client.callTool({ name: "wikimate_lint", arguments: { vault_path: vault } }));

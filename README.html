@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wikimate (위키메이트) — README</title>
+<style>
+:root { color-scheme: light dark; }
+body { font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; line-height: 1.7; word-break: keep-all; }
+@media (prefers-color-scheme: dark) { body { background: #1a1a1a; color: #e8e8e8; } a { color: #6fb3ff; } code, pre { background: #2a2a2a !important; } th { background: #2a2a2a !important; } table, th, td { border-color: #444 !important; } blockquote { border-left-color: #555 !important; color: #bbb !important; } hr { border-color: #444 !important; } }
+@media (prefers-color-scheme: light) { body { background: #fff; color: #222; } }
+h1 { font-size: 1.9em; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; }
+h2 { font-size: 1.4em; margin-top: 2em; border-bottom: 1px solid #ddd; padding-bottom: 0.25em; }
+h3 { font-size: 1.15em; margin-top: 1.5em; }
+code { background: #f2f2f2; padding: 0.15em 0.4em; border-radius: 4px; font-family: Consolas, "D2Coding", monospace; font-size: 0.9em; }
+pre { background: #f2f2f2; padding: 12px 14px; border-radius: 6px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; overflow-x: auto; display: block; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #f5f5f5; }
+blockquote { border-left: 4px solid #ccc; margin: 1em 0; padding: 0.3em 1em; color: #555; }
+details { border: 1px solid #ccc; border-radius: 6px; padding: 0.6em 1em; margin: 1em 0; }
+summary { cursor: pointer; font-weight: 600; }
+a { color: #0969da; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+li { margin: 0.2em 0; }
+</style>
+</head>
+<body>
+<h1>Wikimate (위키메이트)</h1>
+<p>AI 에이전트에게 <strong>"정리해줘"</strong> 라고 하면, 흩어진 자료(웹 링크·PDF·대화 로그·텍스트)를 <strong>내 옵시디언 볼트에 노트로 정리</strong>하고, 관련 있는 노트끼리 <strong>연결</strong>하고, <strong>분류</strong>까지 해 주고, 원하면 <strong>노션에 색인</strong>해주는 <strong>Claude Code 플러그인</strong>. (Codex엔 "플러그인 설치(<code>/plugin</code>)"가 없어요 — 대신 저장소를 받아 <code>codex mcp add</code>로 <strong>MCP 서버로 등록</strong>해 연동합니다: <a href="./adapters/codex/SETUP.md"><code>adapters/codex/SETUP.md</code></a>.)</p>
+<p><strong><a href="./README.en.md">English</a></strong></p>
+<blockquote><p>📘 <strong>처음이세요?</strong> 그대로 따라 하는 <a href="./GUIDE.ko.md">왕초보 가이드</a> (<a href="./GUIDE.ko.html">HTML</a>)를 보세요 — 용어 사전·설치·사용·문제해결·FAQ·라이선스까지 전부 쉽게 설명해요.</p></blockquote>
+<blockquote><p>상태: <strong>v0.7.1(정식 배포)</strong> — 정리·검색·볼트 건강검진·작업 로그·보관함 자동탐지(MCP 도구 5개) 동작·검증 완료. <strong>+ 다음 버전 예정 신규 기능 3종</strong>(자동 링크·MOC·자동 분류, MCP 도구 2개 추가로 총 7개 — 이 저장소에 구현·자동 테스트 119개 통과 완료, 옵시디언 그래프뷰 실제 표시·세션 재시작 라이브 확인은 사용자 확인 대기 중). 아래 "업데이트 내용" 참고. 노션 색인은 노션 도구가 연결된 환경에서 동작(아래 "현재 상태" 참고).</p></blockquote>
+<blockquote><p>📱 <strong>기기 안내:</strong> Wikimate는 <strong>윈도우 PC(데스크톱·노트북) 전용</strong>이에요. <strong>스마트폰·태블릿에는 설치되지 않습니다.</strong></p></blockquote>
+<h2>무엇을 해주나요?</h2>
+<ul>
+<li>🧹 <strong>자연어로 정리</strong> — "이 링크 정리해줘" 한마디면 노트가 만들어져요. (가끔 자동발동이 안 되면 <strong><code>/wikimate &lt;링크&gt;</code></strong> 슬래시 명령으로 100% 실행.)</li>
+<li>🧭 <strong>보관함 자동탐지</strong> — 옵시디언에 등록된 보관함(볼트)을 자동으로 찾아 <strong>"여기에 정리할까요?"</strong> 하고 제안해줘요(이름 안 말해도 됨, 도구 <code>wikimate_vaults</code>).</li>
+<li>📒 <strong>내 진짜 옵시디언 볼트에</strong> — 설치된 옵시디언 도구(MCP/CLI)를 자동 감지해 사용하고, 없으면 파일로 폴백.</li>
+<li>🗂️ <strong>노션 색인(선택)</strong> — 노션 도구가 연결돼 있으면 색인 행을 추가(옵시디언=원본, 노션=단방향 색인).</li>
+<li>✋ <strong>항상 계획 먼저 → 승인 후 실행</strong> — 멋대로 쓰지 않아요.</li>
+<li>🔁 <strong>중복 차단</strong> — 같은 자료는 <code>source_hash</code>로 한 번만.</li>
+<li>🛡️ <strong>안전 설계</strong> — 볼트 밖 경로 차단, 외부 글은 명령이 아니라 데이터로 취급(프롬프트 인젝션 방어).</li>
+<li>🔎 <strong>물어보기</strong> — "내 볼트에서 ~ 찾아줘" 하면 정리해 둔 노트에서 <strong>출처와 함께</strong> 답해요(없는 건 없다고 정직히).</li>
+<li>🩺 <strong>볼트 건강검진</strong> — 중복·깨진 <code>[[링크]]</code>·고아 노트·머리말 누락을 찾아 <strong>보고</strong>하고, 승인하면 <strong>삭제 없이</strong>(보관함 이동·백업) 고쳐요.</li>
+<li>🧾 <strong>작업 로그</strong> — AI가 내 볼트에서 한 일을 자동 기록("최근 작업 보여줘").</li>
+<li>🆕 🔗 <strong>자동 링크·MOC</strong> — 관련 있는 노트끼리 <code>[[링크]]</code>로 연결(노트당 최대 5개, 과잉 연결 방지)하고, 같은 주제 노트는 목차 노트(MOC)로 묶어줘요.</li>
+<li>🆕 🗂️ <strong>자동 분류</strong> — 미분류 노트의 폴더·태그·중요도를 판단해 제안하고, 승인하면 적용해요.</li>
+<li>🆕 🔔 <strong>세션 시작 안내</strong> — Claude Code를 켤 때 옵시디언 도구·등록된 보관함을 자동 감지해 안내(읽기 전용).</li>
+<li>🆕 🕵️ <strong>검수 서브에이전트</strong> — 실제로 노트를 쓴 뒤 "완료" 보고 전에, 별도 관점의 AI가 원문 왜곡·인젝션 감염·기존 노트 훼손 여부를 한 번 더 확인.</li>
+</ul>
+<details>
+<summary><b>📋 업데이트 내용 요약 (펼쳐서 보기)</b></summary>
+
+<p><strong>✅ v0.7.1 (정식 배포판)</strong></p>
+<li><code>wikimate_collect</code>(정리) · <code>wikimate_lint</code>(건강검진) · <code>wikimate_fix</code>(안전수정) · <code>wikimate_runlog</code>(작업기록) · <code>wikimate_vaults</code>(보관함탐지) — MCP 도구 5개</li>
+<li>노션 선택 색인, 스킬 3종(organize/query/lint)</li>
+
+<p><strong>🆕 다음 버전 예정 (이 저장소에 구현·검증 완료, 정식 배포 전)</strong></p>
+<li><code>wikimate_link</code>(자동 링크·MOC) · <code>wikimate_classify</code>(자동 분류) — MCP 도구 2개 추가(총 7개)</li>
+<li>SessionStart hook(세션 시작 자동 감지) · <code>wikimate-reviewer</code> 검수 서브에이전트</li>
+<li>자동 테스트 119개 전부 통과(단위 테스트 + 실제 서버 프로토콜 + 실제 볼트 픽스처 E2E), 실행 중 발견된 결함 5건(셀프링크·중복입력·중요도값 미검증 등) 전부 수정·회귀테스트로 고정됨</li>
+<li>⚠️ 남은 미확인 항목: 실제 옵시디언 그래프뷰/백링크 화면 표시, Claude Code 재시작 후 SessionStart 알림 — 둘 다 사용자 환경에서 직접 확인 필요(자동화로 확인 불가능한 영역)</li>
+
+</details>
+<h2>30초 용어 (왕초보용)</h2>
+<table>
+<thead>
+<tr><th>낱말</th><th>쉬운 뜻</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>플러그인</strong></td><td>프로그램에 끼워 넣는 새 기능 부품 (앱 추가 설치 같은 것)</td></tr>
+<tr><td><strong>마켓플레이스</strong></td><td>플러그인을 받아오는 앱 장터</td></tr>
+<tr><td><strong>MCP / MCP 도구</strong></td><td>AI와 도구를 잇는 통로 / 그 통로로 누르는 기능 버튼</td></tr>
+<tr><td><strong>볼트(Vault)</strong></td><td>옵시디언에서 노트를 모아 두는 보관 폴더(이름이 있어요)</td></tr>
+<tr><td><strong>dry-run</strong></td><td>실제로 하기 전에 "계획만" 미리보기</td></tr>
+<tr><td><strong>🆕 MOC</strong></td><td>같은 주제 노트를 모은 목차 노트</td></tr>
+</tbody>
+</table>
+<blockquote><p>더 많은 용어는 <a href="./GUIDE.ko.md">왕초보 가이드 1번</a>에 있어요.</p></blockquote>
+<h2>설치 (Claude Code)</h2>
+<blockquote><p>⚠️ 아래 <strong>두 명령을 한 줄씩 따로</strong> 입력하세요. (한꺼번에 붙여넣으면 URL이 깨져 실패해요.)</p></blockquote>
+<p><strong>1) 마켓플레이스 추가</strong> — 입력 후 Enter, "added" 확인:</p>
+<pre><code>/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git</code></pre>
+<p><strong>2) 플러그인 설치</strong> — 1)이 끝난 뒤:</p>
+<pre><code>/plugin install wikimate@wikimate-marketplace</code></pre>
+<p>설치 후 Claude Code를 재시작하면 끝. (확인하고 싶으면 <code>/mcp</code>에 <code>wikimate_collect</code>·<code>wikimate_lint</code>·<code>wikimate_fix</code>·<code>wikimate_runlog</code>·<code>wikimate_vaults</code> 5개가 보이면 성공. 🆕 신규기능 포함 폴더로 설치했다면 <code>wikimate_link</code>·<code>wikimate_classify</code>까지 7개.)</p>
+<h2>실행 방법</h2>
+<p><strong>따로 "실행(켜기)"할 게 없어요.</strong> 설치만 하면 Claude Code를 켤 때마다 자동으로 함께 켜져요. "실행"은 곧 <strong>Claude Code를 켜고 대화창에 말로 시키는 것</strong>이 전부예요. (개발자가 서버를 직접 돌리려면 받은 폴더에서 <code>npm install</code> 후 <code>npm start</code>. 전체 자동 검증은 <code>npm run verify</code>.)</p>
+<h2>설치 (Codex)</h2>
+<p>Codex엔 <code>/plugin</code> 마켓플레이스가 <strong>없어요.</strong> 대신 저장소를 받아 <strong>MCP 서버로 등록</strong>합니다.</p>
+<p><strong>1) 저장소 받기</strong></p>
+<pre><code>git clone https://github.com/sodam-ai/SoDam-WikiMate.git</code></pre>
+<p><strong>2) MCP 서버 등록</strong> (볼트·저장소 경로는 본인 것으로 바꾸세요):</p>
+<pre><code>codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:/받은/경로/SoDam-WikiMate/mcp/server.mjs</code></pre>
+<p>→ <code>codex mcp list</code> 에 <code>wikimate</code>가 보이면 성공.</p>
+<p><strong>3) (선택) 자연어 규칙</strong> — Codex 작업 폴더에 저장소의 <code>AGENTS.md</code>를 두면 "정리해줘" 같은 말도 따릅니다.</p>
+<p><strong>업데이트</strong>: 받은 폴더에서 <code>git pull</code> 하면 끝(Claude Code 같은 캐시 함정 없음).</p>
+<blockquote><p>⚠️ <strong>Codex는 "축소판"이에요.</strong> 정리(쓰기) MCP 도구까지 동작하지만, <em>자동 발동·물어보기·여러 노트 종합</em> 같은 <strong>스킬은 Claude Code 전용</strong>이고, 노션 색인은 Codex에 <strong>별도 노션 MCP</strong>가 연결돼 있어야 해요. (자세히: <a href="./adapters/codex/SETUP.md"><code>adapters/codex/SETUP.md</code></a>)</p></blockquote>
+<h2>업데이트가 안 될 때 — 가장 흔한 함정 (Claude Code)</h2>
+<p>GitHub에 새 버전이 올라가도, 내 PC의 <strong>마켓플레이스 캐시는 자동으로 안 바뀌어요.</strong> 그래서 재설치만으론 옛날 버전이 그대로일 수 있어요. 최신으로 갱신하려면:</p>
+<pre><code>/plugin marketplace update wikimate-marketplace
+/plugin install wikimate@wikimate-marketplace</code></pre>
+<p>그래도 안 되면 <code>/plugin</code> 메뉴에서 마켓플레이스를 <strong>remove → 다시 add → 설치</strong> (캐시를 통째로 새로 받아요).</p>
+<blockquote><p>💡 <strong>"GitHub에 푸시해야 하나요?" → 아니요.</strong> 설치·업데이트는 GitHub에서 <em>받아오는</em> 것이라, 내가 따로 올릴(push) 필요가 없어요. (푸시는 개발자가 코드를 바꿀 때만)<br>⚠️ <strong>설치 중 <code>EBUSY: resource busy or locked</code> 가 뜨면</strong> → Windows 백신(Defender)이 갓 쓰인 파일을 잠깐 잠근 거예요. <strong>Claude Code를 완전히 종료했다 다시 켠 뒤</strong> 위 명령을 다시 실행하면 대개 풀립니다.</p></blockquote>
+<h2>사용법</h2>
+<p>대화로 시키면 됩니다:</p>
+<blockquote><p>"이 내용을 내 'Vault' 볼트에 정리해줘"</p></blockquote>
+<blockquote><p>⭐ <strong>확실한 방법(권장)</strong> — 자연어 "정리해줘"는 AI 판단이라 <strong>가끔 자동발동을 안 하고 그냥 요약만</strong> 할 때가 있어요. 그럴 땐 <strong>슬래시 명령</strong> <code>/wikimate &lt;링크/텍스트&gt;</code> 를 쓰면 <strong>100% 발동</strong>합니다(직접 명령이라). 예: <code>/wikimate https://example.com</code></p></blockquote>
+<ul>
+<li>📎 <strong>정리할 "자료"는 무엇이든 돼요</strong> — 한 문장 텍스트, 웹 링크(<code>이 링크 정리해줘: https://...</code>), 파일 경로(<code>이 파일 정리해줘: D:\메모\오늘.md</code>) 모두 OK. 따로 준비할 게 없어요.</li>
+<li>🧭 <strong>보관함 이름은 안 말해도 돼요</strong> — Wikimate가 등록된 보관함을 찾아 "여기에 할까요?"라고 제안해줘요. 콕 집어 <em>"내 'Vault' 볼트에"</em> 처럼 말해도 됩니다(이름은 옵시디언 좌하단 볼트 전환 메뉴에서 확인).</li>
+<li>먼저 계획(어디에·어떤 도구로·노션 색인 여부)을 보여주고, 승인하면 노트를 만듭니다.</li>
+</ul>
+<p><strong>찾을 때도 대화로</strong> (읽기 — 정리해 둔 노트에서):</p>
+<blockquote><p>"내 볼트에서 RAG 찾아서 요약해줘"</p></blockquote>
+<ul>
+<li>색인(노션)과 원본(옵시디언)에서 찾아 <strong>출처와 함께</strong> 답해요. <strong>답하기 전에 원본이 실제로 있는지 확인</strong>하고, 지워진 노트(끊긴 색인)면 "원본 없음"이라고 솔직히 알려줍니다(없는 걸 있다고 안 함).</li>
+<li>🔗 <strong>여러 노트를 묶어서도</strong> 물어볼 수 있어요: "내 노트들로 RAG·임베딩·벡터DB 관계 정리해줘" → 관련 노트를 모아 <strong>노트별 출처와 함께 종합</strong>해 답합니다(어떤 노트로 답할지 먼저 보여줘요).</li>
+</ul>
+<p><strong>정리 상태가 궁금할 때도 대화로</strong> (건강검진 — 읽기):</p>
+<blockquote><p>"내 'Vault' 볼트 건강검진해줘"</p></blockquote>
+<ul>
+<li>🩺 시간이 지나며 쌓인 <strong>고아 노트</strong>(아무 데도 안 이어진 노트)·<strong>깨진 <code>[[링크]]</code></strong>·<strong>중복</strong>·<strong>frontmatter 누락</strong>, 그리고 노션을 쓰면 <strong>끊긴 색인</strong>(원본은 지워졌는데 노션 행만 남은 것)을 찾아 <strong>보고</strong>해요. <strong>멋대로 고치지 않아요</strong> — 고칠 항목을 골라 승인하면 그때만 손봅니다: 중복은 <strong>삭제가 아니라 보관함(99_Archive)으로 이동</strong>(되돌리기 쉬움), 링크 수정은 <strong>고치기 전 자동 백업</strong>(비가역은 한 번 더 확인).</li>
+</ul>
+<p><strong>🆕 관련 노트 연결·목차 만들기도 대화로</strong>:</p>
+<blockquote><p>"이 노트랑 관련 있는 노트들 연결해줘" / "MCP 관련 노트들 목차로 묶어줘"</p></blockquote>
+<ul>
+<li>볼트 전체에서 후보를 찾아 <strong>제목·요약·태그만</strong> 보고(본문은 안 봄) 관련도를 판단·제안하고, 승인한 것만 연결(노트당 최대 5개). 목차 요청 시 주제별 목차 노트(MOC)를 생성·갱신(기존 사용자 작성 내용은 보존).</li>
+</ul>
+<p><strong>🆕 자동 분류도 대화로</strong>:</p>
+<blockquote><p>"이 미분류 노트들 정리해줘"</p></blockquote>
+<ul>
+<li>폴더·태그·중요도를 제안하고, 승인하면 적용. 파일명 충돌 시 절대 덮어쓰지 않음.</li>
+</ul>
+<h2>환경 변수 (선택)</h2>
+<table>
+<thead>
+<tr><th>변수</th><th>용도</th></tr>
+</thead>
+<tbody>
+<tr><td><code>OBSIDIAN_VAULT_PATH</code></td><td>볼트 폴더 절대경로 (파일 폴백·중복검사용)</td></tr>
+<tr><td><code>OBSIDIAN_VAULT_NAME</code></td><td>옵시디언에 등록된 볼트 이름 (CLI용)</td></tr>
+<tr><td><code>NOTION_RESEARCH_DB_ID</code></td><td>노션 색인 DB 지정 (없으면 검색하거나 물어봐요)</td></tr>
+</tbody>
+</table>
+<p><code>.env.example</code>를 복사해 <code>.env</code>로 쓰세요. <strong>실제 값(토큰 등)은 절대 git에 올리지 마세요.</strong></p>
+<h2>폴더 구조</h2>
+<pre><code>.claude-plugin/        플러그인·마켓플레이스 매니페스트
+mcp/server.mjs         무의존 MCP 서버 (stdio) — 도구 7개(collect·lint·fix·runlog·vaults·link·classify)
+mcp/lib/shared.mjs     🆕 공통 헬퍼(경로안전검사·백업·frontmatter 파싱)
+mcp/lib/collect.mjs    수집(이름 안전화·중복 차단)
+mcp/lib/lint.mjs       건강검진(읽기전용)
+mcp/lib/fix.mjs        안전 수정(삭제 없음·백업)
+mcp/lib/runlog.mjs     작업 로그
+mcp/lib/link.mjs       🆕 자동 링크·MOC
+mcp/lib/classify.mjs   🆕 자동 분류
+skills/                자연어 자동 발동 스킬(organize·query·lint·link·classify)
+commands/              /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify 명령
+hooks/                 🆕 세션 시작 자동 감지
+agents/                🆕 검수 서브에이전트(wikimate-reviewer)
+adapters/codex/        Codex용 설정 안내
+templates/             노트 템플릿
+scripts/               검증 스크립트(verify-*·smoke-*·e2e-*)
+(내 볼트의) .wikimate/runlog.jsonl   작업 로그(숨김)</code></pre>
+<h2>아키텍처 (간단히)</h2>
+<pre><code>[나] --말로 명령--&gt; [Claude Code/Codex] --MCP--&gt; [Wikimate 서버] --&gt; [collect/link/classify 등] --&gt; [내 옵시디언 볼트]</code></pre>
+<p>관련도·분류 판단은 <strong>AI(Claude)가 직접</strong> 하고, 서버는 후보 정보 제공과 안전한 파일 쓰기만 담당합니다(별도 유사도 엔진 없음 — 중복 개발 방지). 자세한 그림은 <a href="./GUIDE.ko.md">왕초보 가이드 14번</a>.</p>
+<h2>안전·보안</h2>
+<ul>
+<li>✅ 쓰기는 <strong>사람 승인 후</strong> 실행 (<code>dry_run</code>이 기본 — 계획만 먼저 보여줌). 매번 "승인"이 번거로우면 <strong>"묻지 말고 바로 정리해줘"</strong> 라고 하세요 → 신규 노트 생성은 자동(단 <strong>덮어쓰기·삭제는 항상 한 번 더 확인</strong>). 그리고 승인은 <strong>선택지(숫자/클릭)</strong> 로 떠서, "진행해줘"를 타자치지 않고 골라도 돼요.</li>
+<li>✅ 노트 제목·폴더의 <strong>경로 구분자·금지문자·제어문자를 정리</strong>하고 <strong>볼트 밖 경로를 차단</strong>(경로 이탈 방지).</li>
+<li>✅ 외부 자료 속 지시문은 <strong>명령이 아니라 데이터로만</strong> 취급(프롬프트 인젝션 방어).</li>
+<li>✅ 옵시디언 CLI는 <strong>셸 없이</strong> 실행(명령 주입 방지). 키·토큰은 노트·배포물에 저장하지 않음.</li>
+<li>✅ <code>.obsidian/</code> 폴더는 건드리지 않음. 기존 노트는 승인 없이 수정·삭제하지 않음.</li>
+<li>✅ 🆕 노트당 관련 링크는 <strong>최대 5개</strong>로 코드가 직접 강제(과잉 연결 방지, 프롬프트 지시만으로는 불충분해 코드 레벨 검증).</li>
+<li>✅ 🆕 숫자 입력값(중요도 등)은 범위·타입 검증 후 안전한 기본값으로 대체(2026-07-11 실측 검증으로 발견·수정).</li>
+<li>ℹ️ 노션 색인은 노션 도구가 연결돼 있을 때만. 안 되면 옵시디언만 정리하고 솔직히 보고해요.</li>
+<li>🧾 <strong>작업 기록(Run Log)</strong> — 실제로 만들거나·옮기거나·고친 노트는 자동으로 <code>.wikimate/runlog.jsonl</code>(숨김)에 한 줄씩 남아요. <strong>"최근 작업 보여줘"</strong> 라고 하면 무엇을 했는지 되짚어 드립니다(읽기 전용 안전 로그).</li>
+</ul>
+<p>자세한 보안·데이터 흐름은 <a href="./GUIDE.ko.md">왕초보 가이드 15번</a>.</p>
+<h2>현재 상태 (정직하게)</h2>
+<ul>
+<li>✅ <strong>옵시디언 정리</strong>: 실제 볼트에 노트 생성 확인(자연어 자동 발동 포함).</li>
+<li>✅ <strong>건강검진·안전수정·작업로그</strong>: 단위테스트 + 서버 프로토콜 e2e로 검증(중복·깨진링크·고아 탐지, 삭제 없는 수정, 자동 기록).</li>
+<li>✅ 🆕 <strong>자동 링크·MOC·자동 분류</strong>: 자동 테스트 119개 통과, 실제 볼트 픽스처로 E2E 검증(인젝션 방어·5개 상한·기존 콘텐츠 보존 등 실측 확인). 실행 중 실제 결함 5건 발견 후 전부 수정·회귀테스트 고정.</li>
+<li>🟡 🆕 <strong>그래프뷰 반영·hook 라이브 로드</strong>: 코드·자동테스트로는 확인 한계 — 사용자가 실제 옵시디언 앱·Claude Code 재시작으로 직접 확인 필요.</li>
+<li>🟡 <strong>노션 색인</strong>: 노션 도구(MCP/CLI)가 연결·인증된 환경에서 동작. 환경에 따라 미연결이면 자동으로 건너뜁니다.</li>
+<li>🟡 <strong>Codex</strong>: 같은 MCP 코어를 쓰도록 어댑터 제공(설정은 <code>adapters/codex/SETUP.md</code>). 스킬(자동발동)은 Claude Code 전용.</li>
+<li>⚠️ <strong>라이브 세션 미검증</strong>: 실제 Claude Code <code>/mcp</code> 세션·실볼트 검증은 사용자 환경에서 권장(2분, 위 설치 참고).</li>
+</ul>
+<h2>문제 해결</h2>
+<ul>
+<li><strong>"정리해줘" 했는데 노트는 안 만들고 요약만 해요</strong> → 자연어 자동 발동이 들쭉날쭉이에요. <strong><code>/wikimate &lt;링크&gt;</code></strong> 슬래시 명령으로 콕 찍으면 100% 됩니다(가장 확실).</li>
+<li><strong><code>marketplace ... not found</code>(마켓플레이스 못 찾음)</strong> → 등록이 안 된 거예요. <code>update</code>가 아니라 <strong><code>/plugin marketplace add https://github.com/sodam-ai/SoDam-WikiMate.git</code> 부터</strong> 한 뒤 <code>/plugin install wikimate@wikimate-marketplace</code>.</li>
+<li><strong><code>/mcp</code>에 안 보여요</strong> → Claude Code 재시작. 그래도 없으면 위 "업데이트" 방식으로 캐시 갱신.</li>
+<li><strong>노트가 옵시디언에 안 보여요</strong> → 볼트 <em>이름</em>을 정확히 말했는지 확인(파일 폴백은 <code>OBSIDIAN_VAULT_PATH</code> 폴더에 생성됨).</li>
+<li><strong>노션에 색인이 안 돼요</strong> → 노션 MCP/CLI가 연결·인증돼 있는지 확인. 안 되면 옵시디언 노트만 생성됩니다(정상 폴백).</li>
+<li><strong>제목의 일부 기호가 사라졌어요</strong> → <code>/ \ : * ? " &lt; &gt; |</code> 같은 파일명 금지문자는 안전을 위해 공백으로 정리돼요(의도된 동작).</li>
+<li><strong>설치가 <code>EBUSY ... locked</code> 로 실패해요</strong> → 백신 파일 잠금이에요. Claude Code를 껐다 켠 뒤 다시 설치(위 "업데이트" 참고). 반복되면 잠시 뒤 재시도.</li>
+<li><strong>옛날 버전(예: 0.1.0)이 깔려요</strong> → 마켓플레이스 캐시가 옛것이에요. 위 "업데이트"의 <code>marketplace update</code>(또는 remove → 다시 add)로 갱신하세요.</li>
+<li><strong>🆕 연결이 5개 넘게 안 돼요</strong> → 의도된 안전장치예요(과잉 연결 방지).</li>
+</ul>
+<blockquote><p>더 많은 증상·해결·FAQ는 <a href="./GUIDE.ko.md">왕초보 가이드 16·17번</a>에 표로 정리돼 있어요.</p></blockquote>
+<h2>참고 도구</h2>
+<p><a href="https://github.com/Yakitrak/notesmd-cli">notesmd-cli</a> · <a href="https://github.com/MarkusPfundstein/mcp-obsidian">mcp-obsidian</a> · <a href="https://github.com/makenotion/notion-mcp-server">notion-mcp-server</a> · <a href="https://developers.notion.com/cli/get-started/overview">ntn CLI</a></p>
+<h2>라이선스 · 저작권 · 상업적 이용</h2>
+<blockquote><p>⚖️ 아래는 일반 안내이며 <strong>법률 자문이 아니에요.</strong> 정확한 고지는 <code>LICENSE</code>·<code>NOTICE</code> 파일이 정본입니다.</p></blockquote>
+<ul>
+<li><strong>Wikimate 본체: Apache License 2.0</strong> © 2026 SoDam AI Studio. 상업적 이용·수정·배포 허용, 단 <strong>저작권 고지+라이선스 사본 포함</strong>·<strong>변경 표시</strong>·<strong>NOTICE 유지</strong> 필요. <strong>무보증(AS-IS)</strong>, <strong>상표 권리 미부여</strong>("Wikimate"·"SoDam AI Studio" 이름 임의 사용 금지).</li>
+<li><strong>외부 도구는 번들 아님</strong> — Node.js·@modelcontextprotocol/sdk·notesmd-cli·mcp-obsidian·notion-mcp-server는 <strong>MIT</strong>, <strong>Notion API/<code>ntn</code>은 Notion 약관</strong>, <strong>Obsidian은 개인 무료·상업용 별도 라이선스</strong>. 각자 원문 약관을 직접 확인하세요.</li>
+<li><strong>콘텐츠 저작권</strong>은 원저작자에게 있어요. 수집·재배포 시 원저작물의 라이선스·약관을 지키세요. 노트는 <strong>내 컴퓨터(로컬)</strong> 에만 저장되고 외부로 보내지 않아요(노션 색인은 내가 켤 때만).</li>
+</ul>
+<blockquote><p>전체 라이선스 표·면책은 <a href="./GUIDE.ko.md">왕초보 가이드 19번</a> 또는 <code>NOTICE</code> 참고. 개발·테스트·배포 방법은 <a href="./DEVELOPMENT.md">DEVELOPMENT.md</a>.</p></blockquote>
+</body>
+</html>
