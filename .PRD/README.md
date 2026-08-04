@@ -3,11 +3,12 @@
 > Show Me The PRD로 생성 (2026-06-07) · **버전: v2**
 > **Wikimate (위키메이트)**: AI 에이전트(Claude Code·Codex·Gemini)에게 명령하면 흩어진 자료를 옵시디언(장기 기억)에 정리하고 노션(색인·로그)에 색인하는 **멀티 에이전트 도구**. 핵심은 **이식 가능한 MCP 코어**, Claude Code에선 **마켓플레이스 플러그인**으로 제공.
 
-## 현재 구현 상태 (2026-08-03 갱신 · main=병합 완료, 도구 7개) — ★ 아래 PRD 본문보다 이게 최신
+## 현재 구현 상태 (2026-08-04 갱신 · main=병합 완료, 도구 8개) — ★ 아래 PRD 본문보다 이게 최신
 > 본문 PRD는 *원래 계획*(v2, 2026-06-07)이고 실제 구현은 더 린하게 진행됐어요. **작업 시 코드가 진실원본.**
-- ✅ **main 빌드됨, 도구 7개**: 무의존 MCP 코어 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`·`wikimate_link`·`wikimate_classify`. 자동 연결 SessionStart hook + 검수 서브에이전트(`wikimate-reviewer`, 보고전용) + 스킬 5(organize·query·lint·link·classify)·Codex 어댑터. `collect`엔 **원문 보존 advisory**(저신뢰·대용량 경고, 비차단) 포함.
-- ✅ **`feat/v0.8-connect` → main 병합 완료(2026-08-03)**: 병합 전 사람 확인 2건(B1: SessionStart hook 실제 로드, B2: 옵시디언 그래프뷰 백링크 반영) **둘 다 통과 확인됨**(실제 재시작 화면·그래프뷰 스크린샷으로 검증). 병합 후 `npm run verify` 전체 재검증 **0 FAIL**(충돌 없이 자동 병합).
-- 🟡 **M3(요약·원자노트) 설계 초안 준비됨**([03_PHASES.md](./03_PHASES.md) 참고), 구현 착수 전. Python 추출·Gemini 어댑터는 아직 미구현.
+- ✅ **main 빌드됨, 도구 8개**: 무의존 MCP 코어 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`·`wikimate_link`·`wikimate_classify`·`wikimate_summarize`. 자동 연결 SessionStart hook + 검수 서브에이전트(`wikimate-reviewer`, 보고전용, summarize 결과도 검사) + 스킬 6(organize·query·lint·link·classify·summarize)·Codex 어댑터. `collect`엔 **원문 보존 advisory**(저신뢰·대용량 경고, 비차단) 포함.
+- ✅ **`feat/v0.8-connect` → main 병합 완료(2026-08-03)**: 병합 전 사람 확인 2건(B1: SessionStart hook 실제 로드, B2: 옵시디언 그래프뷰 백링크 반영) **둘 다 통과 확인됨**(실제 재시작 화면·그래프뷰 스크린샷으로 검증).
+- ✅ **M3(요약·원자노트) 구현·병합 완료(2026-08-04)**: `wikimate_summarize` 추가 — link/classify와 동일 안전 패턴(dry-run·백업·충돌 시 접미), 도구 자체는 요약 문장을 생성하지 않음(호출자 LLM이 판단). 유닛테스트 20/20 + 실볼트 e2e 8/8 + 전체 회귀 126/126 전부 PASS. Phase 2가 사실상 완료됐고, 남은 건 Codex 어댑터 재검증뿐.
+- 🟡 Python 추출·Gemini 어댑터는 아직 미구현.
 - 🟡 **옵시디언 쓰기 기본 = 검증된 filesystem(`vault_path`)**; notesmd-cli(이름) 경로는 ⚠️미검증 옵션.
 - 🟡 **노션 색인 = 코어 밖**(스킬 + 외부 노션 MCP/CLI 연결 시에만). 구조적 한계로 "신뢰성"보다 **정직성**(한계 고지·삽입 전 best-effort 중복확인). 라이브 미검증.
 
@@ -44,9 +45,10 @@ MCP 코어 = 정리 로직 1개를 모든 에이전트가 공유 (모델 비종�
 
 > ⚠️ 아래 "Phase -1부터 시작" 안내는 **낡은 정보**입니다(Phase 1a~2 대부분 이미 구현·검증됨, 위 "현재 구현 상태" 참고). 실제 다음 단계는 다음과 같습니다.
 
-1. ~~사람 확인 2건~~ ✅ **완료**(2026-08-03) — `feat/v0.8-connect`도 main에 병합 완료.
-2. **다음: 요약·원자노트(M3) 구현 착수.** 설계 초안은 이미 준비됨([03_PHASES.md](./03_PHASES.md)의 "M3 설계 초안" 참고) — 원문 보존 원칙(요약은 추가이지 대체 아님) 그대로 적용.
-3. (참고, 낡았지만 완전히 무의미하진 않음) 아직 Phase -1 손 시뮬레이션을 직접 해본 적 없다면 [03_PHASES.md](./03_PHASES.md) 참고. 단, 이미 자료 다수가 실제로 정리·검증된 상태라 필수는 아님.
+1. ~~사람 확인 2건~~ ✅ **완료**(2026-08-03) — `feat/v0.8-connect` main 병합 완료.
+2. ~~요약·원자노트(M3) 구현~~ ✅ **완료**(2026-08-04) — `wikimate_summarize` main 병합 완료.
+3. **다음**: PRD 기능표(01_PRD.md §3) 기준 남은 건 ⑧ 마켓플레이스 배포(P3, "검증 후"로 게이트) 뿐이며, 아직 미착수인 Codex 어댑터 재검증(v0.8 신규 도구 3개가 Codex에서도 동일 동작하는지)이 실질적으로 남은 유일한 항목.
+4. (참고, 낡았지만 완전히 무의미하진 않음) 아직 Phase -1 손 시뮬레이션을 직접 해본 적 없다면 [03_PHASES.md](./03_PHASES.md) 참고. 단, 이미 자료 다수가 실제로 정리·검증된 상태라 필수는 아님.
 
 ## 핵심 설계 결정 (v2)
 
