@@ -10,6 +10,9 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const vault = join(root, "sandbox-vault");
 const date = "2026-06-08";
 
+let pass = 0, fail = 0;
+const check = (label, cond) => { console.log(`${cond ? "PASS ✅" : "FAIL ❌"}  ${label}`); cond ? pass++ : fail++; };
+
 const input = {
   vaultPath: vault,
   title: "검증_수집 도구 테스트",
@@ -22,19 +25,32 @@ const input = {
 };
 
 console.log("=== 1) dry-run (계획만, 쓰기 없음) ===");
-console.log(await collect({ ...input, dryRun: true }));
+const r1 = await collect({ ...input, dryRun: true });
+console.log(r1);
+check("dry-run: dry_run=true(쓰기 없음)", r1.dry_run === true);
+check("dry-run: action이 create/skip-duplicate 중 하나", ["create", "skip-duplicate"].includes(r1.action));
 
+// sandbox-vault는 손시뮬 픽스처가 남아있는 영구 볼트라(재실행해도 지워지지 않음), 이 노트가 이미
+// 존재할 수 있다(정상). 그래서 "새로 씀" 하나만 단정하지 않고 "새로 씀 또는 이미 있어 정상 스킵" 둘 다 통과시킨다.
 console.log("\n=== 2) 실제 생성 (dry_run=false) ===");
 const r2 = await collect({ ...input, dryRun: false });
 console.log(r2);
+check(
+  "실제 생성: 새로 씀(written+path) 또는 이미 있어 duplicate로 정상 스킵 중 하나",
+  (r2.written === true && !!r2.path) || (r2.written === false && r2.reason === "duplicate")
+);
 
 console.log("\n=== 3) 같은 자료 재투입 (중복 차단) ===");
-console.log(await collect({ ...input, dryRun: false }));
+const r3 = await collect({ ...input, dryRun: false });
+console.log(r3);
+check("재투입: 2번 이후엔 반드시 중복으로 차단됨", r3.written === false && r3.reason === "duplicate");
 
 console.log("\n=== 4) 파일 실제 존재 확인 ===");
-if (r2.path) {
-  const ok = await stat(r2.path).then(() => "OK ✅").catch(() => "MISSING ❌");
-  console.log(`${r2.path} -> ${ok}`);
+const existingPath = r2.path || r2.duplicate_of || r3.duplicate_of;
+check("파일 경로 확보(신규 작성분 또는 기존 중복 대상)", !!existingPath);
+if (existingPath) {
+  const existsOnDisk = await stat(existingPath).then(() => true).catch(() => false);
+  check(`파일이 실제로 존재함(${existingPath})`, existsOnDisk);
 }
 
 // === 5) 볼트 '이름'만으로도 중복 검사가 되는가 (#2 버그 회귀 테스트) ===
@@ -56,23 +72,19 @@ try {
 
   // 볼트 '이름'만 주고 vaultPath 없음 → 이제 중복으로 잡혀야 정상(이전엔 null로 통과되던 버그)
   const r5 = await collect({ vault: vName, title: "이름만 중복테스트", url: url5, text: text5, dryRun: true, date });
-  const pass = r5.action === "skip-duplicate" && r5.duplicate_check === "done";
-  console.log(`action=${r5.action} / duplicate_check=${r5.duplicate_check} -> ${pass ? "PASS ✅ (이름만으로 중복 잡힘)" : "FAIL ❌"}`);
+  check("이름만으로 중복 잡힘(#2 회귀)", r5.action === "skip-duplicate" && r5.duplicate_check === "done");
 
   // 해석 불가한 볼트 이름 → 조용히 넘기지 말고 'skipped' 명시(fail-loud)
   const r6 = await collect({ vault: "존재하지않는볼트XYZ", title: "t", url: "u", text: "x", dryRun: true, date });
-  const pass2 = String(r6.duplicate_check).startsWith("skipped");
-  console.log(`(미해결 볼트) duplicate_check=${r6.duplicate_check} -> ${pass2 ? "PASS ✅ (조용히 안 넘기고 명시)" : "FAIL ❌"}`);
+  check("미해결 볼트 → 조용히 안 넘기고 명시", String(r6.duplicate_check).startsWith("skipped"));
 
   // ★ 실제 서버 입력 재현(#7): vault_path에 미해석 리터럴 ${OBSIDIAN_VAULT_PATH}가 와도 중복이 잡혀야 함
   const r7 = await collect({ vault: vName, vaultPath: "${OBSIDIAN_VAULT_PATH}", title: "리터럴 경로 테스트", url: url5, text: text5, dryRun: true, date });
-  const pass3 = r7.action === "skip-duplicate" && r7.duplicate_check === "done";
-  console.log(`(리터럴 vault_path) action=${r7.action} / duplicate_check=${r7.duplicate_check} -> ${pass3 ? "PASS ✅ (리터럴 무시→이름으로 해석→중복 잡힘)" : "FAIL ❌ 리터럴에 막힘"}`);
+  check("리터럴 vault_path 무시 -> 이름으로 해석 -> 중복 잡힘", r7.action === "skip-duplicate" && r7.duplicate_check === "done");
 
   // ★ #8: '잘못된-그러나-실존하는' 폴더(원본 파일 폴더 같은)를 vault_path로 줘도, 이름 우선이라 중복이 잡혀야 함
   const r8 = await collect({ vault: vName, vaultPath: cfgDir, title: "잘못된 폴더 테스트", url: url5, text: text5, dryRun: true, date });
-  const pass4 = r8.action === "skip-duplicate" && r8.duplicate_check === "done";
-  console.log(`(잘못된 실존폴더 vault_path) action=${r8.action} -> ${pass4 ? "PASS ✅ (틀린 폴더 무시→이름 우선 해석→중복 잡힘)" : "FAIL ❌ 틀린 폴더를 스캔함"}`);
+  check("실존하는 다른 폴더가 와도 이름 우선 해석으로 중복 잡힘", r8.action === "skip-duplicate" && r8.duplicate_check === "done");
 } finally {
   delete process.env.OBSIDIAN_CONFIG_PATH;
   await rm(vDir, { recursive: true, force: true }).catch(() => {});
@@ -88,10 +100,8 @@ console.log("\n=== 5.5) 파일명 충돌 시 덮어쓰기 방지 ===");
   const first = await collect({ vaultPath: vDir2, title: "충돌테스트", url: "https://a.example.com", text: "원본 A 내용", dryRun: false, date });
   const second = await collect({ vaultPath: vDir2, title: "충돌테스트", url: "https://b.example.com", text: "완전히 다른 B 내용(다른 source_hash)", dryRun: false, date });
   const firstText = await import("node:fs/promises").then((fs) => fs.readFile(first.path, "utf8").catch(() => ""));
-  const pass1 = first.path !== second.path;
-  const pass2 = firstText.includes("원본 A 내용");
-  console.log(`서로 다른 경로에 저장(충돌 회피) -> ${pass1 ? "PASS ✅" : "FAIL ❌"}`);
-  console.log(`원본 파일 내용 보존(덮어쓰기 안 됨) -> ${pass2 ? "PASS ✅" : "FAIL ❌"}`);
+  check("서로 다른 경로에 저장(충돌 회피)", first.path !== second.path);
+  check("원본 파일 내용 보존(덮어쓰기 안 됨)", firstText.includes("원본 A 내용"));
   await rm(vDir2, { recursive: true, force: true }).catch(() => {});
 }
 
@@ -100,17 +110,15 @@ console.log("\n=== 6) frontmatter 필드 정합 (template ↔ collect) ===");
 {
   const fmText = buildNoteContent({ title: "정합테스트", date: "2026-06-22" });
   for (const key of ["project:", "related:", "notion_id:"]) {
-    console.log(`buildNoteContent에 ${key} 포함 -> ${fmText.includes(key) ? "PASS ✅" : "FAIL ❌"}`);
+    check(`buildNoteContent에 ${key} 포함`, fmText.includes(key));
   }
 }
 
 // === 7) importance 검증 (실측으로 발견한 결함 회귀 방지) ===
 // classify.mjs와 같은 결함 클래스: 이전엔 Number(importance)||3이라 NaN만 우연히 3으로 걸러지고
-// 범위밖 숫자(예:999,-5)는 그대로 통과했음. 이 파일은 다른 verify-*.mjs와 달리 PASS/FAIL 집계·exit(1) 게이트가
-// 없어(구조적 허점, 실측 확인) 이 섹션만이라도 스스로 게이트한다.
+// 범위밖 숫자(예:999,-5)는 그대로 통과했음.
 console.log("\n=== 7) importance 범위 검증 (실측 결함 회귀 방지) ===");
 {
-  let sectionFail = false;
   const cases = [
     { importance: "abc", expect: 3, label: "비숫자 문자열('abc') → 안전값 3" },
     { importance: 999, expect: 3, label: "범위 밖(999) → 안전값 3" },
@@ -119,12 +127,9 @@ console.log("\n=== 7) importance 범위 검증 (실측 결함 회귀 방지) ===
   ];
   for (const c of cases) {
     const text = buildNoteContent({ title: "중요도테스트", date: "2026-06-22", importance: c.importance });
-    const ok = text.includes(`importance: ${c.expect}`);
-    console.log(`${c.label} -> ${ok ? "PASS ✅" : "FAIL ❌"}`);
-    if (!ok) sectionFail = true;
-  }
-  if (sectionFail) {
-    console.error("\n=== 7) FAIL — importance 검증 회귀 발생, exit 1 ===");
-    process.exit(1);
+    check(c.label, text.includes(`importance: ${c.expect}`));
   }
 }
+
+console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
+process.exit(fail === 0 ? 0 : 1);

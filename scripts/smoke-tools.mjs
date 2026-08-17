@@ -17,11 +17,15 @@ const parse = (res) => { try { return JSON.parse(res.content?.[0]?.text || "{}")
 
 // 임시 볼트에 문제 케이스 심기
 await mkdir(join(vault, "30_Notes"), { recursive: true });
+await mkdir(join(vault, "00_Inbox"), { recursive: true });
+await mkdir(join(vault, "20_Resources"), { recursive: true });
 const note = (title, hash, body = "") => `---\ntitle: ${title}\nsource_hash: ${hash}\ncreated: 2026-01-01\n---\n${body}`;
 await writeFile(join(vault, "30_Notes", "dupX.md"), note("dupX", "DUP"), "utf8");
 await writeFile(join(vault, "30_Notes", "dupY.md"), note("dupY", "DUP"), "utf8");
 await writeFile(join(vault, "30_Notes", "linker.md"), note("linker", "L1", "- [[target]]\n- [[broken]]"), "utf8");
 await writeFile(join(vault, "30_Notes", "target.md"), note("target", "T1", "- [[linker]]"), "utf8");
+await writeFile(join(vault, "00_Inbox", "classifyme.md"), note("classifyme", "CLS1", "분류 테스트용 본문입니다."), "utf8");
+await writeFile(join(vault, "20_Resources", "summarizeme.md"), note("summarizeme", "SUM1", "요약 테스트용 본문이 여기 들어갑니다. 서버 경유 검증용 텍스트."), "utf8");
 
 // 가짜 obsidian.json(이 임시 볼트를 'open'으로 등록) → wikimate_vaults 결정론적 검증용
 const cfgFile = join(tmpdir(), `wikimate_smoke_cfg_${process.pid}.json`);
@@ -34,9 +38,9 @@ try {
   await client.connect(transport);
   console.log("연결 ✅");
 
-  // 1) 도구 6개 노출
+  // 1) 도구 8개 노출
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-  check("도구 6개 노출(collect/fix/lint/runlog/vaults/link)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog", "wikimate_vaults", "wikimate_link"].every((n) => tools.includes(n)));
+  check("도구 8개 노출(collect/fix/lint/runlog/vaults/link/classify/summarize)", ["wikimate_collect", "wikimate_fix", "wikimate_lint", "wikimate_runlog", "wikimate_vaults", "wikimate_link", "wikimate_classify", "wikimate_summarize"].every((n) => tools.includes(n)));
 
   // 2) lint를 서버 통해 호출 → 중복·깨진링크 탐지
   const lintR = parse(await client.callTool({ name: "wikimate_lint", arguments: { vault_path: vault } }));
@@ -61,6 +65,18 @@ try {
   // 6) vaults를 서버 통해 조회 → 등록 볼트 후보 제시(읽기 전용·자동 선택 X)
   const vaultsR = parse(await client.callTool({ name: "wikimate_vaults", arguments: {} }));
   check("서버경유 vaults: ok + open 볼트 제시", vaultsR.ok === true && vaultsR.open_vault === basename(vault) && (vaultsR.vaults || []).some((v) => v.path === vault));
+
+  // 7) classify를 서버 통해 호출 → suggest(읽기전용 조회) + apply(실제 폴더 이동)
+  const clsSuggest = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "suggest", note: "00_Inbox/classifyme.md" } }));
+  check("서버경유 classify suggest: ok + current_folder", clsSuggest.ok === true && clsSuggest.target?.current_folder === "00_Inbox");
+  const clsApply = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "apply", note: "00_Inbox/classifyme.md", folder: "20_Resources", dry_run: false } }));
+  check("서버경유 classify apply: 실제 폴더 이동", clsApply.ok === true && clsApply.note === "20_Resources/classifyme.md" && await exists(join(vault, "20_Resources", "classifyme.md")));
+
+  // 8) summarize를 서버 통해 호출 → suggest(본문 읽기전용 조회) + apply(summary 반영)
+  const sumSuggest = parse(await client.callTool({ name: "wikimate_summarize", arguments: { vault_path: vault, action: "suggest", note: "20_Resources/summarizeme.md" } }));
+  check("서버경유 summarize suggest: ok + body 포함", sumSuggest.ok === true && typeof sumSuggest.body === "string" && sumSuggest.body.includes("요약 테스트용"));
+  const sumApply = parse(await client.callTool({ name: "wikimate_summarize", arguments: { vault_path: vault, action: "apply", note: "20_Resources/summarizeme.md", summary: "서버 경유 요약 검증", dry_run: false } }));
+  check("서버경유 summarize apply: summary 반영", sumApply.ok === true && sumApply.dry_run === false && sumApply.summary?.after === "서버 경유 요약 검증");
 
   await client.close();
   console.log("종료 ✅");
