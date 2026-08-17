@@ -11,6 +11,7 @@
 - 🟡 Python 추출·Gemini 어댑터는 아직 미구현.
 - 🟡 **옵시디언 쓰기 기본 = 검증된 filesystem(`vault_path`)**; notesmd-cli(이름) 경로는 ⚠️미검증 옵션.
 - 🟡 **노션 색인 = 코어 밖**(스킬 + 외부 노션 MCP/CLI 연결 시에만). 구조적 한계로 "신뢰성"보다 **정직성**(한계 고지·삽입 전 best-effort 중복확인). 라이브 미검증.
+- ✅ **`notion_id` 왕복 연결 고리 완성(2026-08-17)**: `01_PRD.md` §5 성공기준 중 유일하게 미충족이던 항목("노트↔노션 색인행이 notion_id로 연결돼 점프") — 실제 grep으로 확인한 결과 코드 어디에도 notion_id를 쓰는 곳이 없어(항상 빈 문자열) "노션 행→옵시디언"(Obsidian Link) 한쪽만 되고 반대방향은 애초에 불가능했던 것을 발견. `wikimate_link`에 `action=set_notion_id` 추가(기존 백업·dry-run·존재검증 패턴 재사용, 새 유닛테스트 10개 PASS) + `wikimate-organize` 스킬에 "노션 행 생성 후 되쓰기" 단계 편입으로 종결.
 
 ## 한눈에 보는 구조
 

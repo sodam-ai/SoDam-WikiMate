@@ -22,6 +22,8 @@
 > - **`.PRD/RESEARCH_SOURCES.md`도 커밋됨**(`9ba2f9c`) — 민감정보 없음 확인된 채 방치돼 있던 걸 `.PRD/`에 정식 편입.
 > - **독립적으로 새로 발견, 아직 미해결(다음 세션 최우선 후보)**: GitHub 최신 태그가 `v0.7.2`(2026-07-02)인데 main은 그 후 v0.8-connect(link/classify)+M3(summarize)까지 병합되어 실질적으로 훨씬 앞서 있음. `package.json`/`plugin.json`/`marketplace.json` 셋 다 여전히 `0.7.2` 표기. "다음 단계(2026-08-04 확정)" 우선순위 목록에도 이 항목 자체가 없었음(문서의 사각지대). **버전/태그 최신화는 공개 저장소에 보이는 행동이라 실행 전 사용자 확인이 필요해 이번 세션엔 보류함.**
 > - **2순위(Codex 라이브 검증)·4순위(`npm audit`)는 여전히 미착수** — 각각 사용자 승인 필요(계정/쿼터 소모, 의존성 변경)라 그대로 대기.
+> - **위 5개 커밋 push 완료**(`main`==`origin/main`, `65d9e7e`까지 순수 fast-forward). 버전/릴리즈 태그(`0.7.2`→`0.8.0`)는 여전히 미착수 — 공개 행동이라 확인 후 진행 예정.
+> - **[신규] `01_PRD.md` §5 성공기준 중 유일한 미충족 항목("notion_id로 노트↔노션 점프") 근본원인 발견·해결**: 전체 코드베이스 grep 결과 `notion_id`를 쓰는 곳이 `collect.mjs`의 빈 문자열 초기화 1곳뿐이었음 — "노션 행→옵시디언"(Obsidian Link)만 설계·구현됐고 반대 방향(옵시디언→노션)은 애초에 쓸 수 있는 도구가 없어서 "라이브 미검증"이 아니라 "검증할 코드 자체가 없던" 상태였음(직접 확인, 추측 아님). `wikimate_link`에 `action=set_notion_id` 추가로 해결 — 기존 안전 패턴(존재검증·백업·dry-run·멱등) 그대로 재사용, 새 코드·새 위험 유형 없음. 유닛 10개(`verify-link.mjs`, 35→45) + 서버경유 스모크 1개(`smoke-tools.mjs`, `notion_id` snake_case→camelCase 매핑 확인, 과거 `atomic_note`에서 실제 버그 났던 것과 같은 위험 영역) 전부 PASS. `wikimate-organize` 스킬에 "노션 행 생성 후 되쓰기" 단계, `AGENTS.md`·`wikimate-link` 스킬·README(ko/en)에도 반영. **`npm run verify` 총계 145/145 → 155/155.**
 
 ## 위치·전제
 
