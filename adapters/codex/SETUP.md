@@ -21,7 +21,7 @@ codex mcp list
 ```toml
 [mcp_servers.wikimate]
 command = "node"
-args = ["D:/AI_Dev_Work/2026y/26y_06m_10d_wikimate/mcp/server.mjs"]
+args = ["D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate/mcp/server.mjs"]
 env = { OBSIDIAN_VAULT_PATH = "D:/MyVault" }
 ```
 
