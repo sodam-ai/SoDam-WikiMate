@@ -66,6 +66,11 @@ try {
   const vaultsR = parse(await client.callTool({ name: "wikimate_vaults", arguments: {} }));
   check("서버경유 vaults: ok + open 볼트 제시", vaultsR.ok === true && vaultsR.open_vault === basename(vault) && (vaultsR.vaults || []).some((v) => v.path === vault));
 
+  // 6.5) link(set_notion_id)를 서버 통해 호출 → notion_id snake_case 인자가 실제로 반영되는지
+  // (atomic_note에서 실측으로 발견됐던 snake_case->camelCase 매핑 버그와 같은 위험 영역이라 배선 자체를 확인)
+  const notionR = parse(await client.callTool({ name: "wikimate_link", arguments: { vault_path: vault, action: "set_notion_id", note: "30_Notes/target.md", notion_id: "notion-page-xyz", dry_run: false } }));
+  check("서버경유 link set_notion_id: 실제 반영", notionR.ok === true && notionR.notion_id?.after === "notion-page-xyz" && await exists(join(vault, "30_Notes", "target.md")));
+
   // 7) classify를 서버 통해 호출 → suggest(읽기전용 조회) + apply(실제 폴더 이동)
   const clsSuggest = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "suggest", note: "00_Inbox/classifyme.md" } }));
   check("서버경유 classify suggest: ok + current_folder", clsSuggest.ok === true && clsSuggest.target?.current_folder === "00_Inbox");

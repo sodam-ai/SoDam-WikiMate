@@ -46,6 +46,8 @@ await writeFile(
 await writeFile(join(vault, "30_Notes", "가득참.md"), note("가득참", "", ["[[B]]", "[[C]]", "[[미연결]]", "[[인젝션]]", "[[X]]"]), "utf8");
 await writeFile(join(vault, "30_Notes", "X.md"), note("X"), "utf8");
 await writeFile(join(vault, "30_Notes", "Y.md"), note("Y"), "utf8"); // 상한 테스트용 — 가득참.md에 아직 없는 별개 노트
+// Z: set_notion_id 전용 픽스처(다른 테스트가 안 건드리는 독립 노트)
+await writeFile(join(vault, "30_Notes", "Z.md"), note("Z"), "utf8");
 
 try {
   // 1) suggest: related 키 없는 노트 → 후보 목록 + remaining_slots=5
@@ -145,6 +147,37 @@ try {
   const yAfter = await readFile(join(vault, "30_Notes", "Y.md"), "utf8");
   const yRelCount = extractRelatedList(yAfter.match(/^related:.*$/m)?.[0]?.replace(/^related:\s*/, "") || "").length;
   check("요청 내 중복 target → related에 중복 문자열 없음", yRelCount === 1);
+
+  // 16) set_notion_id: 대상 노트 없음 거부
+  const n16 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/없는노트.md", notionId: "abc123", dryRun: false });
+  check("set_notion_id: 존재하지 않는 노트 거부", n16.ok === false);
+
+  // 17) set_notion_id: notion_id 값 누락 거부
+  const n17 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md" });
+  check("set_notion_id: notion_id 값 누락 거부", n17.ok === false);
+
+  // 18) set_notion_id: dry-run은 파일 변경 없음
+  await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md", notionId: "notion-page-abc123", dryRun: true });
+  const zBeforeReal = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
+  check("set_notion_id dry-run: 파일 미변경", !zBeforeReal.includes("notion-page-abc123"));
+
+  // 19) set_notion_id: 실제 실행 → notion_id 키가 아예 없던 노트에도 새 줄로 삽입 + 백업 + RunLog에 남음
+  const n19 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md", notionId: "notion-page-abc123", dryRun: false });
+  check("set_notion_id 실제: ok + before/after 반환", n19.ok === true && n19.notion_id?.before === "" && n19.notion_id?.after === "notion-page-abc123");
+  check("set_notion_id 실제: backup 경로 반환", typeof n19.backup === "string" && n19.backup.length > 0);
+  const zAfterReal = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
+  check("set_notion_id 실제: notion_id가 frontmatter에 반영됨", zAfterReal.includes('notion_id: "notion-page-abc123"'));
+  check("set_notion_id 실제: 다른 필드(title) 보존됨", zAfterReal.includes('title: "Z"'));
+
+  // 20) set_notion_id: 동일 값 재요청 시 changed:false(멱등)
+  const n20 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md", notionId: "notion-page-abc123", dryRun: false });
+  check("set_notion_id: 동일 값 재요청 → changed:false", n20.ok === true && n20.changed === false);
+
+  // 21) set_notion_id: 빈 문자열로 연결 해제 가능
+  const n21 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md", notionId: "", dryRun: false });
+  check("set_notion_id: 빈 문자열로 연결 해제", n21.ok === true && n21.notion_id?.after === "");
+  const zCleared = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
+  check("set_notion_id: 해제 후 frontmatter에 빈 값 반영", zCleared.includes('notion_id: ""'));
 
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {

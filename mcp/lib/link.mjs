@@ -301,8 +301,49 @@ async function buildMoc({ root, topic, targets = [], dryRun = true, ts }) {
   return { ok: true, dry_run: false, note: relPath, created: false, added, resulting_members: merged, backup };
 }
 
-// 메인 진입점. action: "suggest" | "add_links" | "build_moc"
-export async function link({ vault, vaultPath, action, note, targets, topic, dryRun = true, ts } = {}) {
+// action:"set_notion_id" — 노션 색인 행과의 연결 고리(notion_id)를 노트 frontmatter에 안전하게 기록한다.
+// 값 자체(어느 노션 page인지)는 이 함수가 만들지 않는다 — 호출자(스킬)가 노션 도구로 행을 만든 '뒤' 그
+// 결과(page ID/URL)를 넘기면 이 함수는 그것을 저장만 한다(02_DATA_MODEL.md "notion_id ↔ Obsidian Link"
+// 연결 고리의 옵시디언 쪽 절반 — 지금까지 이 절반을 쓰는 코드가 없어 항상 빈 값으로 남아 있었음).
+async function setNotionId({ root, note, notionId, dryRun = true, ts }) {
+  if (!note) return { ok: false, reason: "대상 note(볼트 내 상대경로)가 필요해요." };
+  if (notionId === undefined) return { ok: false, reason: "notion_id 값이 필요해요(연결을 지우려면 빈 문자열 \"\")." };
+
+  const abs = safeInside(root, note);
+  if (!abs) return { ok: false, reason: "볼트 밖 경로이거나 .obsidian이라 수정할 수 없어요(차단)." };
+  if (!existsSync(abs)) return { ok: false, reason: `대상 노트가 없어요: ${note}` };
+
+  const text = await readFile(abs, "utf8");
+  const { fm } = parseFrontmatter(text);
+  const current = fm && fm.notion_id !== undefined ? stripQuotes(fm.notion_id) : "";
+  const next = String(notionId);
+
+  if (current === next) {
+    return { ok: true, dry_run: !!dryRun, note, changed: false, reason: "이미 같은 값이에요." };
+  }
+
+  if (dryRun) {
+    return { ok: true, dry_run: true, note, notion_id: { before: current, after: next } };
+  }
+
+  const stamp = ts || new Date().toISOString().replace(/[:.]/g, "-");
+  const backup = await backupFile(root, abs, stamp);
+  const nextText = replaceFrontmatterLine(text, "notion_id", `notion_id: ${JSON.stringify(next)}`);
+  await writeFile(abs, nextText, "utf8");
+  await appendRunLog(root, {
+    tool: "link",
+    action: "set_notion_id",
+    request: note,
+    changed: note,
+    detail: `notion_id: ${JSON.stringify(current)} -> ${JSON.stringify(next)}`,
+    backup,
+    result: "ok",
+  });
+  return { ok: true, dry_run: false, note, notion_id: { before: current, after: next }, backup };
+}
+
+// 메인 진입점. action: "suggest" | "add_links" | "build_moc" | "set_notion_id"
+export async function link({ vault, vaultPath, action, note, targets, topic, notionId, dryRun = true, ts } = {}) {
   const root = resolveRoot(vault, vaultPath);
   if (!root) {
     const cand = listVaults();
@@ -317,5 +358,6 @@ export async function link({ vault, vaultPath, action, note, targets, topic, dry
   if (action === "suggest") return suggest({ root, note });
   if (action === "add_links") return addLinks({ root, note, targets, dryRun, ts });
   if (action === "build_moc") return buildMoc({ root, topic, targets, dryRun, ts });
-  return { ok: false, reason: `알 수 없는 action: ${action} (지원: suggest | add_links | build_moc)` };
+  if (action === "set_notion_id") return setNotionId({ root, note, notionId, dryRun, ts });
+  return { ok: false, reason: `알 수 없는 action: ${action} (지원: suggest | add_links | build_moc | set_notion_id)` };
 }
