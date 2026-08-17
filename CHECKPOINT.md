@@ -13,6 +13,15 @@
 > - **작업 위치가 바뀜**: 더 이상 `wikimate-connect` worktree가 아니라 **main worktree(`D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`)에서 직접 작업**. `git status`: main == origin/main, 클린(추적 대상 아닌 `.PRD/RESEARCH_SOURCES.md` 1개만 예외, 민감정보 스캔 완료·무해 확인됨).
 > - **main 기준 전체 QA 재실행 완료**(2026-08-04): `npm run verify` 126/126 PASS · 프로토콜 스모크(`smoke-server`/`smoke-tools`) 8/8 PASS · `wikimate_classify`/`wikimate_summarize` 실제 JSON-RPC 서버 경유 임시검증 5/5 PASS(미커밋) · 실볼트 e2e(classify/link/moc) 전부 정상 · `npm audit` 6건(devDependency 한정, 아래 참조) · `node -c` 전체 clean.
 > - **다음 단계는 완전히 새로 확정됨** — 아래 원래 "다음 단계(2026-07-11)" 섹션은 낡았으니 참고만 하고, **맨 아래 "다음 단계(2026-08-04 확정)" 섹션을 따를 것**.
+>
+> ## 🟢 2026-08-17 갱신 — "다음 단계(2026-08-04 확정)" 1순위·3순위 완료, 이 파일 자체도 이번에 커밋됨
+> - **1순위(`AGENTS.md` link/classify/summarize 자연어 워크플로우) — ✅ 완료**(커밋 `a92ff7b`). Codex가 읽는 `AGENTS.md`에 세 도구의 자연어 트리거·dry-run→승인→실행 흐름·스킬 대응을 명시. `adapters/codex/SETUP.md`의 낡은 예시 경로도 같이 수정.
+> - **3순위(`smoke-tools.mjs`에 classify/summarize 서버경유 테스트 정식 편입) — ✅ 완료**(커밋 `b3a1a11`). 실제 실행 확인: 12/12 PASS. 도구 노출 라벨도 "6개"→"8개"로 정정.
+> - **독립적으로 발견·수정한 구조적 허점**: `verify-collect.mjs`가 다른 7개 `verify-*.mjs`와 달리 PASS/FAIL 집계·`exit(1)` 게이트가 없어(2026-07-11 발견 당시 기록됐던 항목, "다음 단계" 우선순위엔 없었음) 실패해도 `npm run verify`가 exit 0으로 통과할 수 있는 구조였음 — 다른 7개와 동일한 `check()`/집계/게이트 패턴으로 통일(커밋 `b3a1a11`). **`npm run verify` 총계가 126/126 → 145/145로 바뀜**(스크립트 8개 구성은 그대로, verify-collect.mjs 자체 체크가 새로 19개 잡히기 시작한 것뿐 — 회귀 아님). 이 파일 중간의 "126/126" 표기들은 각각 그 날짜 시점 기록이라 그대로 두되(과거 기록 임의수정 금지 원칙), **지금부터는 145/145가 맞는 수치**.
+> - **이 CHECKPOINT.md 자신이 미커밋 상태였던 문제도 해결**: 2026-08-04 갱신 내용이 작업트리에만 있고 git엔 없어 `git reset`류 한 번이면 유실될 위험이 있었음 → 별도 커밋(`061456f`)으로 보호.
+> - **`.PRD/RESEARCH_SOURCES.md`도 커밋됨**(`9ba2f9c`) — 민감정보 없음 확인된 채 방치돼 있던 걸 `.PRD/`에 정식 편입.
+> - **독립적으로 새로 발견, 아직 미해결(다음 세션 최우선 후보)**: GitHub 최신 태그가 `v0.7.2`(2026-07-02)인데 main은 그 후 v0.8-connect(link/classify)+M3(summarize)까지 병합되어 실질적으로 훨씬 앞서 있음. `package.json`/`plugin.json`/`marketplace.json` 셋 다 여전히 `0.7.2` 표기. "다음 단계(2026-08-04 확정)" 우선순위 목록에도 이 항목 자체가 없었음(문서의 사각지대). **버전/태그 최신화는 공개 저장소에 보이는 행동이라 실행 전 사용자 확인이 필요해 이번 세션엔 보류함.**
+> - **2순위(Codex 라이브 검증)·4순위(`npm audit`)는 여전히 미착수** — 각각 사용자 승인 필요(계정/쿼터 소모, 의존성 변경)라 그대로 대기.
 
 ## 위치·전제
 
@@ -153,7 +162,7 @@
 
 > B1/B2/M3가 전부 끝난 뒤 main 기준으로 전체 QA(유닛 126/126, 프로토콜 스모크 8/8, 실볼트 e2e, `npm audit`, `AGENTS.md`·어댑터 문서 직접 열람)를 다시 돌려서 나온 결과. 추측 0건 — 전부 실제 파일을 읽거나 명령을 실행해서 확인한 사실만 기록.
 
-### 1순위 · `AGENTS.md`에 link/classify/summarize 자연어 워크플로우 누락 — 지금 바로 해야 함
+### 1순위 · `AGENTS.md`에 link/classify/summarize 자연어 워크플로우 누락 — ✅ 완료(2026-08-17, 커밋 `a92ff7b`)
 - **근거(확인됨, 추측 아님)**: 저장소 루트 `AGENTS.md`를 전문 읽음(34줄 전체). "자동 동작" 절에 `wikimate_collect`(정리)·`wikimate_query`(찾기/물어보기 — 스킬명 언급)·`wikimate_lint`+`wikimate_fix`(건강검진) 3개 워크플로우만 있고, **`wikimate_link`·`wikimate_classify`·`wikimate_summarize`는 단 한 줄도 없음**. 반면 Claude Code 쪽은 `skills/wikimate-link`·`wikimate-classify`·`wikimate-summarize` 3개 SKILL.md가 이미 존재(비대칭 확인됨).
 - **왜 문제인가**: `adapters/codex/SETUP.md`가 스스로 "Codex가 `AGENTS.md`를 읽으면 자연어로도 동일한 워크플로우를 따른다"고 명시함. 즉 MCP 서버 프로토콜이 8개 도구를 전부 정상 노출해도(2026-08-04 실측 확인됨), **Codex가 "이 노트들 연결해줘/분류해줘/요약해줘" 같은 자연어를 듣고 이 3개 도구를 자동으로 쓸 근거 문서 자체가 없다.** 결함이 숨어있는 게 아니라 문서가 아예 안 써진 상태.
 - **위험도**: 낮음(문서 수정만, 코드·안전게이트 변경 없음). 단, 안전 규칙(dry-run 기본·개별승인·인젝션 방어)을 3개 도구에도 동일하게 명시해야 함 — 이미 `AGENTS.md` "안전 규칙" 절이 도구 전체에 적용되는 공통 절이라 구조적으로는 문제 없음, 새 절만 추가하면 됨.
@@ -167,7 +176,7 @@
 - **성공 기준**: 8개 도구 전부 Codex에서도 실제로 호출되고, dry-run 기본값·승인 게이트가 Claude Code와 동일하게 작동.
 - **실패 시**: MCP 서버 프로토콜 자체는 이미 검증됨(2026-08-04, 8개 도구 전부 정상 응답 확인) → 실패하면 Codex 쪽 설정(`~/.codex/config.toml` 경로·환경변수 전달) 문제일 가능성이 code 결함보다 훨씬 큼. 코드부터 의심하지 말 것.
 
-### 3순위 · `smoke-tools.mjs`에 classify/summarize 서버경유 테스트를 정식 편입(커밋)
+### 3순위 · `smoke-tools.mjs`에 classify/summarize 서버경유 테스트를 정식 편입(커밋) — ✅ 완료(2026-08-17, 커밋 `b3a1a11`, 12/12 PASS)
 - **근거**: 2026-08-04 QA에서 `wikimate_classify`/`wikimate_summarize`가 실제 MCP 서버(JSON-RPC) 경유로 정상 동작함을 임시 스크립트로 5/5 PASS 증명했으나, **그 스크립트는 커밋되지 않아 다음부터는 이 두 도구의 서버-배선 계층(snake_case→camelCase 인자 매핑 등)에 회귀가 생겨도 자동으로 안 잡힘.** `smoke-tools.mjs`의 "도구 6개 노출" 라벨도 실제 8개 대비 낡은 문구.
 - **위험도**: 낮음(테스트 파일 추가/확장만).
 - **성공 기준**: `smoke-tools.mjs`(또는 신규 파일)가 classify·summarize를 서버 경유로 호출하는 케이스를 포함해 `npm run verify`나 별도 스모크 체인에서 자동 실행됨.
