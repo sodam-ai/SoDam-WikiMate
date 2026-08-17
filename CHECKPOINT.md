@@ -5,13 +5,23 @@
 > 이 파일은 **마일스톤·검증·상태만** 추적한다 (CLAUDE.md Long-Horizon 규칙).
 >
 > **2026-07-11 개정**: PRD 전문 재독 + 코드 원문 직접 확인 + sandbox-vault 손시뮬 결과로 A~F 6개 사항 반영(아래 "개정 이력" 참조). 도구명 `connect`→`link`로 전면 변경.
+>
+> ## 🔴 2026-08-04 갱신 — 아래 본문은 대부분 2026-07-11 시점(병합 전) 기록입니다. 최신 상태는 여기부터 읽으세요.
+> - **B1(hook 라이브 로드)·B2(그래프뷰 반영) — ✅ 실제 재시작·실제 Obsidian 화면으로 통과 확인됨**(2026-08-03, 스크린샷 근거).
+> - **`feat/v0.8-connect`(M1 링크·M2 MOC·분류) → `main` 병합 완료**(2026-08-03, 32파일·충돌 0·회귀 0 FAIL).
+> - **M3(요약·원자노트, `wikimate_summarize`) 구현 + `feat/m3-summarize` → `main` 병합 완료**(2026-08-04). 아래 "M3" 섹션의 `pending` 표기는 낡은 정보 — 실제로는 **done**.
+> - **작업 위치가 바뀜**: 더 이상 `wikimate-connect` worktree가 아니라 **main worktree(`D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`)에서 직접 작업**. `git status`: main == origin/main, 클린(추적 대상 아닌 `.PRD/RESEARCH_SOURCES.md` 1개만 예외, 민감정보 스캔 완료·무해 확인됨).
+> - **main 기준 전체 QA 재실행 완료**(2026-08-04): `npm run verify` 126/126 PASS · 프로토콜 스모크(`smoke-server`/`smoke-tools`) 8/8 PASS · `wikimate_classify`/`wikimate_summarize` 실제 JSON-RPC 서버 경유 임시검증 5/5 PASS(미커밋) · 실볼트 e2e(classify/link/moc) 전부 정상 · `npm audit` 6건(devDependency 한정, 아래 참조) · `node -c` 전체 clean.
+> - **다음 단계는 완전히 새로 확정됨** — 아래 원래 "다음 단계(2026-07-11)" 섹션은 낡았으니 참고만 하고, **맨 아래 "다음 단계(2026-08-04 확정)" 섹션을 따를 것**.
 
 ## 위치·전제
-- **작업 위치**: worktree `D:/AI_Dev_Work/2026y/wikimate-connect`, 브랜치 `feat/v0.8-connect` (main `b905cc3`/v0.7.1에서 분기)
-- **다른 진행 중 worktree(참고, 블로커 아님)**: `D:/AI_Dev_Work/2026y/SoDam-WikiMate-worktrees/fix-raw-data-preservation` — 브랜치 `chore/bump-0.7.2`, main 미병합.
-- **검증 도구 컨벤션(확인됨)**: `npm run verify`는 `scripts/verify-<tool>.mjs` 5개(collect/lint/fix/runlog/vaults) 순차 실행. 신규 `link`/`summarize` 도구도 각각 `verify-link.mjs`/`verify-summarize.mjs`를 만들어 체인에 추가.
-- **테스트 볼트**: `sandbox-vault/`만 사용(DEVELOPMENT.md safe-testing 원칙).
-- ⚠️ **액션 필요**: `sandbox-vault/`는 `.gitignore:9`로 git 미추적 → 이 worktree엔 없음. 메인 레포(`D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate/sandbox-vault`)에서 **복사**해 와야 함(git 작업 아님, 단순 파일 복사).
+
+> ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
+
+- **(낡은 기록, 참고용)** 작업 위치: worktree `D:/AI_Dev_Work/2026y/wikimate-connect`, 브랜치 `feat/v0.8-connect` (main `b905cc3`/v0.7.1에서 분기)
+- **(낡은 기록, 참고용)** 다른 진행 중 worktree: `D:/AI_Dev_Work/2026y/SoDam-WikiMate-worktrees/fix-raw-data-preservation` — 브랜치 `chore/bump-0.7.2`, main 미병합 여부 미재확인(이번 세션 범위 밖).
+- **검증 도구 컨벤션(확인됨, 2026-08-04 기준 갱신)**: `npm run verify`는 `scripts/verify-<tool>.mjs` **8개**(collect/lint/fix/runlog/vaults/link/classify/summarize) 순차 실행, 126/126 PASS.
+- **테스트 볼트**: `sandbox-vault/`만 사용(DEVELOPMENT.md safe-testing 원칙) — main worktree에 이미 존재, git 미추적(`.gitignore`).
 
 ## 안전 불변 조건 (모든 M 관통 — 절대 위반 금지, 요약 사본)
 1. 기존 노트 편집 전 **백업 + 개별 승인** (신규 생성만 사전승인 가능, 편집은 항상 개별 승인)
@@ -128,17 +138,54 @@
 - 검증: `npm run verify` **119 PASS / 0 FAIL**, exit 0
 - 상태: **done**
 
-## M3: 요약·원자 노트화 (별도 도구로 분리 — 위 C)
-- [ ] `mcp/lib/summarize.mjs` + `wikimate_summarize` 도구 + `wikimate-summarize` 스킬(link과 별개)
-- [x] **F(검수 서브에이전트 필요 여부) 재검토 — 결론 확정(2026-07-11)**: M3는 "요약"이 노트 본문을 LLM이 다시 쓰는 작업이라 M1/M2(기존 후보 중 선택)보다 원문 왜곡·인젝션 증폭 위험이 구조적으로 큼. D에서 만든 `wikimate-reviewer`의 첫 검사 항목이 정확히 "원문 왜곡"이라 M3와 직접 대응됨 → **M3의 모든 실제 요약 쓰기(dry_run=false)는 예외 없이 `wikimate-reviewer` 검수를 통과한 뒤에만 "완료"로 보고한다**(wikimate-organize의 기존 6단계 검수 패턴과 동일하게 wikimate-summarize 스킬에도 명시할 것). 이 결론은 착수 시점에 재논의 불필요 — 아래 착수조건만 남음.
-- **착수 조건(AND, 하나라도 미충족이면 시작 금지)**:
-  1. [ ] 아래 "최우선 블로커" 2건이 사람에 의해 해소됨(그래프뷰 확인 + hook 재시작 확인) — 미해소 상태에서 M3를 얹으면 검증 안 된 레이어가 4겹째 쌓임(2026-07-11 검증 라운드에서 자동테스트 통과 중에도 실결함 5건이 숨어있었던 실측 사례가 근거)
-  2. [ ] 위 F 결론(wikimate-reviewer 필수 연동)을 실제 설계에 반영
-- 상태: **pending — 착수 조건 미충족(블로커 해소 대기)**
+## M3: 요약·원자 노트화 (별도 도구로 분리 — 위 C) — ✅ 완료(2026-08-04, main 병합)
+- [x] `mcp/lib/summarize.mjs` + `wikimate_summarize` 도구 + `wikimate-summarize` 스킬(link과 별개)
+- [x] **F(검수 서브에이전트 필요 여부) 재검토 — 결론 확정(2026-07-11)**: M3는 "요약"이 노트 본문을 LLM이 다시 쓰는 작업이라 M1/M2(기존 후보 중 선택)보다 원문 왜곡·인젝션 증폭 위험이 구조적으로 큼. D에서 만든 `wikimate-reviewer`의 첫 검사 항목이 정확히 "원문 왜곡"이라 M3와 직접 대응됨 → **M3의 모든 실제 요약 쓰기(dry_run=false)는 예외 없이 `wikimate-reviewer` 검수를 통과한 뒤에만 "완료"로 보고한다**. → `agents/wikimate-reviewer.md`의 `description`에 `wikimate_summarize` 명시 반영 완료(2026-08-04).
+- **착수 조건(AND) — 둘 다 충족 확인됨(2026-08-03)**:
+  1. [x] B1(hook 라이브 로드)·B2(그래프뷰 반영) 사람 확인 통과 — 실제 재시작 화면·실제 Obsidian 그래프뷰 스크린샷 근거
+  2. [x] F 결론(wikimate-reviewer 필수 연동)을 실제 설계에 반영
+- **구현·검증 결과(2026-08-04)**: `summarize.mjs`는 `body`(원문)를 수정하는 코드 경로가 구조적으로 없음(summary 필드만 surgical 치환) — "원문 보존" 원칙을 코드 구조로 강제. 유닛테스트 20/20 · 실볼트 e2e(`e2e-summarize-real.mjs`) 8/8 · `npm run verify` 전체 126/126 · MCP 서버 프로토콜(JSON-RPC) 경유 직접 호출 5/5(atomic_note snake_case→camelCase 매핑 포함, 2026-08-04 재확인) 전부 PASS.
+- 상태: **done — `feat/m3-summarize` → `main` 병합 완료(커밋 `ce7536a`), origin에 push 완료**
 
 ---
 
-## 다음 단계 (2026-07-11 확정 — 우선순위 순, 재논의 불필요)
+## 다음 단계 (2026-08-04 확정 — 아래가 최신·최우선, 위 2026-07-11 섹션은 참고용 이력)
+
+> B1/B2/M3가 전부 끝난 뒤 main 기준으로 전체 QA(유닛 126/126, 프로토콜 스모크 8/8, 실볼트 e2e, `npm audit`, `AGENTS.md`·어댑터 문서 직접 열람)를 다시 돌려서 나온 결과. 추측 0건 — 전부 실제 파일을 읽거나 명령을 실행해서 확인한 사실만 기록.
+
+### 1순위 · `AGENTS.md`에 link/classify/summarize 자연어 워크플로우 누락 — 지금 바로 해야 함
+- **근거(확인됨, 추측 아님)**: 저장소 루트 `AGENTS.md`를 전문 읽음(34줄 전체). "자동 동작" 절에 `wikimate_collect`(정리)·`wikimate_query`(찾기/물어보기 — 스킬명 언급)·`wikimate_lint`+`wikimate_fix`(건강검진) 3개 워크플로우만 있고, **`wikimate_link`·`wikimate_classify`·`wikimate_summarize`는 단 한 줄도 없음**. 반면 Claude Code 쪽은 `skills/wikimate-link`·`wikimate-classify`·`wikimate-summarize` 3개 SKILL.md가 이미 존재(비대칭 확인됨).
+- **왜 문제인가**: `adapters/codex/SETUP.md`가 스스로 "Codex가 `AGENTS.md`를 읽으면 자연어로도 동일한 워크플로우를 따른다"고 명시함. 즉 MCP 서버 프로토콜이 8개 도구를 전부 정상 노출해도(2026-08-04 실측 확인됨), **Codex가 "이 노트들 연결해줘/분류해줘/요약해줘" 같은 자연어를 듣고 이 3개 도구를 자동으로 쓸 근거 문서 자체가 없다.** 결함이 숨어있는 게 아니라 문서가 아예 안 써진 상태.
+- **위험도**: 낮음(문서 수정만, 코드·안전게이트 변경 없음). 단, 안전 규칙(dry-run 기본·개별승인·인젝션 방어)을 3개 도구에도 동일하게 명시해야 함 — 이미 `AGENTS.md` "안전 규칙" 절이 도구 전체에 적용되는 공통 절이라 구조적으로는 문제 없음, 새 절만 추가하면 됨.
+- **성공 기준(done-when)**: `AGENTS.md`에 link(관련 노트 제안·연결)·classify(폴더/태그 분류)·summarize(요약·원자노트) 3개가 각각 "어떤 자연어에 반응하는지 + dry-run→승인→실행 흐름 + Claude Code 쪽 스킬명 대응"까지 명시됨.
+- **실패 시**: 이 항목 없이 2순위(Codex 라이브 검증)를 먼저 하면, link/classify/summarize 자연어 트리거가 실패하는 게 "버그"가 아니라 "문서 누락 때문"이라는 걸 착각해 엉뚱한 코드 디버깅으로 새게 됨 — 반드시 순서 지킬 것.
+
+### 2순위 · Codex CLI 실제 라이브 검증 — 1순위 완료 후, 사용자 승인 필요
+- **근거(확인됨)**: `where codex` 실행 결과 `C:\Users\PC\AppData\Roaming\npm\codex.cmd` 설치 확인됨(이 PC에 실재).
+- **왜 사용자 승인이 먼저 필요한가**: 실제 `codex mcp add`/`codex exec` 실행은 사용자의 Codex/OpenAI 계정·쿼터를 소모하는 행동이라 AI가 임의로 시작할 수 없음(이 프로젝트의 "진행하기=푸시 등 소비적 행동은 매번 확인" 관례와 동일선상).
+- **방법**: `adapters/codex/SETUP.md` 절차대로 `codex mcp add wikimate ...` → `codex mcp list`로 등록 확인 → `codex exec`로 (a) collect 자연어 (b) link/classify/summarize 자연어(1순위 반영 후) 각각 실제 트리거.
+- **성공 기준**: 8개 도구 전부 Codex에서도 실제로 호출되고, dry-run 기본값·승인 게이트가 Claude Code와 동일하게 작동.
+- **실패 시**: MCP 서버 프로토콜 자체는 이미 검증됨(2026-08-04, 8개 도구 전부 정상 응답 확인) → 실패하면 Codex 쪽 설정(`~/.codex/config.toml` 경로·환경변수 전달) 문제일 가능성이 code 결함보다 훨씬 큼. 코드부터 의심하지 말 것.
+
+### 3순위 · `smoke-tools.mjs`에 classify/summarize 서버경유 테스트를 정식 편입(커밋)
+- **근거**: 2026-08-04 QA에서 `wikimate_classify`/`wikimate_summarize`가 실제 MCP 서버(JSON-RPC) 경유로 정상 동작함을 임시 스크립트로 5/5 PASS 증명했으나, **그 스크립트는 커밋되지 않아 다음부터는 이 두 도구의 서버-배선 계층(snake_case→camelCase 인자 매핑 등)에 회귀가 생겨도 자동으로 안 잡힘.** `smoke-tools.mjs`의 "도구 6개 노출" 라벨도 실제 8개 대비 낡은 문구.
+- **위험도**: 낮음(테스트 파일 추가/확장만).
+- **성공 기준**: `smoke-tools.mjs`(또는 신규 파일)가 classify·summarize를 서버 경유로 호출하는 케이스를 포함해 `npm run verify`나 별도 스모크 체인에서 자동 실행됨.
+
+### 4순위(선택, 급하지 않음) · `npm audit` devDependency 취약점 처리 여부 결정
+- **근거**: `npm audit` 실행 결과 6건(high 3·moderate 2·low 1) — 전부 devDependency `@modelcontextprotocol/sdk`가 끌고 오는 hono 계열 전이 의존성(hono·body-parser·fast-uri·ip-address·@hono/node-server). `mcp/server.mjs` 소스를 직접 확인한 결과 이 SDK를 **아예 import하지 않음**(진짜 무의존 유지 확인됨) — 실사용자에게 배포되는 실행 경로엔 영향 없음, 로컬 개발용 테스트 스크립트(smoke-*.mjs)에서만 쓰임.
+- **결정 필요 사항**: `npm audit fix`(또는 `--force`, SDK 버전이 바뀔 수 있어 호환성 재검증 필요) 지금 할지, 아니면 실사용 경로 무영향을 근거로 보류할지 — 의존성 변경은 사용자 승인 필요 영역이라 AI가 임의 실행 안 함.
+
+### 참고(사소, 지금 안 급함)
+- `adapters/codex/SETUP.md`의 config.toml 예시 경로가 낡음(`26y_06m_10d_wikimate`, 실제 폴더명은 `26y_06m_10d_SoDam-WikiMate`) — 기능 영향 없는 예시 텍스트, 1순위 작업 때 같이 고치면 효율적.
+
+### 범위 밖 (명확히 구분 — 지금 손댈 대상 아님, 낡은 게 아니라 의도적 보류)
+- **노션 라이브 검증**: 사용자의 실제 노션 계정 연결이 필요해 AI가 대행 불가.
+- **Phase 3(마켓플레이스 등록·Gemini 어댑터·Python 추출)**: PRD가 "검증 후"로 명시적으로 게이트해 둠 — 위 1~4순위가 이 게이트의 일부(보안·완결성 검증)이므로 순서상 먼저 끝나야 함.
+
+---
+
+## 다음 단계 (2026-07-11 확정 — 우선순위 순, 재논의 불필요) [참고용 이력 — 위 2026-08-04 섹션이 최신]
 
 ### 1순위 · 최우선 블로커 (사람만 할 수 있음 — AI 대행 불가, 다음 세션 재개 시 가장 먼저 확인)
 
@@ -160,10 +207,11 @@
 
 ---
 
-## Resume 지침 (2026-07-11 갱신)
-1. `git status -s`로 반쯤 편집된 파일 확인 (현재: 없음, worktree 클린)
-2. 위 "1순위 최우선 블로커" 표의 B1/B2가 해소됐는지부터 확인(사용자에게 직접 질문)
-3. 둘 다 해소 확인되면 → M3 착수 조건 2번(F 결론 반영)까지 확인 후 M3 구현 시작
-4. 하나라도 실패로 보고되면 → 위 "실패 시" 칸의 재점검 절차부터(코드 재작성 아니라 배선/설정 점검이 우선)
-5. 완료 시 `[ ]`→`[x]` + AUDIT.log 기록
-6. 계획 변경 시 새 데이터+사유 명시(일관성 규칙)
+## Resume 지침 (2026-08-04 갱신 — 아래가 최신, 위 2026-07-11 버전은 참고용 이력)
+1. `git status -s --branch`로 확인 (2026-08-04 기준: main == origin/main, 클린 — `.PRD/RESEARCH_SOURCES.md` 미추적 1건만 예외, 무해 확인됨)
+2. B1(hook)·B2(그래프뷰)·M3 — **셋 다 이미 완료·병합됨**. 다시 확인할 필요 없음(재확인하려는 유혹이 들면 이 줄을 근거로 스킵).
+3. 이 문서 152번째 줄 부근 "다음 단계 (2026-08-04 확정)" 섹션(구버전 "2026-07-11" 섹션보다 위, M3 섹션 바로 다음)의 **1순위(`AGENTS.md` 갱신)부터 순서대로** 진행 — 순서를 바꾸면 안 되는 이유가 1순위 항목 설명("실패 시")에 명시돼 있음.
+4. 2순위(Codex 라이브 검증)는 실행 전 **반드시 사용자 승인**을 받을 것(계정/쿼터 소모 행동).
+5. 4순위(`npm audit`)는 의존성 변경이라 **반드시 사용자 승인** 후 실행.
+6. 완료 시 `[ ]`→`[x]` + 근거(실행한 명령·결과) 함께 기록, 추측 문구 금지.
+7. 계획 변경 시 새 데이터+사유 명시(일관성 규칙).
