@@ -15,11 +15,14 @@ console.log(JSON.stringify({ ok: s1.ok, note: s1.note, current_summary: s1.curre
 console.log("본문에 인젝션 방어 관련 실제 문구 포함:", s1.body.includes("인젝션 방어") ? "PASS" : "FAIL");
 
 console.log("\n=== 2) apply dry-run: summary만 갱신 ===");
+const beforeDry = await readFile(join(vault, "00_Inbox", "MCP 연결 기본 구조.md"), "utf8");
 const a2 = await summarize({ vaultPath: vault, action: "apply", note: "00_Inbox/MCP 연결 기본 구조.md", summary: "MCP는 AI 도구를 연결하는 표준 규격 — Claude/Codex가 공통 로직 재사용", dryRun: true });
 console.log(JSON.stringify(a2, null, 2));
 console.log("dry-run이라 파일 미변경 여부 확인 중...");
 const stillOld = await readFile(join(vault, "00_Inbox", "MCP 연결 기본 구조.md"), "utf8");
-console.log("dry-run 후 파일 미변경:", stillOld.includes("(예시 노트)") ? "PASS" : "FAIL");
+// 이전엔 무관한 고정 문자열("(예시 노트)")을 검사해 항상 FAIL이 나던 결함 — 실제로는 dry-run 전후 파일이
+// 바이트 단위로 그대로인지(진짜 미변경 여부)를 비교해야 한다. 볼트 재실행으로 summary가 이미 같은 값이어도 옳게 동작.
+console.log("dry-run 후 파일 미변경:", stillOld === beforeDry ? "PASS" : "FAIL");
 
 console.log("\n=== 3) apply 실제: summary 반영 ===");
 const a3 = await summarize({ vaultPath: vault, action: "apply", note: "00_Inbox/MCP 연결 기본 구조.md", summary: "MCP는 AI 도구를 연결하는 표준 규격 — Claude/Codex가 공통 로직 재사용", dryRun: false });

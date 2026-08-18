@@ -179,6 +179,21 @@ try {
   const zCleared = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
   check("set_notion_id: 해제 후 frontmatter에 빈 값 반영", zCleared.includes('notion_id: ""'));
 
+  // 22) set_notion_id: 경로 이탈·숨김폴더·절대경로 차단(수동 점검으로 실제 안전 확인 후 회귀 테스트로 편입)
+  const n22a = await link({ vaultPath: vault, action: "set_notion_id", note: "../바깥.md", notionId: "x", dryRun: false });
+  check("set_notion_id: 볼트 밖 경로(..) 차단", n22a.ok === false);
+  const n22b = await link({ vaultPath: vault, action: "set_notion_id", note: ".숨김폴더/x.md", notionId: "x", dryRun: false });
+  check("set_notion_id: 점(.)으로 시작하는 폴더 차단", n22b.ok === false);
+  const n22c = await link({ vaultPath: vault, action: "set_notion_id", note: "D:/가짜/x.md", notionId: "x", dryRun: false });
+  check("set_notion_id: 절대(드라이브) 경로 차단", n22c.ok === false);
+
+  // 23) set_notion_id: 특수문자·대용량 문자열도 frontmatter를 깨지 않고 안전 저장(JSON.stringify 인용)
+  const weird = `따옴표"백슬래시\\개행\n대용량${"x".repeat(5000)}`;
+  const n23 = await link({ vaultPath: vault, action: "set_notion_id", note: "30_Notes/Z.md", notionId: weird, dryRun: false });
+  check("set_notion_id: 특수문자·대용량 값 저장 성공", n23.ok === true);
+  const zWeird = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
+  check("set_notion_id: 저장 후에도 frontmatter 블록 정상(title 보존)", zWeird.startsWith("---") && zWeird.includes('title: "Z"'));
+
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {
   await rm(vault, { recursive: true, force: true }).catch(() => {});
