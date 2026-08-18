@@ -30,6 +30,9 @@
 > - **수정**: `description`에 MOC 트리거 문구 추가, 워크플로우를 A(연결)/B(목차) 로 분리해 `build_moc` 절차 명시, 도구 목록에 `build_moc` 항목 추가(5개 상한이 `add_links`에만 적용됨을 명시), `commands/wikimate-link.md`에도 동일 반영. 문서/메타데이터만 수정, 코드 변경 없음 — `npm run verify` 155/155 그대로(영향 없음, 회귀 확인 완료).
 > - **미해결(사람만 확인 가능)**: 이 수정이 실제로 Claude Code에서 "목차 만들어줘"류 발화에 스킬을 켜는지는 **세션 재시작 후 실사용으로만 확인 가능** — 프로그램적으로 검증 불가.
 > - **연이어 발견·해결**: 나머지 5개 스킬(summarize/classify/lint/query)의 `description`도 같은 종류의 결함이 있는지 점검 — summarize는 이미 두 트리거 문구가 다 있어 결함 없음. 대신 `commands/`에 `/wikimate-summarize` 슬래시 명령이 없다는 걸 재확인(README §12·FAQ가 스스로 "아직 없어요"로 고지해 온 항목). `commands/wikimate-summarize.md` 신규 생성(기존 3개와 동일 패턴) + README(ko/en) §12·FAQ·폴더구조 라인의 "없음" 고지 제거로 종결. 문서/메타데이터만, `npm run verify` 155/155 그대로.
+> - **3순위(버전/릴리즈) — ✅ 완료**: 사용자 확정 지시로 진행. `package.json`/`package-lock.json`/`plugin.json`/`marketplace.json`/`mcp/server.mjs` SERVER_INFO 5곳 `0.7.2`→`0.8.0` 동기화(커밋 `6b7bc0f`) → 태그 `v0.8.0`(annotated) push → GitHub Release 발행 완료: https://github.com/sodam-ai/SoDam-WikiMate/releases/tag/v0.8.0 . 릴리즈 노트에 v0.7.2 이후 전체(link/classify/summarize 3개 도구, notion_id 왕복 연결, MOC 트리거 수정, 실측 결함 6건, 문서 정리, verify 126→155) 정리.
+> - **2순위(Codex 라이브 검증) 방향 확정(사용자 지시, 2026-08-18)**: AI가 임의로 `codex exec` 실행하지 않음 — **사용자가 구현 완료 후 직접 별도로 Codex 포팅 작업을 진행**하기로 함. 이후 세션에서 이 항목을 "AI가 대행할 다음 단계"로 다시 제안하지 말 것.
+> - **push 3회 완결, 로컬-원격 완전 동기화**: `main == origin/main`, 미커밋/미푸시 없음.
 
 ## 위치·전제
 
