@@ -24,6 +24,11 @@
 > - **2순위(Codex 라이브 검증)·4순위(`npm audit`)는 여전히 미착수** — 각각 사용자 승인 필요(계정/쿼터 소모, 의존성 변경)라 그대로 대기.
 > - **위 5개 커밋 push 완료**(`main`==`origin/main`, `65d9e7e`까지 순수 fast-forward). 버전/릴리즈 태그(`0.7.2`→`0.8.0`)는 여전히 미착수 — 공개 행동이라 확인 후 진행 예정.
 > - **[신규] `01_PRD.md` §5 성공기준 중 유일한 미충족 항목("notion_id로 노트↔노션 점프") 근본원인 발견·해결**: 전체 코드베이스 grep 결과 `notion_id`를 쓰는 곳이 `collect.mjs`의 빈 문자열 초기화 1곳뿐이었음 — "노션 행→옵시디언"(Obsidian Link)만 설계·구현됐고 반대 방향(옵시디언→노션)은 애초에 쓸 수 있는 도구가 없어서 "라이브 미검증"이 아니라 "검증할 코드 자체가 없던" 상태였음(직접 확인, 추측 아님). `wikimate_link`에 `action=set_notion_id` 추가로 해결 — 기존 안전 패턴(존재검증·백업·dry-run·멱등) 그대로 재사용, 새 코드·새 위험 유형 없음. 유닛 10개(`verify-link.mjs`, 35→45) + 서버경유 스모크 1개(`smoke-tools.mjs`, `notion_id` snake_case→camelCase 매핑 확인, 과거 `atomic_note`에서 실제 버그 났던 것과 같은 위험 영역) 전부 PASS. `wikimate-organize` 스킬에 "노션 행 생성 후 되쓰기" 단계, `AGENTS.md`·`wikimate-link` 스킬·README(ko/en)에도 반영. **`npm run verify` 총계 145/145 → 155/155.**
+>
+> ## 🟢 2026-08-18 갱신 — MOC 자동 트리거 배선 결함 발견·수정(커밋 `8c5da53`)
+> - **발견(직접 확인, 추측 아님)**: `build_moc`는 M2(2026-07-11)부터 존재·검증됐지만, Claude Code의 스킬 자동발동은 `SKILL.md`의 YAML `description`과 사용자 발화를 매칭하는데 `skills/wikimate-link/SKILL.md`의 `description`과 `commands/wikimate-link.md` 둘 다 "목차"/"MOC" 단어가 0건이었음 — "목차 만들어줘"라고 말해도 이 스킬이 켜질 신호가 처음부터 없었던 트리거 배선 결함(코드 버그 아님).
+> - **수정**: `description`에 MOC 트리거 문구 추가, 워크플로우를 A(연결)/B(목차) 로 분리해 `build_moc` 절차 명시, 도구 목록에 `build_moc` 항목 추가(5개 상한이 `add_links`에만 적용됨을 명시), `commands/wikimate-link.md`에도 동일 반영. 문서/메타데이터만 수정, 코드 변경 없음 — `npm run verify` 155/155 그대로(영향 없음, 회귀 확인 완료).
+> - **미해결(사람만 확인 가능)**: 이 수정이 실제로 Claude Code에서 "목차 만들어줘"류 발화에 스킬을 켜는지는 **세션 재시작 후 실사용으로만 확인 가능** — 프로그램적으로 검증 불가.
 
 ## 위치·전제
 
