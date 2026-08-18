@@ -350,9 +350,8 @@ Wikimate는 **안전을 가장 중요하게** 만들었어요. 항상 이 순서
 | `/wikimate-lint` | 볼트 건강검진 |
 | `/wikimate-link` | 자동 링크·MOC 생성 |
 | `/wikimate-classify` | 자동 분류 |
+| `/wikimate-summarize` | 요약·원자노트 만들기 |
 | `/mcp` | 설치/연결 상태 확인 (도구 개수가 보이는지) |
-
-> ℹ️ 요약(summarize) 기능은 전용 슬래시 명령이 아직 없어요. 자연어로 요청하세요.
 
 ### MCP 도구 (안에서 자동 호출됨 — 외울 필요 없음)
 `wikimate_collect`(정리) · `wikimate_lint`(점검) · `wikimate_fix`(수정) · `wikimate_runlog`(기록) · `wikimate_vaults`(보관함 찾기) · `wikimate_link`(자동 링크·MOC) · `wikimate_classify`(자동 분류) · `wikimate_summarize`(요약·원자노트)
@@ -445,7 +444,7 @@ SoDam-WikiMate/
 │   ├── wikimate-link/
 │   ├── wikimate-classify/
 │   └── wikimate-summarize/
-├── commands/             /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify (4개, summarize 전용 명령 없음)
+├── commands/             /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify · /wikimate-summarize (5개)
 ├── hooks/                세션 시작 자동 감지(session-start.mjs, hooks.json)
 ├── agents/               검수 서브에이전트(wikimate-reviewer.md)
 ├── adapters/codex/       Codex 설정 안내(SETUP.md)
@@ -566,7 +565,7 @@ SoDam-WikiMate/
 | **스마트폰에 설치가 안 돼요** | 모바일 미지원 | Wikimate는 **윈도우 PC 전용**이에요. |
 | **연결해달라고 했는데 5개 넘게 안 돼요** | **의도된 안전장치**(과잉 연결 방지) | 정상 동작이에요. 기존 링크 일부를 정리한 뒤 다시 요청하세요. |
 | **자동 분류가 90_Templates·99_Archive는 왜 안 건드리나요** | 의도된 설계(서식은 사람 관리, 보관은 건강검진 전담) | 정상 동작이에요. |
-| **요약이 "정리해줘"처럼 자동으로 잘 안 걸려요** | 전용 슬래시 명령이 아직 없음(정직 고지, [12번](#12-명령어-모음) 참고) | "이 노트 요약해줘"처럼 더 명확한 문장으로 요청하세요. |
+| **요약이 "정리해줘"처럼 자동으로 잘 안 걸려요** | 자연어 자동발동이 가끔 안 들을 수 있음 | "이 노트 요약해줘"처럼 더 명확한 문장으로 요청하거나, `/wikimate-summarize`로 100% 확실하게 발동시키세요([12번](#12-명령어-모음)). |
 | **Codex에서 링크·분류·요약이 자연어로 자동 실행 안 돼요** | `AGENTS.md` 규칙은 있지만(2026-08-17 보강) 실제 자동 발동은 아직 라이브 검증 전 | 지금은 MCP 도구 이름을 직접 언급해 요청하세요(예: "wikimate_link로 연결 후보 보여줘"). 자동 발동이 안 되면 알려주세요 — 라이브 검증 대상입니다. |
 | **"세션 시작 자동 감지" 메시지가 안 떠요** | hooks/agents는 **플러그인을 완전히 다시 불러와야** 반영됨 | Claude Code를 완전히 종료 후 재시작. |
 

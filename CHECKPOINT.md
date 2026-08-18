@@ -29,6 +29,7 @@
 > - **발견(직접 확인, 추측 아님)**: `build_moc`는 M2(2026-07-11)부터 존재·검증됐지만, Claude Code의 스킬 자동발동은 `SKILL.md`의 YAML `description`과 사용자 발화를 매칭하는데 `skills/wikimate-link/SKILL.md`의 `description`과 `commands/wikimate-link.md` 둘 다 "목차"/"MOC" 단어가 0건이었음 — "목차 만들어줘"라고 말해도 이 스킬이 켜질 신호가 처음부터 없었던 트리거 배선 결함(코드 버그 아님).
 > - **수정**: `description`에 MOC 트리거 문구 추가, 워크플로우를 A(연결)/B(목차) 로 분리해 `build_moc` 절차 명시, 도구 목록에 `build_moc` 항목 추가(5개 상한이 `add_links`에만 적용됨을 명시), `commands/wikimate-link.md`에도 동일 반영. 문서/메타데이터만 수정, 코드 변경 없음 — `npm run verify` 155/155 그대로(영향 없음, 회귀 확인 완료).
 > - **미해결(사람만 확인 가능)**: 이 수정이 실제로 Claude Code에서 "목차 만들어줘"류 발화에 스킬을 켜는지는 **세션 재시작 후 실사용으로만 확인 가능** — 프로그램적으로 검증 불가.
+> - **연이어 발견·해결**: 나머지 5개 스킬(summarize/classify/lint/query)의 `description`도 같은 종류의 결함이 있는지 점검 — summarize는 이미 두 트리거 문구가 다 있어 결함 없음. 대신 `commands/`에 `/wikimate-summarize` 슬래시 명령이 없다는 걸 재확인(README §12·FAQ가 스스로 "아직 없어요"로 고지해 온 항목). `commands/wikimate-summarize.md` 신규 생성(기존 3개와 동일 패턴) + README(ko/en) §12·FAQ·폴더구조 라인의 "없음" 고지 제거로 종결. 문서/메타데이터만, `npm run verify` 155/155 그대로.
 
 ## 위치·전제
 

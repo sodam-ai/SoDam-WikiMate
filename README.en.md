@@ -312,7 +312,7 @@ Everything works through **chat (natural language)**. You don't have to memorize
 
 → Reads the note's body and proposes a **one-line summary** (up to 200 characters), or an **atomic note** (a new file) with just the key points. On approval it applies the change, but **the original note's body is never modified** — the summary only fills a separate `summary` field, and an atomic note is a completely new file linked back to the original ("preserve the raw content" principle, enforced structurally in code). After an actual write, the review subagent (`wikimate-reviewer`) double-checks it against the source. (Tool: `wikimate_summarize` / Skill: `wikimate-summarize`)
 
-> ℹ️ **Honest disclosure**: there is no dedicated slash command (`/wikimate-summarize`) for this yet. Use natural language, or Claude Code's automatic skill trigger.
+> ℹ️ Use natural language, Claude Code's automatic skill trigger, or the dedicated `/wikimate-summarize` slash command for 100% reliability.
 
 ---
 
@@ -350,9 +350,8 @@ Install → (automatic) MCP registered → (session-start Obsidian/vault auto-de
 | `/wikimate-lint` | Health-check the vault |
 | `/wikimate-link` | Auto-link · build MOC |
 | `/wikimate-classify` | Auto-classify |
+| `/wikimate-summarize` | Summarize / make an atomic note |
 | `/mcp` | Check install/connection status (see how many tools appear) |
-
-> ℹ️ There is no dedicated slash command for summarize yet. Ask for it in natural language.
 
 ### MCP tools (called automatically internally — no need to memorize)
 `wikimate_collect` (organize) · `wikimate_lint` (health-check) · `wikimate_fix` (fix) · `wikimate_runlog` (log) · `wikimate_vaults` (find vaults) · `wikimate_link` (auto-link · MOC) · `wikimate_classify` (auto-classify) · `wikimate_summarize` (summarize · atomic notes)
@@ -445,7 +444,7 @@ SoDam-WikiMate/
 │   ├── wikimate-link/
 │   ├── wikimate-classify/
 │   └── wikimate-summarize/
-├── commands/             /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify (4; none for summarize)
+├── commands/             /wikimate · /wikimate-lint · /wikimate-link · /wikimate-classify · /wikimate-summarize (5)
 ├── hooks/                Session-start auto-detection (session-start.mjs, hooks.json)
 ├── agents/               Review subagent (wikimate-reviewer.md)
 ├── adapters/codex/       Codex setup guide (SETUP.md)
@@ -566,7 +565,7 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | **Can't install on my phone** | Mobile isn't supported | Wikimate is **Windows-PC only.** |
 | **It won't link more than 5 notes** | **Intentional safeguard** (over-linking prevention) | Normal behavior. Clean up some existing links first, then ask again. |
 | **Auto-classify never touches 90_Templates/99_Archive** | Intentional design (templates are human-managed, archive is health-check's job) | Normal behavior. |
-| **Summarize doesn't auto-trigger as reliably as "organize this"** | No dedicated slash command yet (honest disclosure, see [§12](#12-command-reference)) | Ask with a clearer sentence, like "summarize this note." |
+| **Summarize doesn't auto-trigger as reliably as "organize this"** | Natural-language auto-trigger can be inconsistent | Ask with a clearer sentence like "summarize this note," or use `/wikimate-summarize` for 100% reliability ([§12](#12-command-reference)). |
 | **In Codex, link/classify/summarize don't auto-fire from natural language** | `AGENTS.md` has the rules (since 2026-08-17) but live auto-firing isn't verified yet | For now, name the MCP tool directly (e.g. "show me link candidates using wikimate_link"). Let us know if it doesn't auto-fire — that's exactly what's pending live verification. |
 | **The "session-start auto-detection" message doesn't appear** | hooks/agents only take effect after a **full plugin reload** | Fully quit and reopen Claude Code. |
 
