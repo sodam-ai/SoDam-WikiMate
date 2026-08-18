@@ -33,6 +33,12 @@
 > - **3순위(버전/릴리즈) — ✅ 완료**: 사용자 확정 지시로 진행. `package.json`/`package-lock.json`/`plugin.json`/`marketplace.json`/`mcp/server.mjs` SERVER_INFO 5곳 `0.7.2`→`0.8.0` 동기화(커밋 `6b7bc0f`) → 태그 `v0.8.0`(annotated) push → GitHub Release 발행 완료: https://github.com/sodam-ai/SoDam-WikiMate/releases/tag/v0.8.0 . 릴리즈 노트에 v0.7.2 이후 전체(link/classify/summarize 3개 도구, notion_id 왕복 연결, MOC 트리거 수정, 실측 결함 6건, 문서 정리, verify 126→155) 정리.
 > - **2순위(Codex 라이브 검증) 방향 확정(사용자 지시, 2026-08-18)**: AI가 임의로 `codex exec` 실행하지 않음 — **사용자가 구현 완료 후 직접 별도로 Codex 포팅 작업을 진행**하기로 함. 이후 세션에서 이 항목을 "AI가 대행할 다음 단계"로 다시 제안하지 말 것.
 > - **push 3회 완결, 로컬-원격 완전 동기화**: `main == origin/main`, 미커밋/미푸시 없음.
+>
+> ## 🟢 2026-08-19 갱신 — 전체 기능 실행 검증(정상/경계/실패 케이스), 실결함 1건 발견·수정(커밋 `fc07e3c`)
+> - **`npm run verify` 155→160**, `smoke-tools.mjs` 13/13, `smoke-server.mjs` 정상, 4개 실볼트 e2e 스크립트 전부 재실행 — 회귀 0건.
+> - **실결함 발견**: `e2e-summarize-real.mjs`의 "dry-run 후 파일 미변경" 체크가 무관한 고정 문자열("(예시 노트)")을 검사해 매번 FAIL을 내던 것을 발견 — `summarize.mjs` 프로덕션 코드는 재확인 결과 정상(dry-run은 write 전에 반환), **테스트 스크립트 쪽 버그**였음. 파일 내용 전/후 바이트 비교로 수정.
+> - **경계값 수동 점검**: `set_notion_id`(이번 주 신규)에 경로이탈·점(.)폴더·절대경로·5KB+ 특수문자 문자열 4종 주입 — 전부 기존 `safeInside`/`JSON.stringify` 메커니즘으로 안전 차단·처리 확인(결함 없음). 이 검증이 자동테스트에 없었어서 `verify-link.mjs`에 회귀 테스트 5개로 영구 편입(45→50).
+> - **부가 확인**: 서버에 malformed JSON·존재하지 않는 메서드/도구를 직접 주입해도 크래시 없이 JSON-RPC 에러로 정상 응답, stderr에 예상 밖 경고 없음. 세션 전체 diff(13개 커밋) 민감정보 패턴 스캔 — 발견 0건.
 
 ## 위치·전제
 
