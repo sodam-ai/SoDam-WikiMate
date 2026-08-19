@@ -8,7 +8,7 @@
 - ✅ **main 빌드됨, 도구 8개**: 무의존 MCP 코어 — `wikimate_collect`·`wikimate_lint`·`wikimate_fix`·`wikimate_runlog`·`wikimate_vaults`·`wikimate_link`·`wikimate_classify`·`wikimate_summarize`. 자동 연결 SessionStart hook + 검수 서브에이전트(`wikimate-reviewer`, 보고전용, summarize 결과도 검사) + 스킬 6(organize·query·lint·link·classify·summarize)·Codex 어댑터. `collect`엔 **원문 보존 advisory**(저신뢰·대용량 경고, 비차단) 포함.
 - ✅ **`feat/v0.8-connect` → main 병합 완료(2026-08-03)**: 병합 전 사람 확인 2건(B1: SessionStart hook 실제 로드, B2: 옵시디언 그래프뷰 백링크 반영) **둘 다 통과 확인됨**(실제 재시작 화면·그래프뷰 스크린샷으로 검증).
 - ✅ **M3(요약·원자노트) 구현·병합 완료(2026-08-04)**: `wikimate_summarize` 추가 — link/classify와 동일 안전 패턴(dry-run·백업·충돌 시 접미), 도구 자체는 요약 문장을 생성하지 않음(호출자 LLM이 판단). 유닛테스트 20/20 + 실볼트 e2e 8/8 + 전체 회귀 126/126 전부 PASS. Phase 2가 사실상 완료됐고, 남은 건 Codex 어댑터 재검증뿐.
-- 🟡 Python 추출·Gemini 어댑터는 아직 미구현.
+- 🟡 Python 추출은 아직 미구현. **Gemini 어댑터는 추가됨(2026-08-20)** — 등록 명령(`gemini mcp add/list/remove`) 실측 확인, 실제 도구 호출·자연어 트리거는 라이브 미검증.
 - 🟡 **옵시디언 쓰기 기본 = 검증된 filesystem(`vault_path`)**; notesmd-cli(이름) 경로는 ⚠️미검증 옵션.
 - 🟡 **노션 색인 = 코어 밖**(스킬 + 외부 노션 MCP/CLI 연결 시에만). 구조적 한계로 "신뢰성"보다 **정직성**(한계 고지·삽입 전 best-effort 중복확인). 라이브 미검증.
 - ✅ **`notion_id` 왕복 연결 고리 완성(2026-08-17)**: `01_PRD.md` §5 성공기준 중 유일하게 미충족이던 항목("노트↔노션 색인행이 notion_id로 연결돼 점프") — 실제 grep으로 확인한 결과 코드 어디에도 notion_id를 쓰는 곳이 없어(항상 빈 문자열) "노션 행→옵시디언"(Obsidian Link) 한쪽만 되고 반대방향은 애초에 불가능했던 것을 발견. `wikimate_link`에 `action=set_notion_id` 추가(기존 백업·dry-run·존재검증 패턴 재사용, 새 유닛테스트 10개 PASS) + `wikimate-organize` 스킬에 "노션 행 생성 후 되쓰기" 단계 편입으로 종결.
@@ -27,7 +27,7 @@ MCP 코어 = 정리 로직 1개를 모든 에이전트가 공유 (모델 비종�
 ## 멀티 에이전트 호환 매트릭스
 | 기능 | Claude Code | Codex | Gemini |
 |---|---|---|---|
-| 설치 | 마켓플레이스 플러그인(풀) | 어댑터 | 어댑터(후순위) |
+| 설치 | 마켓플레이스 플러그인(풀) | 어댑터 | 어댑터(2026-08-20 추가, 라이브 미검증) |
 | MCP 코어 | ✅ | ✅ | ✅ |
 | 자동 트리거 skills | ✅ | ⚠️ 규칙으로 유사 | ⚠️ |
 | 서브에이전트 | ✅ | 제한적 | 제한적 |
@@ -42,7 +42,16 @@ MCP 코어 = 정리 로직 1개를 모든 에이전트가 공유 (모델 비종�
 | [03_PHASES.md](./03_PHASES.md) | Phase -1 손시뮬 → 1a(MCP코어)→1b→2→3 | 개발 순서 |
 | [04_PROJECT_SPEC.md](./04_PROJECT_SPEC.md) | 기술 스택·배포·플러그인 구조·**절대 하지 마** | 에이전트에 명령할 때마다 |
 
-## 다음 단계 (2026-08-18 확정 — 아래가 최신, 밑의 "2026-08-03" 절은 참고용 이력)
+## 다음 단계 (2026-08-20 확정 — 아래가 최신, 밑의 "2026-08-18" 절은 참고용 이력)
+
+> Phase 3(`03_PHASES.md`) 착수. 이번 세션에서 안전 게이트 5원칙 전체 교차 감사·동시성/원자적쓰기 수정·notesmd-cli 경로 최초 테스트 등으로 Phase 3의 전제조건("Phase 1~2 안정 + 손시뮬+보안 검증 통과")을 실질적으로 충족한 뒤 진행함.
+
+- ✅ **배포물 보안 자동 점검 추가**(`03_PHASES.md` Phase 3 명시 항목) — `scripts/security-scan.mjs`(실제 토큰 형식만 매칭, 오탐 최소화) + opt-in pre-commit 훅(`.githooks/pre-commit`, `git config core.hooksPath .githooks`). 실측: 가짜 API 키를 심은 실제 `git commit`이 진짜로 차단되는 것, 정상 커밋은 통과하는 것 둘 다 확인. 커밋 후 자체 재검토로 "스킵된 파일을 조용히 '깨끗함'으로 셈"하는 결함을 하나 더 발견해 즉시 후속 수정.
+- ✅ **Gemini CLI 어댑터 추가** — `GEMINI.md`(→ `AGENTS.md`를 가리키는 얇은 파일, 내용 중복로 인한 문서 어긋남 방지) + `adapters/gemini/SETUP.md`. 이 컴퓨터에 실제 설치된 Gemini CLI(0.52.0)로 `gemini mcp add/list/remove` 등록·조회·제거를 직접 실행해 정확한 문법을 확인(추측 아님). "워크스페이스 미신뢰 시 MCP 서버 자동 비활성화" 같은 실제 관찰 사실도 문서에 반영.
+- **경계 명확화(Codex와 동일 원칙)**: 등록 명령 문법은 검증됨. **실제 자연어 트리거·Gemini가 wikimate 도구를 정말 호출하는지는 Gemini API 실호출(사용자 계정/쿼터)이 필요해 AI가 대행하지 않음** — 사용자 확인 대기.
+- **Phase 3 남은 항목**: 마켓플레이스 정식 등록(이미 GitHub 기반으로 사실상 동작 중, 추가 조치 불명확), 노션 운영판 확장(PRD 원문이 스스로 "선택·목적 이탈 경계"로 명시 — 진행 비추천).
+
+## 다음 단계 (2026-08-18 확정 — 참고용 이력, 위 2026-08-20 절이 최신)
 
 > 🔴 아래 "2026-08-03" 절의 3번("Codex 어댑터 재검증이 실질적으로 남은 유일한 항목")은 **두 가지로 틀렸던 것으로 확인됨**: ①실제로는 `notion_id` 왕복 연결 미구현·`wikimate-link`의 MOC 자연어 트리거 배선 누락이라는, 당시 몰랐던 AI 작업 두 건이 더 있었음(둘 다 발견·수정 완료). ②Codex 라이브 검증은 이후 **사용자가 "구현 완료 후 내가 직접 별도로 포팅하겠다"고 확정**해 더 이상 AI의 "다음 단계" 후보가 아님. 과거 기록은 지우지 않고 이 절로 덮어 갱신함(일관성 규칙).
 

@@ -54,6 +54,14 @@
 > - **수정**: "로컬 검증"·"테스트" 절을 현재 8(유닛)+2(스모크)+5(실볼트 e2e) 구성으로 전면 갱신, `-real` 스크립트가 영구 볼트를 써서 재실행 시 일부 단계가 "이미 처리됨"으로 나올 수 있다는 특성도 명시(오늘 e2e-classify-real.mjs에서 직접 확인한 내용).
 > - 문서만 변경, `npm run verify` 160/160 영향 없음.
 
+## 🟢 2026-08-20 갱신 — Phase 3 착수: 배포물 보안 자동 점검 + Gemini 어댑터
+> 이번 세션에서 안전 게이트 5원칙 교차 감사(collect/fix/link/classify/summarize 5개 도구 x dry-run·경계검사·백업·덮어쓰기금지·runlog 5원칙, 위반 0건), 서버 요청 직렬화(동시성 레이스 수정), 원자적 쓰기(temp+rename, 크래시/외부프로세스 안전), notesmd-cli 실경로 최초 테스트(0%→테스트됨), 서로게이트 쌍 잘림 수정 등으로 `03_PHASES.md` Phase 3 전제조건("손시뮬+보안 검증 통과")을 실질적으로 충족한 뒤 Phase 3 착수.
+- **배포물 보안 자동 점검**(커밋 `cb1099c`, 후속 수정 `708eb35`): `scripts/security-scan.mjs` + opt-in pre-commit 훅. 실측: 가짜 API 키 커밋 실제 차단 확인, 정상 커밋 통과 확인. 자체 재검토로 "스킵 파일을 조용히 '깨끗함'으로 셈"하는 결함 발견·즉시 수정(파일당 findings/skipReason 분리).
+- **Gemini CLI 어댑터**(커밋 `5f2196c`): `GEMINI.md`(AGENTS.md를 가리키는 얇은 파일)+`adapters/gemini/SETUP.md`. 실제 설치된 Gemini CLI(0.52.0)로 `mcp add/list/remove` 직접 실행해 문법 확인. 자연어 트리거 라이브 검증은 Codex와 동일 원칙으로 사용자 확인 대기.
+- `npm run verify` 160/160 그대로(전부 스크립트/문서 추가, 핵심 로직 무변경) — 매 커밋 직전 재확인 완료.
+- **범위에서 명시적으로 제외**: 노션 운영판 확장(PRD 원문이 스스로 "선택·목적 이탈 경계"로 경고) — 진행 안 함.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
