@@ -36,7 +36,7 @@ version: 0.5.0
 
 ### 노션 Run Log (안전 기록 — 실제 쓰기 뒤 매번)
 > ⚠️ **지금까지 이 절이 빠져 있었다**: `NOTION_RUNLOG_DB_ID`는 `.env.example`·README에 선언만 돼 있고 실제로 읽거나 쓰는 곳이 없었다(2026-08-19 감사로 확인). 로컬 `.wikimate/runlog.jsonl`은 계속 정상 기록되지만(코어가 자동 처리), **노션을 주로 보는 사용자는 지금까지 "AI가 볼트에 뭘 했는지"를 노션에서 확인할 방법이 없었다** — 이 절이 그 절반을 채운다.
-- **범위**: `wikimate_collect`/`wikimate_link`/`wikimate_classify`/`wikimate_summarize`/`wikimate_fix`가 실제로 쓰기를 한(`dry_run=false`, `written`/`ok+changed:true`/`ok+backup` 등으로 성공 확인된) **모든 경우**, 로컬 Run Log와 1:1로 대응하는 행을 노션에도 남긴다.
+- **범위**: `wikimate_collect`/`wikimate_link`/`wikimate_classify`/`wikimate_summarize`/`wikimate_fix`가 실제로 쓰기를 한(`dry_run=false`이고 `ok:true`(collect는 `written:true`)이며 **`changed:false`나 `skipped_duplicate:true`(멱등 무변경) 응답이 아닌**) **모든 경우**, 로컬 Run Log와 1:1로 대응하는 행을 노션에도 남긴다.
 - **DB 확정**: `NOTION_RUNLOG_DB_ID`가 있으면 그 DB, 없으면 Notion 검색으로 "Wikimate Run Log"를 찾고, 그래도 없으면 "만들까요?" 묻는다(임의 생성 X — Research Library와 동일 원칙). 이 env도 마찬가지로 **존재 자체로 연결을 단정하지 말고 실제 노션 도구로 확인**한다(B2 원칙 재사용).
 - **행 속성**(02_DATA_MODEL.md NotionRunLog 그대로): `Run date`(실행일시), `Request`(받은 명령 요약), `Changed notes`(변경된 노트 — 가능하면 `Obsidian Link` 형식으로), `Errors`(실패/건너뛴 항목, 있을 때만), `Human approved`(이 쓰기가 실제로 사람 승인을 거쳤는지 — 사전승인 신규생성이었는지 개별승인이었는지도 구분해 적음).
 - **실패해도 무해(graceful)**: 노션 Run Log 기록이 실패해도(미연결·API 오류 등) **원래 쓰기 자체는 이미 끝난 뒤라 절대 되돌리거나 막지 않는다** — "노션 Run Log 기록 실패(로컬에는 정상 기록됨)"라고만 정직히 보고. 로컬 `.wikimate/runlog.jsonl`이 항상 진실원본(single source of truth)이고 노션은 거울일 뿐이다.
