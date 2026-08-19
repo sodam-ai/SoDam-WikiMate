@@ -542,7 +542,7 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Review subagent (wikimate-reviewer) | ✅ Done (structurally) | Explicitly covers collect/link/classify/summarize |
 | Codex — the MCP tools themselves | ✅ Confirmed working | All 8 tools confirmed responding correctly via the server protocol (2026-08-04) |
 | Codex — natural-language auto-trigger (link/classify/summarize) | 🟡 Documented, live-unverified | `AGENTS.md` was updated on 2026-08-17 with rules for these 3 tools. Whether `codex exec` actually fires them from natural language is not yet live-tested (pending user go-ahead) |
-| Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill) and the `notion_id` link-back (`wikimate_link` set_notion_id, added 2026-08-17) are both structurally/code complete. User confirmation in a real, connected Notion environment is still pending |
+| Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id, added 2026-08-17), and **Notion Run Log mirroring (added 2026-08-19)** are all structurally/skill-level complete. `NOTION_RUNLOG_DB_ID` had been documented but never actually wired up until now. User confirmation in a real, connected Notion environment is still pending |
 | Formal marketplace registration | 🔴 Not yet | Planned after the items above are fully verified (no-unverified-release principle) |
 | Python advanced extractor / Gemini adapter | 🔴 Not implemented | Planned only, no code yet |
 

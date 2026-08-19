@@ -39,6 +39,11 @@
 > - **실결함 발견**: `e2e-summarize-real.mjs`의 "dry-run 후 파일 미변경" 체크가 무관한 고정 문자열("(예시 노트)")을 검사해 매번 FAIL을 내던 것을 발견 — `summarize.mjs` 프로덕션 코드는 재확인 결과 정상(dry-run은 write 전에 반환), **테스트 스크립트 쪽 버그**였음. 파일 내용 전/후 바이트 비교로 수정.
 > - **경계값 수동 점검**: `set_notion_id`(이번 주 신규)에 경로이탈·점(.)폴더·절대경로·5KB+ 특수문자 문자열 4종 주입 — 전부 기존 `safeInside`/`JSON.stringify` 메커니즘으로 안전 차단·처리 확인(결함 없음). 이 검증이 자동테스트에 없었어서 `verify-link.mjs`에 회귀 테스트 5개로 영구 편입(45→50).
 > - **부가 확인**: 서버에 malformed JSON·존재하지 않는 메서드/도구를 직접 주입해도 크래시 없이 JSON-RPC 에러로 정상 응답, stderr에 예상 밖 경고 없음. 세션 전체 diff(13개 커밋) 민감정보 패턴 스캔 — 발견 0건.
+>
+> ## 🔴 2026-08-19 갱신(2) — 세 번째 PRD 재감사에서 진짜 결함 발견: "노션 Run Log" 유령 기능
+> - **발견(직접 grep 대조, 추측 아님)**: `03_PHASES.md` Phase 1b 체크리스트를 문자 그대로 다시 대조하다 발견. `NOTION_RUNLOG_DB_ID`가 `.env.example`·README·`04_PROJECT_SPEC.md`에 문서화돼 있지만 **전체 저장소에 이걸 읽거나 쓰는 코드/스킬이 0건**이었음(대조군 `NOTION_RESEARCH_DB_ID`는 `wikimate-organize/SKILL.md`에 실제로 연결돼 있어 비대칭 확인). `02_DATA_MODEL.md`의 `NotionRunLog` 엔티티, Phase 1b의 "노션 Run Log 기록" 항목이 실제 구현된 적 없는 상태 — README·CHECKPOINT의 기존 "노션 색인 = 코드 완성, 라이브 미검증" 서술조차 이 갭을 놓치고 있었음(Research Library만 보고 Run Log는 못 봄).
+> - **수정**: `wikimate-organize/SKILL.md`에 "노션 Run Log(안전 기록)" 절 신규 추가 — Research Library와 동일한 안전 패턴(DB확정→행속성→graceful실패→프라이버시 고지), 로컬 `.wikimate/runlog.jsonl`을 계속 진실원본으로 유지하고 노션은 거울로 명시. `AGENTS.md`(Codex용)·README(ko/en) §17 상태표도 동기화. **1단계 범위는 `wikimate-organize`만**(link/classify/summarize/fix로의 확장은 의도적으로 다음 단계로 보류 — 여러 스킬 동시 변경 리스크 회피).
+> - **성격**: 코드가 아니라 스킬(프롬프트) 지시 추가라 `npm run verify`로 검증 불가 — 160/160 그대로(영향 없음 확인, 회귀 없음). 노션 라이브 검증과 마찬가지로 실사용 확인은 사용자의 실제 노션 계정 필요.
 
 ## 위치·전제
 
