@@ -40,6 +40,7 @@ npm start          # MCP 서버(stdio) 실행
 | `scripts/e2e-classify-real.mjs` | classify를 실볼트 노트에 적용(폴더 이동·기존 related: 보존 확인) |
 | `scripts/e2e-moc-real.mjs` | build_moc을 신규/레거시(다른 헤딩) MOC 양쪽에 적용 |
 | `scripts/e2e-summarize-real.mjs` | summarize를 실볼트 노트에 적용(dry-run 무변경·원문 보존·원자노트 계보 확인) |
+| `scripts/e2e-collect-cli-real.mjs` | collect의 1순위 저장 경로인 notesmd-cli 실제 호출을 검증(성공·실패 양쪽) — 2026-08-20까지 자동 테스트가 한 번도 실행한 적 없던 경로. notesmd-cli 없거나 옵시디언 설정을 못 찾으면 스킵(실패 아님). 옵시디언 실제 설정(`obsidian.json`)에 테스트 전용 볼트를 임시 등록했다가 try/finally로 반드시 원상복구한다. |
 > 이름이 `-real`인 스크립트는 격리 볼트가 아니라 **영구 저장되는 `sandbox-vault/`를 그대로 씀** — 재실행하면 이미 처리된 상태를 다시 만나 일부 단계가 "이미 처리됨"으로 나올 수 있다(정상, 1회성 시연 스크립트라 완전한 재실행 idempotency는 보장하지 않음).
 
 ```bash
