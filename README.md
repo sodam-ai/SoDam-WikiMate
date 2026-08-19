@@ -182,6 +182,8 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/내/볼트/경로 -- node D:
 
 > ⚠️ **Codex는 "축소판"이에요.** MCP 도구 8개는 모두 호출할 수 있지만, *자동 발동(스킬)·찾기·건강검진 종합* 같은 똑똑한 기능은 **Claude Code 전용**이에요(스킬은 자연어 자동발동 계층이라 Codex엔 없음). 그리고 **정직한 고지**: 저장소의 `AGENTS.md`(Codex용 자연어 규칙 파일)엔 이제 정리(collect)·찾기(query)·건강검진(lint/fix)·**자동 링크·자동 분류·자동 요약(link/classify/summarize)까지 6개 자연어 흐름이 전부 문서화**돼 있어요(2026-08-17 보강). 단 **실제 `codex exec`로 이 문서가 자연어 자동 트리거를 정말 발동시키는지는 아직 라이브 검증 전**이에요 — MCP 도구 이름을 **직접 지정해서** 호출하면 6개 전부 정상 동작함은 검증됐습니다(2026-08-04 서버 프로토콜 경유 직접 호출). 노션 색인도 Codex에 **별도 노션 MCP**가 연결돼 있어야 해요. 자세히: [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md)
 
+> ⚠️ **Gemini CLI 어댑터(2026-08-20 추가, 아직 라이브 미검증)**: `GEMINI.md`(→ `AGENTS.md`를 가리킴) + `adapters/gemini/SETUP.md`로 등록해요. `gemini mcp add/list/remove` 명령 문법은 실제로 실행해 확인했지만, **Gemini CLI가 실제로 wikimate 도구를 호출하는지·자연어 트리거가 동작하는지는 아직 확인 전**이에요(Gemini API 실호출이 필요해 사용자 승인 없이 진행하지 않음, Codex와 동일 원칙). 자세히: [`adapters/gemini/SETUP.md`](./adapters/gemini/SETUP.md)
+
 ### 업데이트가 안 될 때 — 가장 흔한 함정 (Claude Code)
 GitHub에 새 버전이 올라가도, 내 PC의 **마켓플레이스 캐시는 자동으로 안 바뀌어요.** 그래서 재설치만으론 옛날 버전이 그대로일 수 있어요. 최신으로 갱신하려면:
 ```
@@ -412,7 +414,8 @@ npm start        # MCP 서버 실행
 - Codex용 자연어 규칙 파일(`AGENTS.md`)에 자동 링크·자동 분류·자동 요약의 자연어 트리거 설명이 아직 없음(도구 자체는 Codex에서도 직접 호출하면 정상 동작 확인됨). 문서 보강 예정.
 - Codex CLI로 실제 자연어 트리거까지 라이브 검증 예정.
 - 마켓플레이스 정식 등록·`plugin.json` 버전 숫자 갱신은 위 항목들이 끝난 뒤 진행 예정(미검증 배포 금지 원칙).
-- Python 기반 고급 추출기, Gemini CLI 어댑터는 아직 미구현.
+- Python 기반 고급 추출기는 아직 미구현.
+- Gemini CLI 어댑터(`GEMINI.md`+`adapters/gemini/SETUP.md`) 추가됨(2026-08-20) — 등록 명령까지 실측 확인, 실제 자연어 트리거 라이브 검증은 사용자 확인 대기.
 - 노션 색인은 사용자가 실제 노션 계정을 연결한 라이브 환경에서의 검증이 아직 남아있음(구조·로직은 구현·코드 확인 완료 — 2026-08-17부터 노트→노션 되쓰기(`notion_id`)까지 양방향 코드 완성).
 
 </details>
@@ -448,10 +451,12 @@ SoDam-WikiMate/
 ├── hooks/                세션 시작 자동 감지(session-start.mjs, hooks.json)
 ├── agents/               검수 서브에이전트(wikimate-reviewer.md)
 ├── adapters/codex/       Codex 설정 안내(SETUP.md)
+├── adapters/gemini/      Gemini CLI 설정 안내(SETUP.md)
 ├── templates/note.md     노트 서식
-├── scripts/              검증 스크립트(verify-*·smoke-*·e2e-*, 8개 verify + e2e 4개)
+├── scripts/              검증 스크립트(verify-*·smoke-*·e2e-*, 8개 verify + e2e 5개) + 보안 자동 점검(security-scan.mjs)
 ├── .mcp.json             설치 시 MCP 자동 등록
-├── AGENTS.md             크로스툴(Codex 등) 공통 규칙
+├── AGENTS.md             크로스툴(Codex·Gemini) 공통 규칙
+├── GEMINI.md             Gemini CLI 컨텍스트 파일(내용은 AGENTS.md를 가리킴)
 ├── .env.example          환경변수 예시
 ├── README.md / README.en.md / README.html / README.en.html   이 문서(한/영, md+html) — 왕초보 가이드 내용까지 통합됨
 ├── CHECKPOINT.md         개발 진행상황 추적(개발자용)
@@ -544,7 +549,8 @@ SoDam-WikiMate/
 | Codex — 자연어 자동 트리거(link/classify/summarize) | 🟡 문서 완료, 라이브 검증 전 | `AGENTS.md`에 2026-08-17 문서 보강 완료. 실제 `codex exec`로 자연어가 이 3개 도구를 자동 발동시키는지는 아직 미실행(사용자 승인 대기) |
 | 노션 색인 | 🟡 코드 완성, 라이브 미검증 | 노션 행 생성(스킬)·`notion_id` 양방향 되쓰기(`wikimate_link` set_notion_id, 2026-08-17)·**노션 Run Log 기록(2026-08-19)**까지 구조·스킬 지시 완료. `NOTION_RUNLOG_DB_ID`는 그동안 문서에만 있고 실제로 안 쓰이던 걸 발견해 이번에 연결. 실제 노션 계정 연결 환경에서의 사용자 확인은 아직 |
 | 마켓플레이스 정식 등록 | 🔴 아직 | 위 항목들 검증 완료 후 진행 예정(미검증 배포 금지 원칙) |
-| Python 고급 추출기 / Gemini 어댑터 | 🔴 미구현 | 계획만 있음, 코드 없음 |
+| Python 고급 추출기 | 🔴 미구현 | 계획만 있음, 코드 없음 |
+| Gemini 어댑터 | 🟡 코드 완료, 라이브 검증 전 | 등록 명령(`gemini mcp add/list/remove`) 실측 확인(2026-08-20, Gemini CLI 0.52.0). 자연어 트리거 실사용은 Gemini API 호출이 필요해 사용자 확인 대기(Codex와 동일 원칙) |
 
 ---
 

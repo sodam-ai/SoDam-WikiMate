@@ -182,6 +182,8 @@ codex mcp add wikimate --env OBSIDIAN_VAULT_PATH=D:/your/vault/path -- node D:/y
 
 > ⚠️ **Codex is a "cut-down" version.** All 8 MCP tools can be called, but *auto-trigger (skills), query synthesis,* and similar smart features are **Claude Code only** (skills are the natural-language auto-trigger layer, which Codex doesn't have). **Honest disclosure**: the repo's `AGENTS.md` (the Codex natural-language rule file) now documents all 6 natural-language flows — organize (collect), query, health-check (lint/fix), **and auto-link, auto-classify, auto-summarize (link/classify/summarize)** (added 2026-08-17). What's still **not yet done** is a live check that `codex exec` actually fires these triggers from a natural sentence — calling all 6 tools **directly by MCP tool name** is confirmed working (verified via direct server-protocol calls on 2026-08-04). Notion indexing also needs a **separate Notion MCP** connected in Codex. Details: [`adapters/codex/SETUP.md`](./adapters/codex/SETUP.md)
 
+> ⚠️ **Gemini CLI adapter (added 2026-08-20, live-unverified)**: register it via `GEMINI.md` (→ points to `AGENTS.md`) + `adapters/gemini/SETUP.md`. The `gemini mcp add/list/remove` command syntax was actually run and verified, but **whether Gemini CLI actually calls wikimate tools, or whether natural-language triggering works, hasn't been checked yet** (that needs a real Gemini API call, which we don't do without the user's go-ahead — same principle as Codex). Details: [`adapters/gemini/SETUP.md`](./adapters/gemini/SETUP.md)
+
 ### When updates don't show up — the most common trap (Claude Code)
 When a new version is pushed to GitHub, your local **marketplace cache does NOT update automatically.** So reinstalling alone may leave you on the old version. To get the latest:
 ```
@@ -412,7 +414,8 @@ npm start        # run the MCP server
 - The Codex natural-language rule file (`AGENTS.md`) now describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
 - Live verification of the actual Codex CLI natural-language triggers is planned.
 - Formal marketplace registration and bumping the `plugin.json` version number are planned after the items above are done (per the "no unverified releases" principle).
-- A Python-based advanced extractor and a Gemini CLI adapter are not implemented yet.
+- A Python-based advanced extractor is not implemented yet.
+- A Gemini CLI adapter (`GEMINI.md`+`adapters/gemini/SETUP.md`) was added (2026-08-20) — registration commands verified live; actual natural-language trigger live-testing is still pending user confirmation.
 - Live verification of Notion indexing in an environment with a real, connected Notion account is still pending (the structure/logic itself has been implemented and code-reviewed — as of 2026-08-17 this now includes the note-to-Notion link-back, `notion_id`, in both directions).
 
 </details>
@@ -448,10 +451,12 @@ SoDam-WikiMate/
 ├── hooks/                Session-start auto-detection (session-start.mjs, hooks.json)
 ├── agents/               Review subagent (wikimate-reviewer.md)
 ├── adapters/codex/       Codex setup guide (SETUP.md)
+├── adapters/gemini/      Gemini CLI setup guide (SETUP.md)
 ├── templates/note.md     Note template
-├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 4 e2e scripts)
+├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 5 e2e scripts) + automated security scan (security-scan.mjs)
 ├── .mcp.json             Auto-registers the MCP server on install
-├── AGENTS.md             Cross-tool (e.g. Codex) common rules
+├── AGENTS.md             Cross-tool (Codex, Gemini) common rules
+├── GEMINI.md             Gemini CLI context file (content just points to AGENTS.md)
 ├── .env.example          Environment-variable example
 ├── README.md / README.en.md / README.html / README.en.html   This document (KO/EN, md+html) — now includes the full beginner's-guide content
 ├── CHECKPOINT.md         Development-progress tracking (for developers)
@@ -544,7 +549,8 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Codex — natural-language auto-trigger (link/classify/summarize) | 🟡 Documented, live-unverified | `AGENTS.md` was updated on 2026-08-17 with rules for these 3 tools. Whether `codex exec` actually fires them from natural language is not yet live-tested (pending user go-ahead) |
 | Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id, added 2026-08-17), and **Notion Run Log mirroring (added 2026-08-19)** are all structurally/skill-level complete. `NOTION_RUNLOG_DB_ID` had been documented but never actually wired up until now. User confirmation in a real, connected Notion environment is still pending |
 | Formal marketplace registration | 🔴 Not yet | Planned after the items above are fully verified (no-unverified-release principle) |
-| Python advanced extractor / Gemini adapter | 🔴 Not implemented | Planned only, no code yet |
+| Python advanced extractor | 🔴 Not implemented | Planned only, no code yet |
+| Gemini adapter | 🟡 Code complete, live-unverified | Registration commands (`gemini mcp add/list/remove`) verified live (2026-08-20, Gemini CLI 0.52.0). Actual natural-language triggering needs a real Gemini API call, so it's pending user confirmation (same principle as Codex) |
 
 ---
 
