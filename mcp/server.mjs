@@ -354,6 +354,10 @@ async function dispatch(msg) {
 }
 
 let buf = "";
+// 요청을 도착 순서대로 하나씩 처리(직렬화) — 동시에 여러 요청이 겹쳐 같은 노트 파일을
+// 동시에 읽고-고치고-쓰면(read-modify-write race) 안전 게이트(백업·경계검사)가 있어도
+// 나중 쓰기가 먼저 쓰기를 조용히 덮어쓸 수 있어, 이 서버 프로세스 안에서는 절대 겹치지 않게 한다.
+let chain = Promise.resolve();
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => {
   buf += chunk;
@@ -364,7 +368,7 @@ process.stdin.on("data", (chunk) => {
     if (!line) continue;
     let msg;
     try { msg = JSON.parse(line); } catch { continue; }
-    dispatch(msg).catch((e) => { if (msg && msg.id != null) replyError(msg.id, -32603, String(e?.message || e)); });
+    chain = chain.then(() => dispatch(msg)).catch((e) => { if (msg && msg.id != null) replyError(msg.id, -32603, String(e?.message || e)); });
   }
 });
 process.stdin.on("end", () => process.exit(0));
