@@ -1,0 +1,68 @@
+// 배포물 보안 자동 점검 (03_PHASES.md Phase 3: "배포물 보안 점검(개인 경로·토큰·데이터 미포함 자동 검사)")
+// git 커밋 전(pre-commit 훅) 또는 수동(npm run security-check)으로 실행한다.
+// 오탐을 줄이려고 "키워드 언급"이 아니라 "실제 토큰처럼 생긴 값"만 매칭한다
+// (예: NOTION_RUNLOG_DB_ID 같은 환경변수 이름이나 notion_id: "" 같은 빈 필드는 매칭 안 됨).
+import { execFileSync } from "node:child_process";
+import { readFileSync, statSync } from "node:fs";
+
+const PATTERNS = [
+  { name: "OpenAI/Anthropic 스타일 API 키", re: /\bsk-[A-Za-z0-9_-]{20,}\b/ },
+  { name: "GitHub 토큰", re: /\bgh[pousr]_[A-Za-z0-9]{20,}\b/ },
+  { name: "Notion 토큰", re: /\b(secret|ntn)_[A-Za-z0-9]{32,}\b/ },
+  { name: "AWS Access Key", re: /\bAKIA[0-9A-Z]{16}\b/ },
+  { name: "Slack 토큰", re: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/ },
+  { name: "개인키 블록", re: /-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/ },
+  { name: "일반 시크릿 할당(키=긴 값)", re: /\b(api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][A-Za-z0-9_\-/+=]{16,}["']/i },
+];
+
+function stagedFiles() {
+  const out = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACM"], { encoding: "utf8" });
+  return out.split(/\r?\n/).filter(Boolean);
+}
+
+function allTrackedFiles() {
+  const out = execFileSync("git", ["ls-files"], { encoding: "utf8" });
+  return out.split(/\r?\n/).filter(Boolean);
+}
+
+function scanFile(path) {
+  const findings = [];
+  if (/(^|\/)\.env$/.test(path)) {
+    findings.push({ line: 0, name: ".env 파일 자체를 커밋하려 함(내용과 무관하게 차단)" });
+    return findings;
+  }
+  let text;
+  try {
+    const st = statSync(path);
+    if (!st.isFile() || st.size > 2 * 1024 * 1024) return findings; // 2MB+ 또는 파일 아님 — 스킵
+    text = readFileSync(path, "utf8");
+  } catch {
+    return findings; // 삭제된 파일·바이너리 읽기 실패 — 스킵
+  }
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, i) => {
+    for (const p of PATTERNS) {
+      if (p.re.test(line)) findings.push({ line: i + 1, name: p.name });
+    }
+  });
+  return findings;
+}
+
+const files = process.argv.includes("--all") ? allTrackedFiles() : stagedFiles();
+
+let hasFinding = false;
+for (const f of files) {
+  for (const fnd of scanFile(f)) {
+    hasFinding = true;
+    // 실제 매칭된 값은 절대 출력하지 않는다(스캐너 자신이 시크릿을 로그에 남기면 안 됨)
+    console.error(`[보안 점검] ${f}:${fnd.line} — "${fnd.name}"로 의심되는 패턴 발견`);
+  }
+}
+
+if (hasFinding) {
+  console.error("\n민감정보로 의심되는 내용이 있어 막았어요. 확인 후 제거하고 다시 커밋하세요.");
+  console.error("정말 오탐이면(예: 문서 속 예시 값) 해당 줄의 표현을 바꿔 패턴을 피하세요.");
+  process.exit(1);
+}
+console.log(`[보안 점검] 통과 — ${files.length}개 파일, 의심 패턴 없음.`);
+process.exit(0);

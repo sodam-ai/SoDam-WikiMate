@@ -1,0 +1,5 @@
+#!/bin/sh
+# 커밋 전 보안 자동 점검(scripts/security-scan.mjs) — 스테이징된 파일만 검사.
+# 활성화: git config core.hooksPath .githooks (클론마다 1회, DEVELOPMENT.md 참고)
+node scripts/security-scan.mjs
+exit $?

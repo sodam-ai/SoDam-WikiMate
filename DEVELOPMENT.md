@@ -76,9 +76,21 @@ node scripts/collect-real.mjs
 1. 변경을 작업 브랜치에 커밋 → push.
 2. 기본 브랜치(`main`)에 반영(필요 시 PR → merge). 마켓플레이스 설치는 **기본 브랜치**를 가져옴.
 3. 사용자는 `/plugin marketplace update` 후 재설치로 최신을 받음(README의 "업데이트" 참고).
-4. 시크릿·개인경로·빌드 산출물이 추적 대상에 없는지 push 전 직접 점검(`git status`·`git ls-files`).
+4. 시크릿·개인경로·빌드 산출물이 추적 대상에 없는지 push 전 직접 점검(`git status`·`git ls-files`, 아래 보안 자동 점검으로 대체 가능).
+
+## 보안 자동 점검 (Phase 3: `03_PHASES.md` "배포물 보안 점검")
+`scripts/security-scan.mjs`가 API 키·토큰·개인키 블록·`.env` 파일 자체를 실제 토큰 형식으로만 매칭해 검사한다(오탐 최소화 — 환경변수 "이름"이나 빈 필드는 안 걸림).
+```bash
+npm run security-check          # 스테이징된 파일만(커밋 전)
+npm run security-check -- --all # 저장소 전체 추적 파일(정기 점검용)
+```
+커밋마다 자동 실행하려면(클론마다 1회 활성화, git hook은 버전관리 안 되므로 opt-in):
+```bash
+git config core.hooksPath .githooks
+```
+활성화하면 `git commit`마다 `.githooks/pre-commit`이 자동으로 `security-check`를 돌리고, 의심 패턴이 있으면 커밋 자체를 막는다(실제 매칭값은 로그에 남기지 않음). 2026-08-20 실측: 가짜 API 키를 심은 커밋을 실제로 차단하는 것, 정상 커밋은 통과하는 것 둘 다 확인.
 
 ## 보안 점검 체크리스트
-- 추적 파일·git 히스토리에 토큰/키/개인경로 없음 (`.env`는 `.gitignore`).
+- 추적 파일·git 히스토리에 토큰/키/개인경로 없음 (`.env`는 `.gitignore`, `security-scan.mjs`로도 자동 차단).
 - 입력 text는 데이터로만 저장(인젝션 방어), CLI는 셸 없이 실행(주입 방지).
 - 노트 제목/폴더는 경로구분자·금지문자·제어문자 정리 + 볼트 밖 경로 차단.
