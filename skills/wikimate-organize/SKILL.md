@@ -26,7 +26,7 @@ version: 0.5.0
 1. **Notion MCP**(공식 `mcp.notion.com` / notion-mcp-server) — 연결 확인되면 옵시디언 노트 생성 **직후** 색인행을 추가한다:
    - 색인 DB = **"Wikimate Research Library"**. `NOTION_RESEARCH_DB_ID`가 주어지면 그 DB, 없으면 Notion 검색으로 찾고, 그래도 없으면 "만들까요?" 묻는다(임의 생성 X).
    - **삽입 전 중복 확인(B4)**: `notion-search`로 같은 `Source`(URL) 행이 이미 있는지 best-effort로 찾아, 있으면 사용자에게 알리고 건너뛸지 묻는다. ⚠️ **노션은 완전 중복 차단을 보장 못 한다**(행 단위 조회 API가 환경에 따라 막힘) → "같은 링크를 두 번 정리하면 노션 행이 2개가 될 수 있어요"라고 고지(옵시디언은 source_hash로 막지만 노션은 아님).
-   - 행 속성: `Title`, `Summary`, `Source`(URL), `Tags`(노트 태그가 노션 select 옵션에 없으면 *비우지 말고* 옵션 추가 또는 `Topic`에 반영 — C2), `Importance`(1~5), `Date`, **`Obsidian Link`** = `obsidian://open?vault=<볼트이름>&file=<노트제목>`.
+   - 행 속성: `Title`, `Summary`, `Source`(URL), `Tags`(노트 태그가 노션 select 옵션에 없으면 *비우지 말고* 옵션 추가 또는 `Topic`에 반영 — C2), `Importance`(1~5), `Reliability`(High/Med/Low — 출처 도메인으로 자동 추정: 공식 문서·잘 알려진 사이트는 High, 개인 블로그·불명확한 출처는 Low/Med, "확인 필요"로 함께 표시 — C4와 동일 원칙), `Topic`(노트의 project/주제 맥락으로 자동 채움, 태그가 select 옵션에 없을 때의 대피처로도 겸용 — C2), `Date`, **`Obsidian Link`** = `obsidian://open?vault=<볼트이름>&file=<노트제목>`.
    - **`obsidian://` URL 인코딩 시 괄호도 인코딩(C6)**: `encodeURIComponent`는 `()`를 안 바꾸니, 결과에서 `(`→`%28`·`)`→`%29`로 직접 치환(일부 핸들러에서 괄호로 링크가 깨짐).
    - **주관 등급은 임의로 정하지 마라(C4)**: `Importance`·`Reliability`·`Topic`은 사용자에게 묻거나 "자동추정(확인 필요)"로 표시(폴더는 물으면서 등급만 임의 결정 = 불일치).
    - **프라이버시(C5)**: `Source`·`Obsidian Link`에 로컬 경로·개인정보가 노션 클라우드로 올라갈 수 있음 — 민감하면 색인을 끄도록 안내.
