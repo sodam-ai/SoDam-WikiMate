@@ -8,25 +8,43 @@
 ## 로컬 검증
 ```bash
 npm install        # 검증용 devDependency(@modelcontextprotocol/sdk)만 설치 — 플러그인 실행엔 불필요
-npm run verify     # 수집 로직 단위 검증 (scripts/verify-collect.mjs)
+npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 160개 체크
 npm start          # MCP 서버(stdio) 실행
 ```
 
 ## 테스트
+
+### 유닛 검증 (`npm run verify`가 순서대로 실행, 격리된 임시 볼트 사용 — 8개)
 | 스크립트 | 내용 |
 |---|---|
-| `scripts/verify-collect.mjs` | 수집 로직(이름 안전화·중복 차단·경로이탈 방지) 검증 |
+| `scripts/verify-collect.mjs` | 수집 로직(이름 안전화·중복 차단·경로이탈 방지·importance 검증) 검증 |
 | `scripts/verify-lint.mjs` | 건강검진(중복·깨진링크·고아·frontmatter) 검증 |
 | `scripts/verify-fix.mjs` | 안전 수정(archive 이동·링크치환·백업·경로차단) 검증 |
 | `scripts/verify-runlog.mjs` | Run Log 기록·조회 + 백업 dot-dir 스킵 검증 |
 | `scripts/verify-vaults.mjs` | 볼트 자동탐지(listVaults: 목록·open 우선·ambiguous·설정없음/깨짐 graceful) 검증 |
-| `scripts/smoke-server.mjs` | MCP 프로토콜 e2e (initialize → tools/list → tools/call, collect) |
-| `scripts/smoke-tools.mjs` | MCP 프로토콜 e2e (lint·fix·runlog까지 서버 거쳐 호출·검증) |
-| `scripts/collect-real.mjs` | 실제 웹 자료 1건을 노트화하는 시연(샌드박스 볼트) |
+| `scripts/verify-link.mjs` | 자동 링크(add_links)·MOC 생성(build_moc)·노션 연결고리(set_notion_id) 검증(경로이탈·특수문자 등 경계값 포함) |
+| `scripts/verify-classify.mjs` | 자동 분류(폴더·태그·중요도) 검증 |
+| `scripts/verify-summarize.mjs` | 요약·원자노트화(원문 보존 구조적 강제 포함) 검증 |
+
+### 프로토콜 스모크 (실제 MCP 서버를 stdio로 띄워 JSON-RPC 경유 호출)
+| 스크립트 | 내용 |
+|---|---|
+| `scripts/smoke-server.mjs` | 기본 e2e (initialize → tools/list → tools/call, collect) |
+| `scripts/smoke-tools.mjs` | 8개 도구 전부 서버 경유 호출·검증(snake_case→camelCase 인자 매핑 포함) |
+
+### 실볼트(sandbox-vault) e2e — 1회성, 실제 픽스처에 실제 적용
+| 스크립트 | 내용 |
+|---|---|
+| `scripts/collect-real.mjs` | 실제 웹 자료 1건을 노트화하는 시연 |
+| `scripts/e2e-link-real.mjs` | add_links를 실볼트 기존 클리크에 적용(인젝션 방어·멱등성 포함) |
+| `scripts/e2e-classify-real.mjs` | classify를 실볼트 노트에 적용(폴더 이동·기존 related: 보존 확인) |
+| `scripts/e2e-moc-real.mjs` | build_moc을 신규/레거시(다른 헤딩) MOC 양쪽에 적용 |
+| `scripts/e2e-summarize-real.mjs` | summarize를 실볼트 노트에 적용(dry-run 무변경·원문 보존·원자노트 계보 확인) |
+> 이름이 `-real`인 스크립트는 격리 볼트가 아니라 **영구 저장되는 `sandbox-vault/`를 그대로 씀** — 재실행하면 이미 처리된 상태를 다시 만나 일부 단계가 "이미 처리됨"으로 나올 수 있다(정상, 1회성 시연 스크립트라 완전한 재실행 idempotency는 보장하지 않음).
 
 ```bash
-node scripts/verify-collect.mjs
-node scripts/smoke-server.mjs
+npm run verify
+node scripts/smoke-tools.mjs
 node scripts/collect-real.mjs
 ```
 > 개인 볼트 경로가 들어가는 검증 스크립트는 `.gitignore`로 추적 제외(예: `scripts/test-real-vault.mjs`).

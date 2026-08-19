@@ -48,6 +48,11 @@
 > ## 🟢 2026-08-19 갱신(3) — 네 번째 재감사: 스킬 파일 내부 자기모순 발견·수정
 > - **발견**: `wikimate-organize/SKILL.md` 안에서 C4 규칙(31줄, "Importance·Reliability·Topic은 자동추정+확인필요 표시")이 언급하는 `Reliability`가 실제 "행 속성" 목록(29줄)엔 아예 없었음 — 같은 파일 안 규칙과 실행 목록이 서로 안 맞는 자기모순. `02_DATA_MODEL.md`의 `NotionResearchRow`엔 둘 다 선택(X) 필드로 정식 설계돼 있었음.
 > - **수정**: "행 속성" 목록에 `Reliability`(출처 도메인 기반 자동추정+확인필요 표시)·`Topic`(노트 project/주제 맥락 자동 채움) 추가, C4와 동일한 안전 원칙(임의 확정 금지) 적용. 스킬 지시만 변경, `npm run verify` 160/160 영향 없음.
+>
+> ## 🟢 2026-08-19 갱신(4) — 다섯 번째 재감사: `DEVELOPMENT.md`가 Phase 1a 시절에 멈춰있던 것 발견·수정
+> - **발견**: 이번 세션 처음으로 `DEVELOPMENT.md`를 열어봄 — "로컬 검증" 절이 `npm run verify`를 "1개 스크립트(verify-collect.mjs)만 도는 것"으로 서술(실제는 8개 체인·160개 체크), "테스트" 표에 `verify-link/classify/summarize.mjs`와 실볼트 e2e 4종(`e2e-link/classify/moc/summarize-real.mjs`) 총 7개 스크립트가 통째로 누락 — Phase 1a(수집·건강검진만 있던 시절) 상태로 멈춰 있었음.
+> - **수정**: "로컬 검증"·"테스트" 절을 현재 8(유닛)+2(스모크)+5(실볼트 e2e) 구성으로 전면 갱신, `-real` 스크립트가 영구 볼트를 써서 재실행 시 일부 단계가 "이미 처리됨"으로 나올 수 있다는 특성도 명시(오늘 e2e-classify-real.mjs에서 직접 확인한 내용).
+> - 문서만 변경, `npm run verify` 160/160 영향 없음.
 
 ## 위치·전제
 
