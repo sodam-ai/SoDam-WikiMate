@@ -15,13 +15,15 @@ const PATTERNS = [
   { name: "일반 시크릿 할당(키=긴 값)", re: /\b(api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][A-Za-z0-9_\-/+=]{16,}["']/i },
 ];
 
+// stdio를 명시적으로 pipe로 고정 — git이 실패할 때 자기 usage 도움말(수십 KB)을 화면에 그대로
+// 흘리는 걸 막는다(실측: 지정 안 하면 git repo 밖에서 실행 시 이 텍스트가 그대로 새어나감).
 function stagedFiles() {
-  const out = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACM"], { encoding: "utf8" });
+  const out = execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACM"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   return out.split(/\r?\n/).filter(Boolean);
 }
 
 function allTrackedFiles() {
-  const out = execFileSync("git", ["ls-files"], { encoding: "utf8" });
+  const out = execFileSync("git", ["ls-files"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   return out.split(/\r?\n/).filter(Boolean);
 }
 
@@ -57,7 +59,15 @@ function scanFile(path) {
   return { findings, skipReason: null };
 }
 
-const files = process.argv.includes("--all") ? allTrackedFiles() : stagedFiles();
+let files;
+try {
+  files = process.argv.includes("--all") ? allTrackedFiles() : stagedFiles();
+} catch (e) {
+  // git 저장소가 아니거나 git 명령 자체가 실패하는 경우 — 검사 대상을 못 정했으므로 "통과"라고
+  // 말할 수 없다. 조용히 넘어가지 않고(fail-open 금지) 무슨 일이 있었는지만 짧게 알리고 막는다.
+  console.error(`[보안 점검] git 명령 실행 실패 — 이 폴더가 git 저장소가 맞는지 확인하세요: ${e.message.split("\n")[0]}`);
+  process.exit(1);
+}
 
 let hasFinding = false;
 const skipped = [];
