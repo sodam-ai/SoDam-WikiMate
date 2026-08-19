@@ -88,7 +88,7 @@ export async function backupFile(root, abs, ts) {
 // 파일명 안전화 (경로 조작 방지: 경로 구분자·금지문자·제어문자 제거, '..' 무력화)
 export function safeComponent(name) {
   const s = String(name ?? "")
-    .replace(/[/\\:*?"<>|\u0000-]/g, " ")
+    .replace(/[/\\:*?"<>|\u0000-\u001f]/g, " ")
     .replace(/\.{2,}/g, ".")
     .replace(/^\.+/, "")
     .replace(/\s+/g, " ")
