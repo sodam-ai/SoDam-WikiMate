@@ -107,9 +107,12 @@ export function safeComponent(name) {
     .replace(/\.{2,}/g, ".")
     .replace(/^\.+/, "")
     .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 120);
-  return s || "untitled";
+    .trim();
+  const sliced = s.slice(0, 120);
+  // slice()는 UTF-16 코드유닛 단위라 이모지 등 서로게이트 쌍을 반으로 쪼갤 수 있다.
+  // 잘린 끝이 짝 잃은 상위 서로게이트면 마저 잘라내 깨진 문자(U+FFFD)가 파일명에 안 남게 한다.
+  const safe = /[\uD800-\uDBFF]$/.test(sliced) ? sliced.slice(0, -1) : sliced;
+  return safe || "untitled";
 }
 
 // --- 신규 (v0.8.0 link 기능용) ---
