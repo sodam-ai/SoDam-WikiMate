@@ -3,13 +3,13 @@
 // 안전: 외부 자료 text는 '데이터'로만 저장(인젝션 방어). dry_run=true 기본(계획만 보고).
 
 import { createHash } from "node:crypto";
-import { readdir, readFile, writeFile, mkdir, stat } from "node:fs/promises";
+import { readdir, readFile, mkdir, stat } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { appendRunLog } from "./runlog.mjs";
-import { safeComponent } from "./shared.mjs";
+import { safeComponent, writeFileAtomic } from "./shared.mjs";
 
 const execFileP = promisify(execFile);
 
@@ -250,7 +250,7 @@ export async function collect({ vault, vaultPath, folder = "", title, url = "", 
       fp = join(dir, `${safeTitle}_dup${i}.md`);
     } while (existsSync(fp));
   }
-  await writeFile(fp, noteBody, "utf8");
+  await writeFileAtomic(fp, noteBody, "utf8");
   await appendRunLog(dedupPath || vaultPath, { tool: "collect", action: "create", method: "filesystem", request: title, changed: fp, result: "ok", source_hash: hash, detail: renamed ? "파일명 충돌 — 다른 자료가 같은 이름을 선점해 접미 부여(덮어쓰기 없음)" : undefined });
   return { dry_run: false, written: true, method: "filesystem", path: fp, source_hash: hash };
 }

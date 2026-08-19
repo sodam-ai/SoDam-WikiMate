@@ -5,12 +5,12 @@
 // 범위: 분류 대상 폴더는 00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts로 제한한다.
 //       90_Templates(사람이 직접 관리)·99_Archive(wikimate_fix의 action=archive 전담)는 이 도구 책임 밖 — 역할 중복 방지.
 
-import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { readFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, dirname, relative } from "node:path";
 import { resolveVaultPath, listVaults, walkVault } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, FOLDERS } from "./shared.mjs";
+import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, writeFileAtomic, FOLDERS } from "./shared.mjs";
 
 const CLASSIFY_TARGET_FOLDERS = [FOLDERS.INBOX, FOLDERS.PROJECTS, FOLDERS.RESOURCES, FOLDERS.NOTES, FOLDERS.DRAFTS];
 
@@ -162,7 +162,7 @@ async function apply({ root, note, folder, tags, importance, dryRun = true, ts }
     let nextText = text;
     if (plan.tags) nextText = replaceFrontmatterLine(nextText, "tags", serializeTagList(plan.tags.after));
     if (plan.importance) nextText = replaceFrontmatterLine(nextText, "importance", `importance: ${plan.importance.after}`);
-    await writeFile(abs, nextText, "utf8");
+    await writeFileAtomic(abs, nextText, "utf8");
   }
 
   if (plan.move) {

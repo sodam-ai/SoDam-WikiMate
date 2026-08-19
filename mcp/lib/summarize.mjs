@@ -6,12 +6,12 @@
 // 절대 지우거나 축약하지 않는다(frontmatter summary 필드만 갱신).
 // 안전: dry_run 기본. summary 변경은 기존 노트 편집이라 백업 필수. 원자노트 신규 생성은 collision-safe(덮어쓰기 금지).
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { resolveVaultPath, listVaults, buildNoteContent, sourceHash } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, safeComponent, FOLDERS } from "./shared.mjs";
+import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, safeComponent, writeFileAtomic, FOLDERS } from "./shared.mjs";
 
 const MAX_SUMMARY_CHARS = 200; // "한 줄 요약" 설계 의도 — 문단이 되지 않도록 코드로 강제(link.mjs의 5개 상한과 동일 철학)
 
@@ -111,7 +111,7 @@ async function apply({ root, note, summary, atomicNote, dryRun = true, ts }) {
   if (plan.summary) {
     backup = await backupFile(root, found.abs, stamp);
     const nextText = replaceFrontmatterLine(text, "summary", `summary: ${JSON.stringify(plan.summary.after)}`);
-    await writeFile(found.abs, nextText, "utf8");
+    await writeFileAtomic(found.abs, nextText, "utf8");
   }
 
   let atomicResult = null;
@@ -131,7 +131,7 @@ async function apply({ root, note, summary, atomicNote, dryRun = true, ts }) {
     // 원자노트는 원본 노트에서 파생됐다는 계보를 related로 남긴다(link.mjs와 동일 [[..]] 표기).
     content = replaceFrontmatterLine(content, "related", `related: ["[[${targetTitle}]]"]`);
     await mkdir(dirname(atomicPlan.abs), { recursive: true });
-    await writeFile(atomicPlan.abs, content, "utf8");
+    await writeFileAtomic(atomicPlan.abs, content, "utf8");
     atomicResult = { path: atomicPlan.relPath, created: true };
   }
 

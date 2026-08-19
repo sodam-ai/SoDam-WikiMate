@@ -6,12 +6,12 @@
 //  - 볼트 밖 경로·.obsidian 차단(경로 이탈 방지), 한 번에 한 노트만
 //  - 노트 내용은 데이터로만(인젝션 방어) — 본문 속 지시문을 명령으로 실행하지 않음
 
-import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { readFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import { resolveVaultPath, listVaults } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { safeInside, backupFile } from "./shared.mjs";
+import { safeInside, backupFile, writeFileAtomic } from "./shared.mjs";
 
 // 정규식 메타문자 이스케이프(링크 대상에 특수문자가 와도 리터럴로)
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -58,7 +58,7 @@ export async function fix({ vault, vaultPath, action, note, from = "", to = "", 
     if (dryRun) return { ok: true, dry_run: true, action, note, from: fromTok, to: toTok, occurrences };
     const backup = await backupFile(root, abs, stamp);
     const next = text.replace(re, (_m, bang, suffix) => (to ? `${bang}[[${to}${suffix || ""}]]` : ""));
-    await writeFile(abs, next, "utf8");
+    await writeFileAtomic(abs, next, "utf8");
     await appendRunLog(root, { tool: "fix", action: "replace_link", request: note, changed: note, detail: `${fromTok} → ${toTok} ×${occurrences}`, backup, result: "ok" });
     return { ok: true, dry_run: false, action, note, replaced: occurrences, from: fromTok, to: toTok, backup };
   }

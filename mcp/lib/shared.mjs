@@ -1,8 +1,8 @@
 // Wikimate MCP 코어 — 공유 헬퍼 (lint.mjs/fix.mjs에서 추출, 로직 불변)
 // link.mjs(v0.8.0)가 새 도구를 만들며 기존 파서·가드를 재사용하기 위해 분리.
 
-import { isAbsolute, resolve, relative, join, dirname } from "node:path";
-import { mkdir, copyFile } from "node:fs/promises";
+import { isAbsolute, resolve, relative, join, dirname, basename } from "node:path";
+import { mkdir, copyFile, writeFile, rename, unlink } from "node:fs/promises";
 
 // 옵시디언 볼트 7폴더 표준(02_DATA_MODEL.md:40-49). 원자노트·MOC는 NOTES.
 export const FOLDERS = {
@@ -72,6 +72,21 @@ export function safeInside(root, relPath) {
   if (rel === "" || rel.startsWith("..")) return null;
   if (rel.split(/[/\\]/).some((seg) => seg.startsWith("."))) return null;
   return abs;
+}
+
+// 원자적 쓰기: 같은 폴더에 임시파일로 먼저 쓰고 rename()으로 바꿔치기.
+// rename은 같은 볼륨 안에서 파일시스템 차원에서 원자적이라, 다른 프로그램(옵시디언·클라우드 동기화)이
+// "쓰다 만 반쪽 파일"을 절대 못 본다 — 항상 이전 완전한 내용이거나 새 완전한 내용만 보임.
+// 대상이 다른 프로그램에 잠겨 rename이 실패하면(Windows에서 흔함) 임시파일을 지우고 에러를 던진다.
+export async function writeFileAtomic(abs, content, encoding = "utf8") {
+  const tmp = join(dirname(abs), `.${basename(abs)}.wikimate-tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  await writeFile(tmp, content, encoding);
+  try {
+    await rename(tmp, abs);
+  } catch (e) {
+    try { await unlink(tmp); } catch {}
+    throw new Error(`파일 쓰기 실패(다른 프로그램이 파일을 사용 중일 수 있어요): ${e.message}`);
+  }
 }
 
 // 수정 전 원본을 .wikimate/backups/<ts>/<상대경로>로 복사 → 되돌릴 수 있게

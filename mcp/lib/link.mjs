@@ -3,7 +3,7 @@
 // 안전: dry_run 기본, 기존 노트 편집 전 백업, 노트당 관련링크 5개 상한(과잉연결 방지, 03_PHASES.md Phase 2),
 //       노트 본문은 데이터로만 취급(인젝션 방어), 존재 검증된 노트로만 링크(깨진 링크 금지).
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, relative, join, dirname } from "node:path";
 import { resolveVaultPath, listVaults, walkVault } from "./collect.mjs";
@@ -17,6 +17,7 @@ import {
   backupFile,
   safeComponent,
   extractLinks,
+  writeFileAtomic,
   FOLDERS,
 } from "./shared.mjs";
 
@@ -164,7 +165,7 @@ async function addLinks({ root, note, targets = [], dryRun = true, ts }) {
   const backup = await backupFile(root, abs, stamp);
   const newLine = serializeRelatedList(merged);
   const next = replaceFrontmatterLine(text, "related", newLine);
-  await writeFile(abs, next, "utf8");
+  await writeFileAtomic(abs, next, "utf8");
   await appendRunLog(root, {
     tool: "link",
     action: "add_links",
@@ -268,7 +269,7 @@ async function buildMoc({ root, topic, targets = [], dryRun = true, ts }) {
     if (dryRun) return { ok: true, dry_run: true, note: relPath, created: true, members: newTokens };
 
     await mkdir(dirname(abs), { recursive: true });
-    await writeFile(abs, content, "utf8");
+    await writeFileAtomic(abs, content, "utf8");
     await appendRunLog(root, { tool: "link", action: "build_moc", request: topic, changed: relPath, detail: `신규 생성, members=${newTokens.join(", ")}`, result: "ok" });
     return { ok: true, dry_run: false, note: relPath, created: true, members: newTokens };
   }
@@ -296,7 +297,7 @@ async function buildMoc({ root, topic, targets = [], dryRun = true, ts }) {
   const membersBody = mocMembersBullets(byBaseLower, merged);
   let next = replaceMocMembersSection(text, membersBody);
   next = replaceFrontmatterLine(next, "updated", `updated: ${today}`);
-  await writeFile(abs, next, "utf8");
+  await writeFileAtomic(abs, next, "utf8");
   await appendRunLog(root, { tool: "link", action: "build_moc", request: topic, changed: relPath, detail: `+${added.join(", ")}`, backup, result: "ok" });
   return { ok: true, dry_run: false, note: relPath, created: false, added, resulting_members: merged, backup };
 }
@@ -329,7 +330,7 @@ async function setNotionId({ root, note, notionId, dryRun = true, ts }) {
   const stamp = ts || new Date().toISOString().replace(/[:.]/g, "-");
   const backup = await backupFile(root, abs, stamp);
   const nextText = replaceFrontmatterLine(text, "notion_id", `notion_id: ${JSON.stringify(next)}`);
-  await writeFile(abs, nextText, "utf8");
+  await writeFileAtomic(abs, nextText, "utf8");
   await appendRunLog(root, {
     tool: "link",
     action: "set_notion_id",
