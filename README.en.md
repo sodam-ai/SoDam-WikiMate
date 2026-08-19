@@ -208,7 +208,7 @@ If that still fails, in the `/plugin` menu **remove → re-add → install** the
 > ```
 > npm install     # installs verification tooling (@modelcontextprotocol/sdk)
 > npm start       # runs the MCP server directly (usually unnecessary)
-> npm run verify  # runs the full automated verification (155 checks)
+> npm run verify  # runs the full automated verification (160 checks)
 > ```
 
 ---
@@ -359,7 +359,7 @@ Install → (automatic) MCP registered → (session-start Obsidian/vault auto-de
 ### Dev/verification (terminal, advanced)
 ```
 npm install      # install verification tooling (@modelcontextprotocol/sdk)
-npm run verify   # run all automated checks (155 checks)
+npm run verify   # run all automated checks (160 checks)
 npm start        # run the MCP server
 ```
 
