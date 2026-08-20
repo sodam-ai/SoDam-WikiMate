@@ -83,6 +83,13 @@
 - 로컬 사전 재현 전부 통과: `npm run verify` 160/160 exit 0 · `smoke-tools.mjs` 13/13 exit 0 · `security-scan.mjs --all` 72개 전수 검사 통과 exit 0. 코드 변경 0.
 - push 완료(`main == origin/main`). **실제 GitHub Actions 실행 결과(`gh run list` 직접 확인): `completed / success`**(커밋 `37f5eb7` 기준).
 
+## 🟢 2026-08-20 갱신(5) — `DEVELOPMENT.md`에 CI 존재 자체가 기록 안 돼 있던 것 발견·보강
+- **발견**: `DEVELOPMENT.md`("개발·검증·배포용" 기준 문서)를 전문 재확인한 결과, "로컬 검증"·"테스트" 절은 이미 `smoke-tools.mjs`까지 최신이었으나(2026-08-19 갱신(4)에서 먼저 정리됨) "GitHub Actions"·"CI" 단어가 파일 전체에 0건 — 이번 세션에서 만든 자동화 사실 자체가 이 문서에 전혀 반영 안 돼 있었음. 코드/설정은 바뀌었는데 그걸 설명하는 문서가 그 사실을 모르는, 이번 세션에서 반복 발견한 것과 같은 유형.
+- **수정**: "## CI (자동 검증, GitHub Actions)" 절 신규 추가(트리거 조건·3단계 명시) + "배포" 절 4번 항목에 "push 이후 CI가 한 번 더 확인" 한 줄 보강.
+- 문서만 변경, 코드 변경 0 — `npm run verify` 160/160·`security-scan.mjs --all` 72개 전수 통과 재확인.
+- **판단**: 이번 감사에서 이보다 큰 결함은 못 찾음 — `01_PRD.md`·`03_PHASES.md` 명시 항목 중 AI가 실행 가능한 건 이 항목을 끝으로 사실상 소진. 남는 건 전부 사람 계정 필요 라이브 검증(노션·Codex·Gemini·마켓플레이스 신규설치)과 사람 승인 필요 공개 행동(`npm audit`, 버전 태그)뿐.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).

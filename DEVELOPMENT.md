@@ -50,6 +50,16 @@ node scripts/collect-real.mjs
 ```
 > 개인 볼트 경로가 들어가는 검증 스크립트는 `.gitignore`로 추적 제외(예: `scripts/test-real-vault.mjs`).
 
+## CI (자동 검증, GitHub Actions — 2026-08-20 추가)
+`main`에 push하거나 PR을 올릴 때마다 GitHub 서버가 아래 3단계를 **사람 개입 없이 자동으로** 재실행한다(`.github/workflows/ci.yml`).
+```
+npm ci
+npm run verify                    # 유닛 160개
+node scripts/smoke-tools.mjs      # 프로토콜(서버경유) 13개
+node scripts/security-scan.mjs --all   # 전체 추적 파일 보안 스캔
+```
+로컬에서 opt-in 훅을 안 켜뒀거나 검증을 깜빡해도, push 이후엔 이 워크플로가 한 번 더 확인해준다. 시크릿·환경변수 설정이 필요 없어(무의존 프로젝트) 별도 준비 없이 그대로 동작한다. 실볼트 e2e(`-real` 스크립트, 위 표)는 `sandbox-vault/`가 CI엔 없어(`.gitignore`) 여기 포함되지 않음 — 지금까지처럼 로컬 1회성 시연으로만 실행한다.
+
 ## ⚠️ 실볼트(운영) 테스트 금지 — 안전 테스트 원칙
 "정리/검색/건강검진" 흐름을 **손으로** 테스트할 때 **사용자의 실제 운영 옵시디언 볼트에서 하지 말 것.** (2026-06-22 실세션 교훈)
 - **이유**: 실볼트 테스트는 ① 테스트 노트가 진짜 노트들과 섞이고 ② 옵시디언 휴지통 설정(`trashOption:"system"`)이 테스트 노트를 외부 삭제해 "됐나?" 검증이 흔들리며 ③ 연결된 노션 실DB·끊긴 색인과 엉켜 "테스트"가 "복구"로 변질된다.
@@ -76,7 +86,7 @@ node scripts/collect-real.mjs
 1. 변경을 작업 브랜치에 커밋 → push.
 2. 기본 브랜치(`main`)에 반영(필요 시 PR → merge). 마켓플레이스 설치는 **기본 브랜치**를 가져옴.
 3. 사용자는 `/plugin marketplace update` 후 재설치로 최신을 받음(README의 "업데이트" 참고).
-4. 시크릿·개인경로·빌드 산출물이 추적 대상에 없는지 push 전 직접 점검(`git status`·`git ls-files`, 아래 보안 자동 점검으로 대체 가능).
+4. 시크릿·개인경로·빌드 산출물이 추적 대상에 없는지 push 전 직접 점검(`git status`·`git ls-files`, 아래 보안 자동 점검으로 대체 가능). push 이후엔 위 "CI(자동 검증)" 절이 GitHub 서버에서 한 번 더 확인한다(이중 안전망).
 
 ## 보안 자동 점검 (Phase 3: `03_PHASES.md` "배포물 보안 점검")
 `scripts/security-scan.mjs`가 API 키·토큰·개인키 블록·`.env` 파일 자체를 실제 토큰 형식으로만 매칭해 검사한다(오탐 최소화 — 환경변수 "이름"이나 빈 필드는 안 걸림).
