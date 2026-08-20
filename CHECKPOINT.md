@@ -69,6 +69,13 @@
 - **범위에서 제외**: `plugin.json`/`package.json` 버전 태그 갱신 — 공개 행동(태그+릴리즈)이라 별도 사용자 확인 필요, 이번 작업에 포함 안 함.
 - push 완료(`main == origin/main`).
 
+## 🟢 2026-08-20 갱신(3) — GitHub Actions CI 신설, Phase 3 자동검사 실질화
+- **발견**: `03_PHASES.md` Phase 3가 명시한 "배포물 보안 점검(...자동 검사)"가 실제로는 `.githooks/pre-commit`(로컬 opt-in, `git config core.hooksPath` 직접 설정 필요) 뿐이라 이 저장소를 새로 클론한 사람에겐 전혀 자동이 아니었음. 또한 `npm run verify` "160/160"이라는 지금까지의 모든 기록이 이 컴퓨터에 이미 존재하는 `sandbox-vault/`(`.gitignore` 대상, `verify-collect.mjs`가 참조)에 암묵적으로 의존해온 것이라, 완전히 새 클론 상태에서 정말로 통과하는지 이 프로젝트 역사상 한 번도 실측된 적이 없었음을 확인.
+- **직접 실측(추측 아님)**: `sandbox-vault/`를 안전하게 다른 이름으로 옮겨(삭제 아님) 완전히 빈 상태에서 `npm run verify` 재실행 → 160/160 PASS, 실패 0건(다행히 정상 확인). 실험 후 원본을 정확한 원래 자리로 복구, 파일 37개·전체 sha256 해시가 실험 전후 100% 일치함을 확인(데이터 손실 없음).
+- **조치**: `.github/workflows/ci.yml` 신설 — `main` push·PR마다 `actions/checkout` → `actions/setup-node@v4`(Node 18) → `npm ci` → `npm run verify` → `node scripts/security-scan.mjs --all` 순차 실행. 이 프로젝트는 런타임 의존성이 없어 CI 실행에 별도 값 설정이 필요 없음(로컬에서 동일 커맨드 순서로 사전 재현 확인 완료: `npm ci` exit 0, `npm run verify` 160/160 exit 0, `security-scan.mjs --all` 71개 전수 검사 통과 exit 0).
+- **범위 확인**: PRD가 명시한 항목 그 자체(새 기능 추가 아님), 코드 변경 0. Codex/Gemini/노션/마켓플레이스 신규설치 같은 사람 계정이 필요한 항목은 전혀 안 건드림.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
