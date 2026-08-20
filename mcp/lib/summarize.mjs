@@ -11,14 +11,13 @@ import { existsSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { resolveVaultPath, listVaults, buildNoteContent, sourceHash } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, safeComponent, writeFileAtomic, FOLDERS } from "./shared.mjs";
+import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, safeComponent, writeFileAtomic, stripQuotes, FOLDERS } from "./shared.mjs";
 
 const MAX_SUMMARY_CHARS = 200; // "한 줄 요약" 설계 의도 — 문단이 되지 않도록 코드로 강제(link.mjs의 5개 상한과 동일 철학)
 
 function resolveRoot(vault, vaultPath) {
   return (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
 }
-function stripQuotes(v) { return String(v ?? "").replace(/^["']|["']$/g, ""); }
 
 function findAbs(root, note) {
   const rel = String(note || "").replace(/\\/g, "/");

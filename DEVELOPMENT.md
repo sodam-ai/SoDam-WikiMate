@@ -8,7 +8,7 @@
 ## 로컬 검증
 ```bash
 npm install        # 검증용 devDependency(@modelcontextprotocol/sdk)만 설치 — 플러그인 실행엔 불필요
-npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 174개 체크
+npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 180개 체크
 npm start          # MCP 서버(stdio) 실행
 ```
 
@@ -54,7 +54,7 @@ node scripts/collect-real.mjs
 `main`에 push하거나 PR을 올릴 때마다 GitHub 서버가 아래 3단계를 **사람 개입 없이 자동으로** 재실행한다(`.github/workflows/ci.yml`).
 ```
 npm ci
-npm run verify                    # 유닛 174개
+npm run verify                    # 유닛 180개
 node scripts/smoke-tools.mjs      # 프로토콜(서버경유) 13개
 node scripts/security-scan.mjs --all   # 전체 추적 파일 보안 스캔
 ```

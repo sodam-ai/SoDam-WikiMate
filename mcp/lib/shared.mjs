@@ -28,6 +28,19 @@ export const FOLDERS = {
   ARCHIVE: "99_Archive",
 };
 
+// title/summary/project 등은 buildNoteContent가 JSON.stringify로 써서(백슬래시·따옴표 안전 이스케이프) 저장한다.
+// classify.mjs/summarize.mjs/link.mjs가 각자 따로 "따옴표만 벗기는" 버전을 갖고 있었는데(2026-08-20 감사로 발견),
+// 그 방식은 이스케이프를 안 풀어서 값에 백슬래시가 있으면 재조회·멱등성 비교가 깨졌다(실측 확인: 재요청해도
+// changed:false가 안 나옴). 여기 하나로 합쳐 JSON 문자열이면 제대로 파싱하고, 아닐 때만(과거 수동 작성 노트 등
+// 하위호환) 기존의 단순 따옴표 제거로 폴백한다.
+export function stripQuotes(v) {
+  const s = String(v ?? "");
+  if (/^".*"$/.test(s)) {
+    try { return JSON.parse(s); } catch { /* 잘못된 JSON이면 아래 폴백 */ }
+  }
+  return s.replace(/^["']|["']$/g, "");
+}
+
 // --- lint.mjs에서 이동 (바이트 단위, 로직 불변) ---
 
 // frontmatter(머리말) 파싱 — 간단 key: value (+ aliases 배열)

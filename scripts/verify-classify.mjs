@@ -116,6 +116,18 @@ try {
   const a14 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/상태테스트.md", status: "draft", dryRun: false });
   check("apply: 이미 같은 status 재요청 시 changed:false(멱등)", a14.changed === false);
 
+  // 12) project에 백슬래시/따옴표가 있어도 재조회·멱등성이 깨지지 않는지(실측 결함 회귀 방지 — 2026-08-20 발견)
+  // stripQuotes가 "따옴표만 벗기고 이스케이프는 안 풂"이라, 값에 백슬래시가 있으면 재조회 시 다른 값으로 보여
+  // 재요청해도 changed:false가 안 나오던 결함. classify/summarize/link 세 곳에 각자 있던 걸 shared.mjs로 통합.
+  await writeFile(join(vault, "20_Resources", "특수문자테스트.md"), note("특수문자테스트", ["z"], 3), "utf8");
+  const tricky = 'C:\\Users\\PC\\project "이름"';
+  const a15 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/특수문자테스트.md", project: tricky, dryRun: false });
+  check("apply: 백슬래시/따옴표 포함 project 저장 ok", a15.ok === true && a15.plan.project.after === tricky);
+  const s16 = await classify({ vaultPath: vault, action: "suggest", note: "20_Resources/특수문자테스트.md" });
+  check("suggest: 재조회 시 원래 값과 정확히 일치(이스케이프 왕복 보존)", s16.target?.current_project === tricky);
+  const a16 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/특수문자테스트.md", project: tricky, dryRun: false });
+  check("apply: 같은 값 재요청 시 changed:false(멱등 — 이게 실측으로 깨졌던 부분)", a16.changed === false);
+
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {
   await rm(vault, { recursive: true, force: true }).catch(() => {});

@@ -10,7 +10,7 @@ import { existsSync } from "node:fs";
 import { basename, dirname, relative } from "node:path";
 import { resolveVaultPath, listVaults, walkVault } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, writeFileAtomic, FOLDERS } from "./shared.mjs";
+import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, writeFileAtomic, stripQuotes, FOLDERS } from "./shared.mjs";
 
 const CLASSIFY_TARGET_FOLDERS = [FOLDERS.INBOX, FOLDERS.PROJECTS, FOLDERS.RESOURCES, FOLDERS.NOTES, FOLDERS.DRAFTS];
 // 02_DATA_MODEL.md가 정의한 Note.status(진행 상태) 값. 언제 draft/done이 되는지는 PRD가 정하지 않았으므로
@@ -28,7 +28,6 @@ const FOLDER_HINTS = {
 function resolveRoot(vault, vaultPath) {
   return (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
 }
-function stripQuotes(v) { return String(v ?? "").replace(/^["']|["']$/g, ""); }
 function folderOf(rel) {
   const parts = String(rel || "").split("/");
   return parts.length > 1 ? parts[0] : "";

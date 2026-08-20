@@ -18,6 +18,7 @@ import {
   safeComponent,
   extractLinks,
   writeFileAtomic,
+  stripQuotes,
   FOLDERS,
 } from "./shared.mjs";
 
@@ -28,10 +29,6 @@ const MOC_SECTION_HEADING = "## 관련 노트";
 
 function resolveRoot(vault, vaultPath) {
   return (vault && resolveVaultPath(vault)) || ((vaultPath && existsSync(vaultPath)) ? vaultPath : null);
-}
-
-function stripQuotes(v) {
-  return String(v ?? "").replace(/^["']|["']$/g, "");
 }
 
 // 볼트의 전 노트를 훑어 {rel, base, fm, body, related} 배열로 반환(읽기 전용). link/lint 공용 순회는 walkVault 재사용.

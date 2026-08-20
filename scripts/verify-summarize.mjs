@@ -70,6 +70,16 @@ try {
   const a7 = await summarize({ vaultPath: vault, action: "apply", note: "20_Resources/자료.md", summary: "MCP 서버 구축 절차 요약", dryRun: false });
   check("apply: 동일 summary 재요청 시 changed:false", a7.changed === false);
 
+  // 7.5) summary에 백슬래시/따옴표가 있어도 재조회·멱등성이 안 깨지는지(실측 결함 회귀 방지 — 2026-08-20 발견,
+  // classify.mjs에서 먼저 발견돼 shared.mjs의 stripQuotes로 통합하면서 여기도 같이 고쳐짐)
+  const trickySummary = 'C:\\경로 "인용구" 요약';
+  const a7b = await summarize({ vaultPath: vault, action: "apply", note: "20_Resources/자료.md", summary: trickySummary, dryRun: false });
+  check("apply: 백슬래시/따옴표 포함 summary 저장 ok", a7b.ok === true);
+  const s7c = await summarize({ vaultPath: vault, action: "suggest", note: "20_Resources/자료.md" });
+  check("suggest: 재조회 시 원래 값과 정확히 일치(이스케이프 왕복 보존)", s7c.current_summary === trickySummary);
+  const a7d = await summarize({ vaultPath: vault, action: "apply", note: "20_Resources/자료.md", summary: trickySummary, dryRun: false });
+  check("apply: 같은 값 재요청 시 changed:false(멱등 — 이게 실측으로 깨졌던 부분)", a7d.changed === false);
+
   // 8) apply 실제: atomic_note 생성 — 30_Notes에 파일 + related로 원본 노트 계보 남김 + 원본 노트는 그대로
   const a8 = await summarize({
     vaultPath: vault, action: "apply", note: "20_Resources/자료.md",

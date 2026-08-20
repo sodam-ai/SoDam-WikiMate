@@ -116,6 +116,16 @@
 - **검증**: `verify-collect.mjs`에 신규 회귀 3개(시크릿 감지·값 미노출·정상텍스트 무경고) 추가(19→22). `npm run verify` 총계 **171→174**. `security-scan.mjs --all`이 리팩터 후에도 72개 그대로 통과(자기 자신의 패턴 배열을 옮긴 것이라 회귀 위험이 가장 컸던 지점). `smoke-server`/`smoke-tools` 정상. 전부 exit 0.
 - push 완료(`main == origin/main`).
 
+## 🔴 2026-08-21 갱신 — 전체 기능 재검증 중 실결함 발견: `stripQuotes` 이스케이프 미해제로 멱등성 깨짐
+> 사용자 요청("지금까지 구현된 기능이 제대로 작동하는지 테스트하고 검증") 수행 중, 지난 세션에 추가한 `classify.mjs`의
+> `project` 필드를 경계값(백슬래시·따옴표 포함 문자열)으로 직접 재현 테스트하다가 발견.
+- **재현**: `project`에 백슬래시가 들어간 값(예: `C:\Users\PC\project`)을 `apply`로 저장한 뒤 `suggest`로 재조회하면, 원래 값과 다른(이스케이프가 안 풀린) 값이 돌아옴 — `재조회값 == 원래 입력값? false`로 직접 확인.
+- **원인**: `classify.mjs`/`summarize.mjs`/`link.mjs` 세 곳에 **각자 독립적으로** 정의된 `stripQuotes()`가 "앞뒤 따옴표만 제거"하고 `\\`·`\"` 같은 JSON 이스케이프는 안 풀었음. 그런데 이 필드들은 전부 `JSON.stringify()`로 써지므로, 값에 백슬래시나 따옴표가 있으면 읽을 때마다 다른 문자열이 됨 — `classify.apply`의 `project` 멱등성 검사(`재요청 시 changed:false`)와 `summarize.apply`의 `summary` 멱등성 검사가 실제로 깨짐(같은 값 재요청해도 매번 "변경"으로 오판 → 불필요한 백업·Run Log 반복 생성).
+- **수정**: `stripQuotes`를 `mcp/lib/shared.mjs`에 하나로 통합 — 값이 `"..."` 형태(JSON 문자열)면 `JSON.parse`로 정확히 복원하고, 아니면(과거 수동 작성 노트 등 하위호환) 기존 방식으로 폴백. 세 파일 모두 로컬 정의 제거하고 공용 함수 import로 교체(SECRET_PATTERNS 통합 때와 같은 이유 — 각자 따로 두면 한 곳만 고치고 잊는 사고가 남).
+- **재검증**: `verify-classify.mjs`(+3, 백슬래시/따옴표 저장·재조회 일치·멱등 확인)·`verify-summarize.mjs`(+3, 동일 패턴) 신규 회귀 추가. `npm run verify` 총계 174→**180**. `node --check` 전체 clean. `smoke-server`/`smoke-tools`(14/14) 정상. 실볼트 e2e 5종(link/classify/moc/summarize/collect-cli) 전부 재실행 exit 0 — `link.mjs`가 바뀌어 title/summary 표시 경로가 있는 것들 위주로 재확인. 서버(JSON-RPC) 레벨에서 `status`에 숫자·스키마 밖 문자열, `project`에 배열을 직접 주입해도 크래시 없이 정상 거부/처리(실제 노트 파일 해시 불변으로 무결성 확인). `security-scan.mjs`(staged) clean. `obsidian.json` 해시 재확인 — 세션 시작 시점과 100% 동일.
+- **참고(결함 아님, 관찰)**: `project`에 배열을 보내면 서버가 타입 거부 없이 `String(...)`로 조용히 콤마 join함(`["a","b"]`→`"a,b"`) — `title`/`tags` 등 기존 자유문자열 필드들과 동일한 기존 관용(느슨한 타입 허용)이라 이번 범위에서 별도 수정 안 함.
+- push 예정(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
