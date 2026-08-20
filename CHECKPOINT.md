@@ -208,12 +208,24 @@
 - **검증**: `npm run verify` 191/191(exit 0, 회귀 없음) · `security-scan.mjs --all` 72개 통과. 코드 변경 0, 문서 4개 파일만 변경.
 - push 예정(`main == origin/main`).
 
-> ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
+## 🟢 2026-08-21 갱신(7) — 세션 종료 · 다음 세션 Resume 지침 (아래가 최신, 다른 "Resume 지침"·"다음 단계" 절은 전부 참고용 이력)
 
-- **(낡은 기록, 참고용)** 작업 위치: worktree `D:/AI_Dev_Work/2026y/wikimate-connect`, 브랜치 `feat/v0.8-connect` (main `b905cc3`/v0.7.1에서 분기)
-- **(낡은 기록, 참고용)** 다른 진행 중 worktree: `D:/AI_Dev_Work/2026y/SoDam-WikiMate-worktrees/fix-raw-data-preservation` — 브랜치 `chore/bump-0.7.2`, main 미병합 여부 미재확인(이번 세션 범위 밖).
-- **검증 도구 컨벤션(확인됨, 2026-08-04 기준 갱신)**: `npm run verify`는 `scripts/verify-<tool>.mjs` **8개**(collect/lint/fix/runlog/vaults/link/classify/summarize) 순차 실행, 126/126 PASS.
-- **테스트 볼트**: `sandbox-vault/`만 사용(DEVELOPMENT.md safe-testing 원칙) — main worktree에 이미 존재, git 미추적(`.gitignore`).
+> 다음 세션은 이 절부터 읽을 것. 위 갱신(1)~(6)이 이번 세션 전체 작업 이력.
+
+### 지금 바로 알아야 할 것
+- **`main` 상태**: clean, `origin/main`과 완전 동일(`git status` 재확인 완료). 최신 커밋 `f85f940`(README 4종 갱신). 버전 `v0.9.0`(태그+Release 완료).
+- **자동 테스트**: `npm run verify` **191/191**, `security-scan.mjs --all` 72개 clean, GitHub Actions CI `main` 기준 최신 커밋까지 전부 `completed/success`(직접 확인).
+- **⚠️ 미병합 브랜치 1개 존재 — 다음 세션 시작 시 가장 먼저 확인할 것**: `chore/remove-guide-pdfs`(로컬+`origin` 둘 다 존재, 커밋 `48eebfb`, GUIDE.ko.pdf/GUIDE.en.pdf 삭제 — README·문서 어디서도 참조 안 되던 낡은 PDF). **PR·병합은 사용자 지시로 자동 진행 안 함**(main/master 직접 push 금지 원칙 적용, 이번 세션 한정 지시였는지 향후에도 적용할지는 미확정 — 다음에 "안전하게 commit/push"류 요청이 다시 오면 이 세션의 방식(공개여부 확인→질문, main 직접 push 금지→새 브랜치)을 참고할지 사용자에게 먼저 물어볼 것, 임의로 세션 전체 기본값처럼 확대 적용하지 말 것). 병합 PR 링크: https://github.com/sodam-ai/SoDam-WikiMate/pull/new/chore/remove-guide-pdfs
+- **GitHub 저장소**: PUBLIC 유지(2026-08-21 사용자 명시 확인, 재질문 불필요). Topics 10개(ai-agent/claude-code/knowledge-management/mcp/nodejs/notion/obsidian/pkm/codex/gemini) — 최신, 재점검 불필요. About 설명 최신·정확.
+
+### 다음 작업 후보 (우선순위순, 갱신(5)에서 이미 확정 — 재조사 없이 바로 이 순서로 진행 가능)
+1. **[바로 착수 가능, 위험 낮음]** `wikimate-classify` 스킬의 "완료 표시"(status/project) 자연어 트리거 배선 보강 — 기능(코드)은 이미 완성, 스킬 설명서(`skills/wikimate-classify/SKILL.md`)에 트리거 문구·워크플로우 단계만 추가하면 됨. 상세 근거·주의사항은 갱신(5) 참고.
+2. **[설계 결정 먼저 필요, 바로 착수 금지]** `Link.reason`/`Link.kind`(왜/어떤 종류로 연결했는지) 미구현 — `related:` 파서가 한 줄 배열만 허용해 저장 방식을 먼저 정해야 함. 사용자에게 "제안하기" 형식으로 방향(본문 병행 vs 구조 변경) 먼저 확인할 것.
+3. **영구 사람 전담(매번 다시 묻지 말 것)**: 노션 실계정 라이브 검증·Codex 자연어 트리거 라이브 검증·Gemini 자연어 트리거 라이브 검증·마켓플레이스 신규설치 라이브 검증 — 4건 전부 여러 세션에 걸쳐 확정된 경계, AI 대행 불가.
+
+### 이번 세션에서 배운 것(다음 세션도 알아야 할 습관)
+- **"동일 지시 반복 = 더 꼼꼼히 파라"** 원칙이 이번 세션 중 실제로 통했음: 같은 검증 요청이 반복될 때마다 새 관점으로 더 깊이 파서 stripQuotes·MOC 중복·replace_link 존재검증 누락 등 **실제 결함 6건**을 찾아냄. 다음 세션도 같은 유형 요청이 반복되면 "이미 다 봤다"고 넘기지 말고 아직 안 본 경계값·파일 조합을 계속 찾을 것.
+- **문서(README/CHECKPOINT)가 코드보다 먼저 낡는 패턴이 반복적으로 발견됨**(CI 존재 자체가 DEVELOPMENT.md에 안 적혀있었던 것, README가 버전/테스트수를 옛날 값으로 갖고 있던 것 등) — 코드를 고칠 때마다 관련 문서 최신성도 같이 대조하는 습관이 이 프로젝트에서 특히 중요함이 반복 확인됨.
 
 ## 안전 불변 조건 (모든 M 관통 — 절대 위반 금지, 요약 사본)
 1. 기존 노트 편집 전 **백업 + 개별 승인** (신규 생성만 사전승인 가능, 편집은 항상 개별 승인)
