@@ -104,6 +104,12 @@
 - **재검증**: `npm run verify` 160/160 · `smoke-server.mjs`/`smoke-tools.mjs` 13/13 · `security-scan.mjs --all` 72개 통과 — 전부 exit 0.
 - **정직성 원칙**: Release 노트에 Gemini·Codex 자연어 트리거·노션 라이브 검증은 "코드 완료, 라이브 미검증"으로 명시(과장 금지).
 
+## 🟢 2026-08-20 갱신(8) — `02_DATA_MODEL.md` 필드 완전성 감사: `status`·`project` 배선 누락 발견·수정
+- **발견(코드 grep으로 직접 확인, 추측 아님)**: `02_DATA_MODEL.md`가 정의한 Note frontmatter 필드 `status`(진행상태, 필수)·`project`(관련 프로젝트, 선택)가 `collect.mjs`/`link.mjs`에서 생성 시 한 번(`status: inbox`, `project: ""`)만 써지고, `classify.mjs`·`summarize.mjs`·`fix.mjs`·`lint.mjs`·server.mjs 스키마·6개 스킬 전체를 grep한 결과 이후 이 값을 바꾸는 코드가 0건이었음 — 노트를 아무리 정리·요약·연결해도 frontmatter엔 영원히 `status: inbox`가 남는 구조. `Link.reason`("왜 연결했는지")도 같은 방식으로 확인한 결과 저장 공간 자체가 없음(단, 현재 `related:` 파서가 "한 줄 배열만" 허용하는 설계 제약 때문에 별도 설계 결정이 필요해 이번 범위에서 제외).
+- **조치**: `classify.mjs`의 `apply`에 `status`(inbox/draft/done 3값 검증)·`project`(자유 문자열, `JSON.stringify` 안전 인용) 옵션 필드 추가 — 기존 folder/tags/importance와 동일한 안전 패턴(존재검증→백업→멱등스킵→Run Log) 재사용, 새 코드·새 위험 유형 없음. **자동 전환 로직은 만들지 않음** — PRD가 draft/done 전환 기준을 정의하지 않아, 에이전트가 명시적으로 요청했을 때만 바뀌게 함(임의 판단 금지). `suggest`에도 `current_status`/`current_project`/`status_options` 노출. `server.mjs` 스키마·`smoke-tools.mjs`(서버경유 실배선 확인)·README(ko/en) 기능 설명도 함께 갱신.
+- **검증**: `verify-classify.mjs`에 신규 회귀 11개 추가(23→34) — 잘못된 status 거부, 정상 변경, 멱등 재요청, 다른 필드(summary) 보존 등. `npm run verify` 총계 **160→171**. `smoke-tools.mjs` 서버경유 실배선 확인 1개 추가(13→14). `security-scan.mjs --all` 72개 통과. 전부 exit 0.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).

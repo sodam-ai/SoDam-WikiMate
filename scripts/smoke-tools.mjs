@@ -77,6 +77,10 @@ try {
   const clsApply = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "apply", note: "00_Inbox/classifyme.md", folder: "20_Resources", dry_run: false } }));
   check("서버경유 classify apply: 실제 폴더 이동", clsApply.ok === true && clsApply.note === "20_Resources/classifyme.md" && await exists(join(vault, "20_Resources", "classifyme.md")));
 
+  // 7.5) classify status/project — 02_DATA_MODEL.md에 정의됐지만 어떤 도구도 못 바꾸던 필드(이번 세션 감사로 발견, classify.mjs에 신규 배선)
+  const clsStatus = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "apply", note: "20_Resources/classifyme.md", status: "draft", project: "서버경유 테스트", dry_run: false } }));
+  check("서버경유 classify apply: status/project 실제 반영", clsStatus.ok === true && clsStatus.plan?.status?.after === "draft" && clsStatus.plan?.project?.after === "서버경유 테스트");
+
   // 8) summarize를 서버 통해 호출 → suggest(본문 읽기전용 조회) + apply(summary 반영)
   const sumSuggest = parse(await client.callTool({ name: "wikimate_summarize", arguments: { vault_path: vault, action: "suggest", note: "20_Resources/summarizeme.md" } }));
   check("서버경유 summarize suggest: ok + body 포함", sumSuggest.ok === true && typeof sumSuggest.body === "string" && sumSuggest.body.includes("요약 테스트용"));

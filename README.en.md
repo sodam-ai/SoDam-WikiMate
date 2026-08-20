@@ -210,7 +210,7 @@ If that still fails, in the `/plugin` menu **remove → re-add → install** the
 > ```
 > npm install     # installs verification tooling (@modelcontextprotocol/sdk)
 > npm start       # runs the MCP server directly (usually unnecessary)
-> npm run verify  # runs the full automated verification (160 checks)
+> npm run verify  # runs the full automated verification (171 checks)
 > ```
 
 ---
@@ -307,7 +307,7 @@ Everything works through **chat (natural language)**. You don't have to memorize
 ### ⑥ Auto-classify (decide folder, tags, importance)
 > "Organize these unclassified notes" / "Decide where this note belongs"
 
-→ Looking at a note's current folder/tags/part of the body, plus the tag vocabulary already used in the vault, it proposes **which folder fits (00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts) and what tags/importance (1-5) make sense**, and applies it on approval. If a file with the same name already exists, it **never overwrites** — it saves separately. (Tool: `wikimate_classify` / Skill: `wikimate-classify`)
+→ Looking at a note's current folder/tags/part of the body, plus the tag vocabulary already used in the vault, it proposes **which folder fits (00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts) and what tags/importance (1-5) make sense**, and applies it on approval. If a file with the same name already exists, it **never overwrites** — it saves separately. Say something like "I'm done with this note, mark it done" and it can also update the **progress status (inbox/draft/done) and a project name** (added 2026-08-20 — only changes when you explicitly ask, never inferred automatically). (Tool: `wikimate_classify` / Skill: `wikimate-classify`)
 
 ### ⑦ Summarize · atomic notes (condense a long note)
 > "Summarize this note in one line" / "Pull out the key points into a new note"
@@ -361,7 +361,7 @@ Install → (automatic) MCP registered → (session-start Obsidian/vault auto-de
 ### Dev/verification (terminal, advanced)
 ```
 npm install      # install verification tooling (@modelcontextprotocol/sdk)
-npm run verify   # run all automated checks (160 checks)
+npm run verify   # run all automated checks (171 checks)
 npm start        # run the MCP server
 ```
 

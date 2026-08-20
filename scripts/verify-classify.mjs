@@ -93,6 +93,29 @@ try {
   const a11 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/중요도테스트.md", tags: ["새태그", "새태그"], dryRun: false });
   check("요청 내 중복 태그 → 1개만 추가", a11.ok === true && a11.plan.tags.after.filter((t) => t === "새태그").length === 1);
 
+  // 11) status/project — 02_DATA_MODEL.md에 정의됐지만 어떤 도구도 못 바꾸던 필드(이번 세션 감사로 발견) 회귀 방지
+  await writeFile(join(vault, "20_Resources", "상태테스트.md"), note("상태테스트", ["y"], 3), "utf8");
+  const s12 = await classify({ vaultPath: vault, action: "suggest", note: "20_Resources/상태테스트.md" });
+  check("suggest: current_status 노출(기본 inbox)", s12.target?.current_status === "inbox");
+  check("suggest: current_project 노출(빈 프로젝트는 null)", s12.target?.current_project === null);
+  check("suggest: status_options 3개(inbox/draft/done)", Array.isArray(s12.status_options) && s12.status_options.join(",") === "inbox,draft,done");
+
+  const a12 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/상태테스트.md", status: "not-a-real-status", dryRun: false });
+  check("apply: 잘못된 status 값 거부", a12.ok === false && /inbox, draft, done/.test(a12.reason || ""));
+  const statusUnchanged = await readFile(join(vault, "20_Resources", "상태테스트.md"), "utf8");
+  check("apply: status 거부 후 파일 미변경(원래값 inbox 유지)", statusUnchanged.includes("status: inbox"));
+
+  const a13 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/상태테스트.md", status: "draft", project: "위키메이트 개발", dryRun: false });
+  check("apply 실제: status+project 동시 변경 ok", a13.ok === true);
+  check("apply 실제: status 변경분 백업 생성됨", typeof a13.backup === "string" && a13.backup.length > 0);
+  const statusChanged = await readFile(join(vault, "20_Resources", "상태테스트.md"), "utf8");
+  check("apply 실제: status가 draft로 반영됨", statusChanged.includes("status: draft"));
+  check("apply 실제: project가 안전하게 인용부호로 반영됨", statusChanged.includes('project: "위키메이트 개발"'));
+  check("apply 실제: 다른 필드(summary)는 그대로 보존됨", statusChanged.includes('summary: "상태테스트 요약"'));
+
+  const a14 = await classify({ vaultPath: vault, action: "apply", note: "20_Resources/상태테스트.md", status: "draft", dryRun: false });
+  check("apply: 이미 같은 status 재요청 시 changed:false(멱등)", a14.changed === false);
+
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {
   await rm(vault, { recursive: true, force: true }).catch(() => {});
