@@ -74,7 +74,7 @@
 - **직접 실측(추측 아님)**: `sandbox-vault/`를 안전하게 다른 이름으로 옮겨(삭제 아님) 완전히 빈 상태에서 `npm run verify` 재실행 → 160/160 PASS, 실패 0건(다행히 정상 확인). 실험 후 원본을 정확한 원래 자리로 복구, 파일 37개·전체 sha256 해시가 실험 전후 100% 일치함을 확인(데이터 손실 없음).
 - **조치**: `.github/workflows/ci.yml` 신설 — `main` push·PR마다 `actions/checkout` → `actions/setup-node@v4`(Node 18) → `npm ci` → `npm run verify` → `node scripts/security-scan.mjs --all` 순차 실행. 이 프로젝트는 런타임 의존성이 없어 CI 실행에 별도 값 설정이 필요 없음(로컬에서 동일 커맨드 순서로 사전 재현 확인 완료: `npm ci` exit 0, `npm run verify` 160/160 exit 0, `security-scan.mjs --all` 71개 전수 검사 통과 exit 0).
 - **범위 확인**: PRD가 명시한 항목 그 자체(새 기능 추가 아님), 코드 변경 0. Codex/Gemini/노션/마켓플레이스 신규설치 같은 사람 계정이 필요한 항목은 전혀 안 건드림.
-- push 완료(`main == origin/main`).
+- push 완료(`main == origin/main`). **실제 GitHub Actions 첫 실행 결과(`gh run list`로 직접 확인): `completed / success`** — 로컬 사전 재현뿐 아니라 실제 서버에서도 그린 확인됨(커밋 `edaa60d` 기준).
 
 ## 위치·전제
 
