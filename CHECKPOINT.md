@@ -62,6 +62,13 @@
 - **범위에서 명시적으로 제외**: 노션 운영판 확장(PRD 원문이 스스로 "선택·목적 이탈 경계"로 경고) — 진행 안 함.
 - push 완료(`main == origin/main`).
 
+## 🟢 2026-08-20 갱신(2) — 마켓플레이스 등록 문서 자기모순 정정
+- **발견**: `.claude-plugin/marketplace.json`의 `description`과 `README.md`(ko/en) 두 곳이 "Phase 3 등록 전 — 미검증 배포 금지"/"🔴 아직"으로 표기돼 있었으나, 정작 그 전제조건(Phase 3 "손시뮬+보안 검증 통과")은 바로 위 항목(배포물 보안 자동 점검)에서 이미 충족돼 있어 문서가 스스로 모순됨(구조는 `v0.8.0` 태그+Release로 실재, `.claude-plugin/` 정상 구조 재확인).
+- **수정**: `marketplace.json` description, `README.md`/`README.en.md`의 "앞으로 남은 것" 절·상태표 각 1곳(총 4곳)을 "구조·보안검증 완료, 실사용자 신규설치 라이브 검증만 대기"로 정정. **과장 금지**: "등록 완료"라고 새로 주장하지 않음 — 신규 사용자의 실제 설치 라이브 검증은 Codex/Gemini/노션과 동일하게 사람 몫으로 명시.
+- 문서·메타데이터만 변경, 코드 변경 0 — `npm run verify` 160/160 영향 없음(재확인 완료).
+- **범위에서 제외**: `plugin.json`/`package.json` 버전 태그 갱신 — 공개 행동(태그+릴리즈)이라 별도 사용자 확인 필요, 이번 작업에 포함 안 함.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).

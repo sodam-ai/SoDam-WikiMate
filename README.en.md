@@ -413,7 +413,7 @@ npm start        # run the MCP server
 
 - The Codex natural-language rule file (`AGENTS.md`) now describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
 - Live verification of the actual Codex CLI natural-language triggers is planned.
-- Formal marketplace registration and bumping the `plugin.json` version number are planned after the items above are done (per the "no unverified releases" principle).
+- The structure and security check needed for marketplace registration (`.claude-plugin/plugin.json`/`marketplace.json`, the automated deployment security scan) are done (2026-08-20) — only a live verification of a real fresh install by an actual user remains (same principle as Codex/Gemini). Whether to bump the `plugin.json` version number is a separate open question.
 - A Python-based advanced extractor is not implemented yet.
 - A Gemini CLI adapter (`GEMINI.md`+`adapters/gemini/SETUP.md`) was added (2026-08-20) — registration commands verified live; actual natural-language trigger live-testing is still pending user confirmation.
 - Live verification of Notion indexing in an environment with a real, connected Notion account is still pending (the structure/logic itself has been implemented and code-reviewed — as of 2026-08-17 this now includes the note-to-Notion link-back, `notion_id`, in both directions).
@@ -548,7 +548,7 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Codex — the MCP tools themselves | ✅ Confirmed working | All 8 tools confirmed responding correctly via the server protocol (2026-08-04) |
 | Codex — natural-language auto-trigger (link/classify/summarize) | 🟡 Documented, live-unverified | `AGENTS.md` was updated on 2026-08-17 with rules for these 3 tools. Whether `codex exec` actually fires them from natural language is not yet live-tested (pending user go-ahead) |
 | Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id, added 2026-08-17), and **Notion Run Log mirroring (added 2026-08-19)** are all structurally/skill-level complete. `NOTION_RUNLOG_DB_ID` had been documented but never actually wired up until now. User confirmation in a real, connected Notion environment is still pending |
-| Formal marketplace registration | 🔴 Not yet | Planned after the items above are fully verified (no-unverified-release principle) |
+| Formal marketplace registration | 🟡 Structure & security check done, live verification pending | `plugin.json`/`marketplace.json` structure confirmed valid; Phase 3 precondition (automated deployment security scan, `scripts/security-scan.mjs`) met (2026-08-20). Live verification of a real user's fresh install is still pending |
 | Python advanced extractor | 🔴 Not implemented | Planned only, no code yet |
 | Gemini adapter | 🟡 Code complete, live-unverified | Registration commands (`gemini mcp add/list/remove`) verified live (2026-08-20, Gemini CLI 0.52.0). Actual natural-language triggering needs a real Gemini API call, so it's pending user confirmation (same principle as Codex) |
 

@@ -2,7 +2,7 @@
   "name": "wikimate-marketplace",
   "owner": { "name": "SoDam AI Studio" },
   "metadata": {
-    "description": "Wikimate 플러그인 배포용 마켓플레이스 (Phase 3 등록 전 — 미검증 배포 금지)"
+    "description": "Wikimate 플러그인 배포용 마켓플레이스 (Phase 3 구조·보안검증 완료, 실사용자 신규설치 라이브 검증 대기)"
   },
   "plugins": [
     {

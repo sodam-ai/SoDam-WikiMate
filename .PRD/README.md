@@ -49,7 +49,8 @@ MCP 코어 = 정리 로직 1개를 모든 에이전트가 공유 (모델 비종�
 - ✅ **배포물 보안 자동 점검 추가**(`03_PHASES.md` Phase 3 명시 항목) — `scripts/security-scan.mjs`(실제 토큰 형식만 매칭, 오탐 최소화) + opt-in pre-commit 훅(`.githooks/pre-commit`, `git config core.hooksPath .githooks`). 실측: 가짜 API 키를 심은 실제 `git commit`이 진짜로 차단되는 것, 정상 커밋은 통과하는 것 둘 다 확인. 커밋 후 자체 재검토로 "스킵된 파일을 조용히 '깨끗함'으로 셈"하는 결함을 하나 더 발견해 즉시 후속 수정.
 - ✅ **Gemini CLI 어댑터 추가** — `GEMINI.md`(→ `AGENTS.md`를 가리키는 얇은 파일, 내용 중복로 인한 문서 어긋남 방지) + `adapters/gemini/SETUP.md`. 이 컴퓨터에 실제 설치된 Gemini CLI(0.52.0)로 `gemini mcp add/list/remove` 등록·조회·제거를 직접 실행해 정확한 문법을 확인(추측 아님). "워크스페이스 미신뢰 시 MCP 서버 자동 비활성화" 같은 실제 관찰 사실도 문서에 반영.
 - **경계 명확화(Codex와 동일 원칙)**: 등록 명령 문법은 검증됨. **실제 자연어 트리거·Gemini가 wikimate 도구를 정말 호출하는지는 Gemini API 실호출(사용자 계정/쿼터)이 필요해 AI가 대행하지 않음** — 사용자 확인 대기.
-- **Phase 3 남은 항목**: 마켓플레이스 정식 등록(이미 GitHub 기반으로 사실상 동작 중, 추가 조치 불명확), 노션 운영판 확장(PRD 원문이 스스로 "선택·목적 이탈 경계"로 명시 — 진행 비추천).
+- ✅ **[같은 날 후속] 마켓플레이스 등록 항목의 "추가 조치 불명확" 해소**: `.claude-plugin/plugin.json`·`marketplace.json`을 직접 열람한 결과 구조는 이미 정상(`v0.8.0` 태그+GitHub Release 실재, README 설치 안내도 이미 검증된 명령으로 문서화됨)임에도, `marketplace.json`의 `description`과 `README.md`(ko/en) 두 곳이 스스로 "Phase 3 등록 전 — 미검증 배포 금지"/"🔴 아직"으로 표기 중이던 자기모순 발견 — 정작 그 전제조건(Phase 3 "손시뮬+보안 검증 통과")은 바로 위 항목(배포물 보안 자동 점검)에서 이미 충족됨. 4곳(`marketplace.json` description, `README.md`/`README.en.md`의 "앞으로 남은 것" 절·상태표 각 1곳)을 "구조·보안검증 완료, 실사용자 신규설치 라이브 검증만 대기"로 정정. **과장 금지**: "등록 완료"라고 새로 주장하지 않음 — 신규 사용자의 실제 설치 라이브 검증은 Codex·Gemini·노션과 동일하게 사람 몫으로 명시. 문서·메타데이터만 변경, `npm run verify` 영향 없음.
+- **Phase 3 남은 항목**: 마켓플레이스 신규설치 라이브 검증(사람 몫, 위와 동일 경계), `plugin.json`/`package.json` 버전 태그 갱신 여부(공개 행동이라 별도 확인 필요, 이번 작업 범위 밖), 노션 운영판 확장(PRD 원문이 스스로 "선택·목적 이탈 경계"로 명시 — 진행 비추천).
 
 ## 다음 단계 (2026-08-18 확정 — 참고용 이력, 위 2026-08-20 절이 최신)
 
