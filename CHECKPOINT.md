@@ -81,7 +81,7 @@
 - **안전성 직접 확인**: `smoke-tools.mjs` 실행 전후 `sandbox-vault/` 전체 파일수·해시 대조 → 완전히 동일(37개, 동일 해시) — 소스 확인 결과 이 스크립트는 `os.tmpdir()`의 완전히 격리된 임시 볼트만 쓰고 종료 시 스스로 정리함(sandbox-vault 미접촉). CI에 넣어도 안전함을 실측으로 확인.
 - **조치**: `.github/workflows/ci.yml`에 `node scripts/smoke-tools.mjs` 단계 추가(`npm run verify` 다음, `security-scan.mjs --all` 앞). 새 의존성 없음(SDK는 이미 devDependency), 시크릿 불필요.
 - 로컬 사전 재현 전부 통과: `npm run verify` 160/160 exit 0 · `smoke-tools.mjs` 13/13 exit 0 · `security-scan.mjs --all` 72개 전수 검사 통과 exit 0. 코드 변경 0.
-- push 완료(`main == origin/main`).
+- push 완료(`main == origin/main`). **실제 GitHub Actions 실행 결과(`gh run list` 직접 확인): `completed / success`**(커밋 `37f5eb7` 기준).
 
 ## 위치·전제
 
