@@ -97,6 +97,13 @@
 - **재검증**: `npm run verify` 160/160 · `smoke-server.mjs`/`smoke-tools.mjs`(SDK를 실제로 쓰는 스크립트) 정상·13/13 · `security-scan.mjs --all` 72개 통과 — 전부 exit 0, 회귀 없음.
 - push 완료(`main == origin/main`).
 
+## 🟢 2026-08-20 갱신(7) — v0.9.0 릴리즈(사용자 확인 후 진행)
+- **근거**: `git log v0.8.0..HEAD`로 확인한 결과 v0.8.0(2026-08-18) 이후 **28개 커밋**이 릴리즈 없이 쌓여 있었음(Gemini 어댑터·보안 자동 스캔+CI·서버 동시성 레이스 수정·원자적 쓰기·노션 Run Log 실배선·`npm audit` 5→0건 등 실동작 변경 다수 포함). 사용자님 기존 범용 규칙("모든 프로젝트 릴리즈 항상 최신 유지")과도 어긋난 상태였음.
+- **버전 판단**: 마이너(`0.9.0`) 선택 — 새 어댑터(Gemini) 추가라는 기능 확장이 있어 패치로는 축소 표기, 반대로 Codex·Gemini 자연어 트리거 라이브 검증이 아직 사람 몫이라 메이저(1.0.0) "완성 선언"은 시기상조.
+- **조치**: `package.json`/`package-lock.json`(`npm version minor --no-git-tag-version`)·`.claude-plugin/plugin.json`·`.claude-plugin/marketplace.json`·`mcp/server.mjs`(SERVER_INFO) 6곳 전부 `0.9.0`으로 동기화(코드 내 "v0.8.0" 이력 주석 4곳은 그 시점 기록이라 의도적으로 유지, 손 안 댐).
+- **재검증**: `npm run verify` 160/160 · `smoke-server.mjs`/`smoke-tools.mjs` 13/13 · `security-scan.mjs --all` 72개 통과 — 전부 exit 0.
+- **정직성 원칙**: Release 노트에 Gemini·Codex 자연어 트리거·노션 라이브 검증은 "코드 완료, 라이브 미검증"으로 명시(과장 금지).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
