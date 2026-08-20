@@ -90,6 +90,13 @@
 - **판단**: 이번 감사에서 이보다 큰 결함은 못 찾음 — `01_PRD.md`·`03_PHASES.md` 명시 항목 중 AI가 실행 가능한 건 이 항목을 끝으로 사실상 소진. 남는 건 전부 사람 계정 필요 라이브 검증(노션·Codex·Gemini·마켓플레이스 신규설치)과 사람 승인 필요 공개 행동(`npm audit`, 버전 태그)뿐.
 - push 완료(`main == origin/main`).
 
+## 🟢 2026-08-20 갱신(6) — `npm audit` devDependency 취약점 6→0건, 사용자 승인 받아 처리
+- **사용자 확인**: 남은 항목 중 어느 걸 진행할지 직접 확인받음 — "npm audit 검토·처리"로 확정.
+- **검토**: `npm audit fix --dry-run`으로 변경분 사전 확인 — 전부 같은 메이저 버전 안 패치/마이너 업그레이드(ip-address 10.2.0→10.5.0, hono 4.12.23→4.13.3, fast-uri 3.1.2→3.1.5, body-parser 2.2.2→2.3.0, @hono/node-server 1.19.14→1.19.17, `content-type` 신규 추가). 전부 `@modelcontextprotocol/sdk`(devDependency, 테스트 스크립트 전용)의 전이 의존성이라 실사용 경로(`mcp/server.mjs`) 무영향 재확인(코드 어디서도 이 SDK를 import하지 않음, 여러 세션에 걸쳐 확인된 사실).
+- **조치**: `npm audit fix` 실행 → `npm audit` 재확인 결과 **5건(1 low·1 moderate·3 high) → 0건**. `package.json` 변경 없음(직접 의존성 범위 그대로), `package-lock.json`만 갱신.
+- **재검증**: `npm run verify` 160/160 · `smoke-server.mjs`/`smoke-tools.mjs`(SDK를 실제로 쓰는 스크립트) 정상·13/13 · `security-scan.mjs --all` 72개 통과 — 전부 exit 0, 회귀 없음.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
