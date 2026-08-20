@@ -192,6 +192,22 @@
 ### 변경 없음 — 사람 전담 4건 (재확인, AI가 다음 단계로 착수 불가)
 노션 실계정 라이브 검증·Codex 자연어 트리거 라이브 검증·Gemini 자연어 트리거 라이브 검증·마켓플레이스 신규설치 라이브 검증 — 전부 여러 세션에 걸쳐 사람 전담으로 확정된 경계, 이번에도 재확인만 하고 손대지 않음.
 
+## 🟢 2026-08-21 갱신(6) — README 4종(ko/en × md/html) 전면 갱신: 완전 초보자용 종합 문서 최신화
+
+> 사용자 요청("목차·설치·사전준비물·다운로드·빠른시작·명령어·업데이트요약(토글)·아키텍처·보안·FAQ·라이선스 등을 완전 초보자도 이해할 수 있게, ko/en·md/html 4개 파일 내용 100% 동일하게, 라이선스는 엄격한 기준으로")로 진행. 기존 README.md/README.en.md(692줄, 21개 섹션 구조)는 이미 이 요구사항 전체를 충족하는 구조였음(직접 확인) — 처음부터 새로 쓰지 않고, **날짜·버전·수치가 낡아 실제와 안 맞던 부분을 전수 대조해 정정**하는 방식으로 진행(불필요한 재작성 최소화).
+
+- **발견한 낡음/모순(직접 대조 확인)**:
+  1. 상단 배너·설치 절이 여전히 "2026-08-04 기준"·"버전 0.7.2"·"126개 테스트"로 표기 — 실제로는 `v0.9.0`(2026-08-20 릴리즈, `plugin.json`/`package.json` 직접 확인)·191개 테스트로 이미 갱신된 지 오래.
+  2. §13(업데이트 요약)·§17(현재 상태 표)에 2026-08-20~21 사이 작업(보안 자동 점검·CI·Gemini 어댑터·npm audit·status/project 필드·노션 Run Log 6개 스킬 배선·stripQuotes/MOC/replace_link 실결함 3건 수정) 전체가 누락돼 있었음.
+  3. §14(폴더 구조)에 e2e 스크립트가 "5개"로 표기 — 실제로는 `e2e-collect-cli-real.mjs` 추가로 6개(`ls scripts/` 직접 확인), `.github/workflows/`·`.githooks/`도 트리에 없었음.
+  4. 직전 세션(갱신(5))에서 새로 찾은 두 갱신 사항(classify 자연어 트리거 배선 보강 필요·Link.reason/kind 미구현)을 "앞으로 남은 것" 토글에도 정직하게 반영.
+- **조치**: 위 4가지를 README.md/README.en.md에 동일하게 반영(문장 구조는 유지, 사실만 갱신 — 대규모 재작성 아님). 그 뒤 README.html/README.en.html은 **손으로 patch하지 않고 `pandoc -f gfm -t html`로 md 원본에서 새로 생성**해 4개 파일 간 사실 불일치 가능성을 원천 차단(기존 html은 2026-08-04 시점의 훨씬 낡은 md 구조를 반영하고 있어 수동 패치보다 재생성이 더 안전하다고 판단). 생성된 heading id가 기존 목차 앵커(`#6-설치-방법` 등)와 **글자 하나 안 틀리고 정확히 일치**함을 직접 확인(GFM 슬러그 알고리즘이 동일). 기존 CSS 스타일(다크모드 대응 포함)은 그대로 유지, TOC만 `<nav class="toc">`로 재포장.
+- **검증(md↔html 내용 일치)**: `<h2>` 개수(22개)·`<details>` 개수(6개)·`<h1>` 존재, 그리고 "191"·"v0.9.0"·"2026-08-21" 등 신규 사실 문구의 등장 횟수가 md/html 4개 파일 전부 정확히 동일함을 직접 카운트로 확인(추측 아님). ASCII 아키텍처 다이어그램(박스 문자)도 원본 그대로 보존 확인.
+- **라이선스 절(§20)**: 기존에 이미 Apache-2.0 조건(고지·NOTICE 유지·상표 미부여)·외부 도구별 개별 라이선스표(Node/SDK/notesmd-cli/mcp-obsidian/notion-mcp-server/Notion API/Obsidian, 각각 상업적 이용 가능여부 명시)·데이터 저작권 귀속·AS-IS 면책까지 전부 갖춰져 있었음(재확인, 내용 변경 없음) — "엄격한 기준" 요구사항은 이미 충족돼 있다고 판단해 이번엔 손대지 않음.
+- **범위 밖으로 확인만 하고 안 건드린 것**: 저장소 루트의 `README.pdf`/`README.en.pdf`/`GUIDE.ko.pdf`/`GUIDE.en.pdf`(2026-08-02 생성, 이번 README 갱신 내용 미반영) — README.md/README.en.md 어디서도 이 PDF들을 링크하지 않는 걸 확인해(grep) 사용자 도달 경로상 모순 위험은 없다고 판단, 이번 요청 범위(md+html 4개) 밖이라 재생성하지 않음.
+- **검증**: `npm run verify` 191/191(exit 0, 회귀 없음) · `security-scan.mjs --all` 72개 통과. 코드 변경 0, 문서 4개 파일만 변경.
+- push 예정(`main == origin/main`).
+
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
 
 - **(낡은 기록, 참고용)** 작업 위치: worktree `D:/AI_Dev_Work/2026y/wikimate-connect`, 브랜치 `feat/v0.8-connect` (main `b905cc3`/v0.7.1에서 분기)

@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it takes your scattered materials (web
 
 > 📱 **Device note**: Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets** (Claude Code and Codex, the AI programs you talk to, are themselves PC-only programs).
 
-> ✅ **Current status (as of 2026-08-04, honestly)**: All **8** MCP tools are merged into `main` and pushed to GitHub. **All 126 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
+> ✅ **Current status (as of 2026-08-21, honestly)**: Current version **v0.9.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 191 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
 
 This document is written so that **someone who has never touched AI, a computer, a mobile device, or any electronic device before** can follow it step by step from top to bottom. Every hard term is spelled out in plain language.
 
@@ -160,7 +160,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 To verify, check `/mcp` — success means you see all **8**:
 `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog` · `wikimate_vaults` · `wikimate_link` · `wikimate_classify` · `wikimate_summarize`
 
-> ℹ️ This repo's `.claude-plugin/plugin.json` still shows version `0.7.2` (to be bumped at the next stable release) — but the **`main` branch code itself already includes all 8 tools**, so installing via the method above gets you every feature described in this document. We're being upfront that the version number and the actual feature set are temporarily out of sync.
+> ℹ️ This repo is currently versioned **`v0.9.0`** (released 2026-08-20), and the `main` branch code already includes all 8 tools. Installing via the method above gets you every feature described in this document.
 
 ### Codex
 
@@ -409,14 +409,37 @@ npm start        # run the MCP server
 </details>
 
 <details>
+<summary><b>✅ Phase 3: automated security scan, CI, Gemini adapter, v0.9.0 release (2026-08-20) (click to expand)</b></summary>
+
+- 🔒 **Automated release security scan** (`scripts/security-scan.mjs`) — matches only real API-key/token/private-key formats (minimizes false positives). An optional pre-commit hook (`.githooks/pre-commit`) can also check before every commit.
+- 🤖 **New GitHub Actions CI** — every push/PR to `main` makes GitHub's own server automatically re-run `npm run verify` (core logic), the server-protocol checks, and the security scan, with no human involved. A second safety net even if you forget to check locally.
+- 🌐 **Gemini CLI adapter added** — `GEMINI.md` + `adapters/gemini/SETUP.md`. The registration commands (`gemini mcp add/list/remove`) were actually run and verified.
+- 🧹 **`npm audit` vulnerabilities: 5 → 0** — safely patched only the verification-only devDependency's transitive dependencies (confirmed in code to have zero effect on the actual server).
+- 🏷️ **v0.9.0 official release** — GitHub tag and Release published.
+- Most of this is docs/config only, so it doesn't affect the core behavior (organizing, linking, classifying, summarizing notes).
+
+</details>
+
+<details>
+<summary><b>✅ Status/project fields + full Notion Run Log wiring (2026-08-20 to 21) (click to expand)</b></summary>
+
+- 🏷️ **Added "progress status" and "related project" to classify** — say something like "I'm done with this note, mark it done" and it also updates the progress status (inbox/draft/done) and project name (only when asked, never inferred).
+- ⚠️ **Secret-looking-string detection** — if the material you're organizing (a web page, a chat log, etc.) contains something that looks like an API key or password, the preview screen warns you before saving ("there's something like this, want to remove it first?") — it never force-deletes it (raw-text-preservation principle).
+- 📇 **Notion Run Log wired into every feature** — the "log what the AI did" write to Notion, previously wired only into the organize feature, is now wired into linking, classifying, summarizing, and the fix side of health-check too.
+- 🐛 **3 real defects found and fixed during re-verification**: (1) a saved value with a backslash or quote came back different when read again, (2) re-running "build a table of contents" kept silently piling up duplicate entries, (3) the "replace a link" feature could create a link to a note that didn't even exist. All three were reproduced, root-caused, fixed, and re-verified; automated tests grew from 180 to 191.
+
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
-- The Codex natural-language rule file (`AGENTS.md`) now describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
-- Live verification of the actual Codex CLI natural-language triggers is planned.
-- The structure and security check needed for marketplace registration (`.claude-plugin/plugin.json`/`marketplace.json`, the automated deployment security scan) are done (2026-08-20) — only a live verification of a real fresh install by an actual user remains (same principle as Codex/Gemini). Whether to bump the `plugin.json` version number is a separate open question.
+- **Classify's "mark as done" natural-language trigger needs strengthening (newly found, 2026-08-21)**: the status/project feature itself is complete, but the guidance the AI relies on to auto-trigger it hasn't fully caught up yet, so a plain-language request may not reliably fire it. To be sure, use the `/wikimate-classify` slash command or name the tool directly ("use wikimate_classify to change the status"). A fix is planned for the next update.
+- **Recording "why" or "what kind" a link was made is not implemented yet (design under review)**: right now only the fact that two notes are related gets saved — the reason or relationship type doesn't. This needs a storage-format decision before it can be added.
+- The Codex natural-language rule file (`AGENTS.md`) already describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
+- The **Gemini CLI adapter**'s registration commands are verified, but live verification of real natural-language triggering is still pending user confirmation.
+- **Live marketplace fresh-install verification**: the structure/security checks are done (2026-08-20) — only a live check of a brand-new user installing it from scratch remains.
+- **Live Notion-indexing verification**: the structure, logic, bidirectional link (`notion_id`), and Run Log are all complete in code (2026-08-21) — only a check in a real, connected Notion account remains.
 - A Python-based advanced extractor is not implemented yet.
-- A Gemini CLI adapter (`GEMINI.md`+`adapters/gemini/SETUP.md`) was added (2026-08-20) — registration commands verified live; actual natural-language trigger live-testing is still pending user confirmation.
-- Live verification of Notion indexing in an environment with a real, connected Notion account is still pending (the structure/logic itself has been implemented and code-reviewed — as of 2026-08-17 this now includes the note-to-Notion link-back, `notion_id`, in both directions).
 
 </details>
 
@@ -453,7 +476,9 @@ SoDam-WikiMate/
 ├── adapters/codex/       Codex setup guide (SETUP.md)
 ├── adapters/gemini/      Gemini CLI setup guide (SETUP.md)
 ├── templates/note.md     Note template
-├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 5 e2e scripts) + automated security scan (security-scan.mjs)
+├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 6 e2e scripts) + automated security scan (security-scan.mjs)
+├── .github/workflows/    GitHub Actions CI (ci.yml, auto re-runs on every push/PR)
+├── .githooks/            Optional pre-commit security hook (enable via git config core.hooksPath)
 ├── .mcp.json             Auto-registers the MCP server on install
 ├── AGENTS.md             Cross-tool (Codex, Gemini) common rules
 ├── GEMINI.md             Gemini CLI context file (content just points to AGENTS.md)
@@ -547,10 +572,16 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Review subagent (wikimate-reviewer) | ✅ Done (structurally) | Explicitly covers collect/link/classify/summarize |
 | Codex — the MCP tools themselves | ✅ Confirmed working | All 8 tools confirmed responding correctly via the server protocol (2026-08-04) |
 | Codex — natural-language auto-trigger (link/classify/summarize) | 🟡 Documented, live-unverified | `AGENTS.md` was updated on 2026-08-17 with rules for these 3 tools. Whether `codex exec` actually fires them from natural language is not yet live-tested (pending user go-ahead) |
-| Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id, added 2026-08-17), and **Notion Run Log mirroring (added 2026-08-19)** are all structurally/skill-level complete. `NOTION_RUNLOG_DB_ID` had been documented but never actually wired up until now. User confirmation in a real, connected Notion environment is still pending |
-| Formal marketplace registration | 🟡 Structure & security check done, live verification pending | `plugin.json`/`marketplace.json` structure confirmed valid; Phase 3 precondition (automated deployment security scan, `scripts/security-scan.mjs`) met (2026-08-20). Live verification of a real user's fresh install is still pending |
+| Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id), and **Notion Run Log mirroring (2026-08-19 to 21, wired into all 6 skills)** are all structurally/skill-level complete. User confirmation in a real, connected Notion environment is still pending |
+| Formal marketplace registration | 🟡 Structure & security check done, live verification pending | `plugin.json`/`marketplace.json` structure confirmed valid (currently v0.9.0); Phase 3 precondition (automated deployment security scan, `scripts/security-scan.mjs` + GitHub Actions CI) met (2026-08-20). Live verification of a real user's fresh install is still pending |
 | Python advanced extractor | 🔴 Not implemented | Planned only, no code yet |
 | Gemini adapter | 🟡 Code complete, live-unverified | Registration commands (`gemini mcp add/list/remove`) verified live (2026-08-20, Gemini CLI 0.52.0). Actual natural-language triggering needs a real Gemini API call, so it's pending user confirmation (same principle as Codex) |
+| Automated release security scan + CI | ✅ Done (2026-08-20) | `scripts/security-scan.mjs` + GitHub Actions (auto re-runs on every `main` push/PR). Confirmed by actually seeing it block a commit with a fake API key |
+| `npm audit` vulnerabilities | ✅ 0 (2026-08-20) | 5 → 0. Only patched transitive dependencies of a verification-only devDependency the real server never uses |
+| Progress status (status) & related project (project) | ✅ Done (2026-08-20) | Added to `wikimate_classify`, changes only when asked (never inferred). **However, the natural-language auto-trigger still needs strengthening** (see next row) |
+| Classify's "mark as done" natural-language auto-trigger | 🟡 Feature complete, trigger wiring needs strengthening (newly found, 2026-08-21) | The feature itself (changing status/project) works correctly, but the guidance that makes it fire reliably from plain language still needs work. For now, naming `/wikimate-classify` or the tool directly triggers it reliably |
+| Recording why/what-kind a link was made (Link.reason/kind) | 🔴 Not implemented (design under review) | Only the fact that notes are related gets saved — not why or what kind of relationship. A storage-format decision is needed before this can move forward |
+| Re-verification defect fixes | ✅ Done (2026-08-21) | Save/re-read value mismatch, MOC duplicate buildup, and link creation to a nonexistent note — all 3 reproduced, root-caused, fixed, and re-verified. Automated tests grew from 180 to 191 |
 
 ---
 
