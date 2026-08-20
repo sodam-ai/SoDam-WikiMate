@@ -76,6 +76,13 @@
 - **범위 확인**: PRD가 명시한 항목 그 자체(새 기능 추가 아님), 코드 변경 0. Codex/Gemini/노션/마켓플레이스 신규설치 같은 사람 계정이 필요한 항목은 전혀 안 건드림.
 - push 완료(`main == origin/main`). **실제 GitHub Actions 첫 실행 결과(`gh run list`로 직접 확인): `completed / success`** — 로컬 사전 재현뿐 아니라 실제 서버에서도 그린 확인됨(커밋 `edaa60d` 기준).
 
+## 🟢 2026-08-20 갱신(4) — CI에 프로토콜(서버경유) 계층 테스트 편입, 남은 사각지대 해소
+- **발견**: 방금 만든 CI가 `npm run verify`(160개, `mcp/lib/*.mjs` 함수를 직접 호출)만 돌고, `scripts/smoke-tools.mjs`(실제 MCP 서버를 stdio로 띄워 JSON-RPC 프로토콜로 8개 도구 전부 호출, 13개 판정)는 빠져 있었음. 서버 배선(인자 이름 변환 등) 계층에서만 나던 과거 실측 결함(예: `atomic_note` 매핑 문제) 사례가 있어, 라이브러리 함수 검증만으로는 못 잡는 사각지대였음.
+- **안전성 직접 확인**: `smoke-tools.mjs` 실행 전후 `sandbox-vault/` 전체 파일수·해시 대조 → 완전히 동일(37개, 동일 해시) — 소스 확인 결과 이 스크립트는 `os.tmpdir()`의 완전히 격리된 임시 볼트만 쓰고 종료 시 스스로 정리함(sandbox-vault 미접촉). CI에 넣어도 안전함을 실측으로 확인.
+- **조치**: `.github/workflows/ci.yml`에 `node scripts/smoke-tools.mjs` 단계 추가(`npm run verify` 다음, `security-scan.mjs --all` 앞). 새 의존성 없음(SDK는 이미 devDependency), 시크릿 불필요.
+- 로컬 사전 재현 전부 통과: `npm run verify` 160/160 exit 0 · `smoke-tools.mjs` 13/13 exit 0 · `security-scan.mjs --all` 72개 전수 검사 통과 exit 0. 코드 변경 0.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).

@@ -20,4 +20,6 @@ jobs:
 
       - run: npm run verify
 
+      - run: node scripts/smoke-tools.mjs
+
       - run: node scripts/security-scan.mjs --all
