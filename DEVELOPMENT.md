@@ -8,7 +8,7 @@
 ## 로컬 검증
 ```bash
 npm install        # 검증용 devDependency(@modelcontextprotocol/sdk)만 설치 — 플러그인 실행엔 불필요
-npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 171개 체크
+npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 174개 체크
 npm start          # MCP 서버(stdio) 실행
 ```
 
@@ -54,7 +54,7 @@ node scripts/collect-real.mjs
 `main`에 push하거나 PR을 올릴 때마다 GitHub 서버가 아래 3단계를 **사람 개입 없이 자동으로** 재실행한다(`.github/workflows/ci.yml`).
 ```
 npm ci
-npm run verify                    # 유닛 171개
+npm run verify                    # 유닛 174개
 node scripts/smoke-tools.mjs      # 프로토콜(서버경유) 13개
 node scripts/security-scan.mjs --all   # 전체 추적 파일 보안 스캔
 ```
@@ -104,3 +104,4 @@ git config core.hooksPath .githooks
 - 추적 파일·git 히스토리에 토큰/키/개인경로 없음 (`.env`는 `.gitignore`, `security-scan.mjs`로도 자동 차단).
 - 입력 text는 데이터로만 저장(인젝션 방어), CLI는 셸 없이 실행(주입 방지).
 - 노트 제목/폴더는 경로구분자·금지문자·제어문자 정리 + 볼트 밖 경로 차단.
+- 수집 원문(text)에 시크릿처럼 보이는 문자열이 있으면 `wikimate_collect`가 dry-run 단계에서 advisory로 미리 알림(2026-08-20 추가). 원문 보존 원칙상 자동으로 지우거나 막지는 않음 — `scripts/security-scan.mjs`와 같은 패턴(`mcp/lib/shared.mjs`의 `SECRET_PATTERNS`)을 공유해서 씀.

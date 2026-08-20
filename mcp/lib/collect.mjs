@@ -9,7 +9,7 @@ import { join, resolve, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { appendRunLog } from "./runlog.mjs";
-import { safeComponent, writeFileAtomic } from "./shared.mjs";
+import { safeComponent, writeFileAtomic, SECRET_PATTERNS } from "./shared.mjs";
 
 const execFileP = promisify(execFile);
 
@@ -185,6 +185,15 @@ export async function collect({ vault, vaultPath, folder = "", title, url = "", 
   }
   if (content.length > LARGE_TEXT_CHARS) {
     advisories.push(`대용량 원문: ${content.length}자예요. 자르지 않고 그대로 저장하지만, 볼트 용량이 신경 쓰이면 나중에 직접 정리하세요.`);
+  }
+  // 04_PROJECT_SPEC.md "절대 하지 마": API 키·토큰·비밀번호를 볼트·노트에 저장하지 말 것.
+  // 원문(text)은 그대로 보존하는 게 이 도구의 설계 원칙(요약 금지)이라 여기서 자동으로 지우거나 막지는 않고,
+  // security-scan.mjs와 같은 패턴으로 미리 알려서 사람이 승인 전에 판단하게 한다(정보 제공용, 매칭값은 로그에 안 남김).
+  const secretScanText = `${title}\n${content}`;
+  for (const p of SECRET_PATTERNS) {
+    if (p.re.test(secretScanText)) {
+      advisories.push(`⚠️ 시크릿처럼 보이는 문자열이 있어요("${p.name}" 패턴). 이 노트는 원문을 그대로 저장하니, 실제 키·비밀번호라면 저장 전에 지우는 걸 권장해요.`);
+    }
   }
   const hash = sourceHash(origin, content);
   const cliAvailable = await hasNotesmdCli();

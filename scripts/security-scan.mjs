@@ -4,16 +4,7 @@
 // (예: NOTION_RUNLOG_DB_ID 같은 환경변수 이름이나 notion_id: "" 같은 빈 필드는 매칭 안 됨).
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
-
-const PATTERNS = [
-  { name: "OpenAI/Anthropic 스타일 API 키", re: /\bsk-[A-Za-z0-9_-]{20,}\b/ },
-  { name: "GitHub 토큰", re: /\bgh[pousr]_[A-Za-z0-9]{20,}\b/ },
-  { name: "Notion 토큰", re: /\b(secret|ntn)_[A-Za-z0-9]{32,}\b/ },
-  { name: "AWS Access Key", re: /\bAKIA[0-9A-Z]{16}\b/ },
-  { name: "Slack 토큰", re: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/ },
-  { name: "개인키 블록", re: /-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/ },
-  { name: "일반 시크릿 할당(키=긴 값)", re: /\b(api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][A-Za-z0-9_\-/+=]{16,}["']/i },
-];
+import { SECRET_PATTERNS as PATTERNS } from "../mcp/lib/shared.mjs";
 
 // stdio를 명시적으로 pipe로 고정 — git이 실패할 때 자기 usage 도움말(수십 KB)을 화면에 그대로
 // 흘리는 걸 막는다(실측: 지정 안 하면 git repo 밖에서 실행 시 이 텍스트가 그대로 새어나감).

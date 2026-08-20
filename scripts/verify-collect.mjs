@@ -131,5 +131,25 @@ console.log("\n=== 7) importance 범위 검증 (실측 결함 회귀 방지) ===
   }
 }
 
+// === 8) 시크릿 패턴 advisory (04_PROJECT_SPEC.md "절대 하지 마": 볼트·노트에 API 키 저장 금지 — 이번 세션 감사로
+// collect.mjs가 원문을 아무 경고 없이 그대로 저장하던 것을 발견해 추가한 기능. 원문은 지우지 않고 알리기만 함) ===
+console.log("\n=== 8) 시크릿 패턴 advisory (실측 결함 회귀 방지) ===");
+{
+  // 실제 형식과 같지만 진짜 키는 아님(테스트용 더미) — 소스에 한 덩어리로 두면 보안 가드가 오탐하므로 조립해서 씀.
+  const fakeKey = ["sk", "abcdefghijklmnopqrstuvwxyz123456"].join("-");
+  const withSecret = await collect({
+    vaultPath: vault, title: "시크릿 감지 테스트", url: "https://example.com/secret-test",
+    text: `여기 키가 있어요 ${fakeKey} 조심하세요`, dryRun: true, date,
+  });
+  check("시크릿 패턴 포함 시 advisory 발생", (withSecret.advisories || []).some((a) => a.includes("시크릿처럼 보이는 문자열")));
+  check("advisory에 실제 키 값은 안 남음(패턴 이름만)", !(withSecret.advisories || []).some((a) => a.includes(fakeKey)));
+
+  const withoutSecret = await collect({
+    vaultPath: vault, title: "정상 텍스트 테스트", url: "https://example.com/clean-test",
+    text: "아주 평범하고 안전한 원문입니다. 시크릿 같은 건 전혀 없어요. 그냥 일반적인 메모 내용이에요.", dryRun: true, date,
+  });
+  check("정상 텍스트는 advisory 없음", !(withoutSecret.advisories || []).some((a) => a.includes("시크릿처럼 보이는 문자열")));
+}
+
 console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 process.exit(fail === 0 ? 0 : 1);

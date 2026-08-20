@@ -4,6 +4,19 @@
 import { isAbsolute, resolve, relative, join, dirname, basename } from "node:path";
 import { mkdir, copyFile, writeFile, rename, unlink } from "node:fs/promises";
 
+// 시크릿처럼 생긴 값 패턴("키워드 언급"이 아니라 "실제 토큰 형식"만 매칭 — 오탐 최소화).
+// scripts/security-scan.mjs(배포물 스캔)와 collect.mjs(수집 원문 advisory)가 공유해서 쓴다 —
+// 두 곳에 따로 정의하면 한쪽만 고치고 잊어버려 패턴이 어긋나는 사고(이 프로젝트가 여러 번 겪은 유형)를 막기 위함.
+export const SECRET_PATTERNS = [
+  { name: "OpenAI/Anthropic 스타일 API 키", re: /\bsk-[A-Za-z0-9_-]{20,}\b/ },
+  { name: "GitHub 토큰", re: /\bgh[pousr]_[A-Za-z0-9]{20,}\b/ },
+  { name: "Notion 토큰", re: /\b(secret|ntn)_[A-Za-z0-9]{32,}\b/ },
+  { name: "AWS Access Key", re: /\bAKIA[0-9A-Z]{16}\b/ },
+  { name: "Slack 토큰", re: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/ },
+  { name: "개인키 블록", re: /-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/ },
+  { name: "일반 시크릿 할당(키=긴 값)", re: /\b(api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][A-Za-z0-9_\-/+=]{16,}["']/i },
+];
+
 // 옵시디언 볼트 7폴더 표준(02_DATA_MODEL.md:40-49). 원자노트·MOC는 NOTES.
 export const FOLDERS = {
   INBOX: "00_Inbox",

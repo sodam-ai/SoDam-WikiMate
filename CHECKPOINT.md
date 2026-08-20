@@ -110,6 +110,12 @@
 - **검증**: `verify-classify.mjs`에 신규 회귀 11개 추가(23→34) — 잘못된 status 거부, 정상 변경, 멱등 재요청, 다른 필드(summary) 보존 등. `npm run verify` 총계 **160→171**. `smoke-tools.mjs` 서버경유 실배선 확인 1개 추가(13→14). `security-scan.mjs --all` 72개 통과. 전부 exit 0.
 - push 완료(`main == origin/main`).
 
+## 🟢 2026-08-20 갱신(9) — `04_PROJECT_SPEC.md` "절대 하지 마" 규칙 감사: 수집 원문 시크릿 무경고 저장 발견·수정
+- **발견(직접 확인, 추측 아님)**: `04_PROJECT_SPEC.md` §4의 "API 키·토큰·비밀번호·개인정보를 볼트·노트·배포물에 저장하지 마" 규칙이 "배포물"(`security-scan.mjs`) 쪽만 지켜지고 있었고, "볼트·노트" 쪽은 전혀 안 지켜지고 있었음 — `wikimate_collect`는 사용자가 넘긴 원문(`text`)을 시크릿 패턴 검사 없이 그대로 노트에 저장했음. 실제 채팅로그·웹페이지를 그대로 아카이브하는 이 도구의 설계상, 원본에 실수로 남은 API 키가 있으면 영구히 평문 노트로 박제될 수 있는 구조였음.
+- **조치**: `security-scan.mjs`의 시크릿 패턴 배열을 `mcp/lib/shared.mjs`의 `SECRET_PATTERNS`로 공용화(두 곳에 따로 정의해 어긋나는 사고 방지) → `collect.mjs`가 이를 재사용해 `title`+`text`에서 패턴이 발견되면 dry-run advisory로 미리 알림. **원문은 삭제·수정하지 않음**(이 도구의 "원문 보존" 원칙 유지) — 차단이 아니라 사람이 승인 전에 판단하도록 정보만 제공(기존 저신뢰/대용량 advisory와 동일한 톤). advisory 텍스트엔 실제 매칭값을 남기지 않음(`security-scan.mjs`와 동일한 원칙).
+- **검증**: `verify-collect.mjs`에 신규 회귀 3개(시크릿 감지·값 미노출·정상텍스트 무경고) 추가(19→22). `npm run verify` 총계 **171→174**. `security-scan.mjs --all`이 리팩터 후에도 72개 그대로 통과(자기 자신의 패턴 배열을 옮긴 것이라 회귀 위험이 가장 컸던 지점). `smoke-server`/`smoke-tools` 정상. 전부 exit 0.
+- push 완료(`main == origin/main`).
+
 ## 위치·전제
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
