@@ -124,9 +124,18 @@
 - **수정**: `stripQuotes`를 `mcp/lib/shared.mjs`에 하나로 통합 — 값이 `"..."` 형태(JSON 문자열)면 `JSON.parse`로 정확히 복원하고, 아니면(과거 수동 작성 노트 등 하위호환) 기존 방식으로 폴백. 세 파일 모두 로컬 정의 제거하고 공용 함수 import로 교체(SECRET_PATTERNS 통합 때와 같은 이유 — 각자 따로 두면 한 곳만 고치고 잊는 사고가 남).
 - **재검증**: `verify-classify.mjs`(+3, 백슬래시/따옴표 저장·재조회 일치·멱등 확인)·`verify-summarize.mjs`(+3, 동일 패턴) 신규 회귀 추가. `npm run verify` 총계 174→**180**. `node --check` 전체 clean. `smoke-server`/`smoke-tools`(14/14) 정상. 실볼트 e2e 5종(link/classify/moc/summarize/collect-cli) 전부 재실행 exit 0 — `link.mjs`가 바뀌어 title/summary 표시 경로가 있는 것들 위주로 재확인. 서버(JSON-RPC) 레벨에서 `status`에 숫자·스키마 밖 문자열, `project`에 배열을 직접 주입해도 크래시 없이 정상 거부/처리(실제 노트 파일 해시 불변으로 무결성 확인). `security-scan.mjs`(staged) clean. `obsidian.json` 해시 재확인 — 세션 시작 시점과 100% 동일.
 - **참고(결함 아님, 관찰)**: `project`에 배열을 보내면 서버가 타입 거부 없이 `String(...)`로 조용히 콤마 join함(`["a","b"]`→`"a,b"`) — `title`/`tags` 등 기존 자유문자열 필드들과 동일한 기존 관용(느슨한 타입 허용)이라 이번 범위에서 별도 수정 안 함.
-- push 예정(`main == origin/main`).
+- push 완료(`main == origin/main`).
 
-## 위치·전제
+## 🟢 2026-08-21 갱신(2) — "다음 Phase" 재감사: 노션 Run Log 스킬 배선을 나머지 4개 스킬로 확장
+
+> Phase -1~3 전부 정의된 항목이 소진된 상태에서 "다음 Phase"를 다시 물어, `03_PHASES.md`엔 Phase 4가 없음을 재확인. 대신 CHECKPOINT 자신이 "다음 단계로 보류"라 적어 둔 미완료 갭 1건을 실행.
+
+- **발견(직접 grep 대조, 추측 아님)**: "2026-08-19 갱신(2)"에서 "1단계 범위는 `wikimate-organize`만(다른 스킬 확장은 의도적으로 다음 단계로 보류 — 여러 스킬 동시 변경 리스크 회피)"라고 적어뒀는데, 6개 스킬 파일 전체를 `Run Log|runlog|NOTION_RUNLOG` 패턴으로 검색한 결과 `wikimate-organize/SKILL.md` **딱 1곳**에서만 매칭 — 나머지 5개(link/classify/summarize/lint/query)엔 여전히 0건이었음.
+- **조치**: `wikimate-link`(`add_links`/`build_moc`)·`wikimate-classify`(`apply`)·`wikimate-summarize`(`apply`)·`wikimate-lint`(자신은 읽기전용이지만 5번 단계에서 부르는 `wikimate_fix`의 `archive`/`replace_link`) 4개 스킬에 organize와 동일한 "노션 Run Log" 절(DB 확정→행 속성→graceful 실패→프라이버시 고지) 추가, 각 스킬의 "결과 보고" 단계에도 Run Log 기록 여부 보고 문구 추가. **`wikimate-query`는 제외**(읽기전용, 실제 쓰기가 없어 Run Log 대상 자체가 없음 — 정확히 확인 후 제외, 임의 누락 아님).
+- **범위 준수**: 진행 중 `wikimate-classify/SKILL.md`의 `apply` 인자 목록에 이전 세션에서 이미 추가된 `status`/`project`가 문서화 안 돼 있는 걸 발견했으나, 이번 승인 범위(Run Log 확장)를 벗어나는 별개 갭이라 **되돌리고 손대지 않음**(drive-by 변경 금지 원칙).
+- **자체 재검토로 발견·수정**: `wikimate-lint/SKILL.md`에 처음 쓴 문장에 "절대로"(뜻: 결코) 오타가 들어가 "절(section) 기준으로"라는 의도와 반대로 읽히는 걸 재확인 중 발견, 즉시 수정.
+- **검증**: 코드 변경 0(전부 스킬 프롬프트 문서), `npm run verify` **180/180 그대로**(exit 0, 재확인 완료) · `security-scan.mjs --all` 72개 통과. 스킬 자동발동은 세션 재시작 후 실사용으로만 확인 가능(2026-08-18 MOC 트리거 수정 때와 동일한 한계) — 이번 세션에서 프로그램적으로 검증 가능한 범위는 여기까지.
+- push 예정(`main == origin/main`).
 
 > ⚠️ 아래는 2026-07-11(병합 전) 기록 — **낡음**. 현재(2026-08-04)는 `feat/v0.8-connect`·`feat/m3-summarize` 둘 다 `main`에 병합 완료, **작업은 main worktree `D:/AI_Dev_Work/2026y/26y_06m_10d_SoDam-WikiMate`에서 직접** 함(더 이상 별도 worktree 불필요). `npm run verify`는 이제 8개 스크립트 체인(collect/lint/fix/runlog/vaults/link/classify/summarize). `sandbox-vault/`는 이 worktree에 이미 존재하고 e2e 스크립트로 계속 실측 사용 중(복사 불필요).
 

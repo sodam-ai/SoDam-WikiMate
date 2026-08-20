@@ -28,7 +28,14 @@ version: 0.1.0
    - **깨진 링크**: `action="replace_link"` — 비슷한 실제 노트를 후보로 제시(오타·이동 가능). 사용자가 고른 대상으로 `from`→`to` 치환(수정 전 자동 백업). 마땅한 대상이 없으면 `to`를 비워 링크 제거(이것도 확인 후).
    - **고아·frontmatter**: v1은 **고치기보다 안내**(고아는 "관련 노트에 `[[링크]]` 달기/폴더 이동" 제안, frontmatter는 누락 키 안내). 본문 자동 재작성은 안 함(오손상 위험).
    - **끊긴 노션 색인**: AI가 노션 행을 못 지울 수 있음 → 사용자가 노션에서 직접 삭제하도록 안내(임의 삭제 X).
-   - 🔒 모든 `wikimate_fix`는 **dry_run 먼저 → 사람 확인 → 실행**. 비가역·치환은 끌 수 없는 개별 확인선.
+   - 🔒 모든 `wikimate_fix`는 **dry_run 먼저 → 사람 확인 → 실행**. 비가역·치환은 끌 수 없는 개별 확인선. 실행 후엔 노션 Run Log 기록 여부(성공/실패/생략)도 사용자에게 보고한다(아래 "노션 Run Log" 절 참고).
+
+### 노션 Run Log (안전 기록 — 실제 쓰기 뒤 매번)
+- **범위**: `wikimate_fix`가 실제로 쓰기를 한(`dry_run=false`이고 `ok:true`인) 모든 경우(`archive`·`replace_link`), 로컬 Run Log(`.wikimate/runlog.jsonl`, 코어가 자동 기록)와 1:1로 대응하는 행을 노션에도 남긴다.
+- **DB 확정**: `NOTION_RUNLOG_DB_ID`가 있으면 그 DB, 없으면 Notion 검색으로 "Wikimate Run Log"를 찾고, 그래도 없으면 "만들까요?" 묻는다(임의 생성 X — 존재 자체로 연결을 단정하지 말고 실제 노션 도구로 확인, `wikimate-organize` 스킬과 동일 원칙).
+- **행 속성**(02_DATA_MODEL.md `NotionRunLog`): `Run date`, `Request`(받은 명령 요약 — 예: "중복 노트 A를 99_Archive로 이동" / "깨진 링크 [[X]]를 [[Y]]로 치환"), `Changed notes`(대상 노트, 가능하면 `Obsidian Link` 형식), `Errors`(있을 때만), `Human approved`(개별 승인했음을 항상 표시 — `wikimate_fix`는 항상 개별 확인 후 실행하므로 `true`).
+- **실패해도 무해(graceful)**: 실패해도 원래 쓰기는 이미 끝난 뒤라 되돌리거나 막지 않는다 — "노션 Run Log 기록 실패(로컬에는 정상 기록됨)"라고만 정직히 보고. 로컬 `.wikimate/runlog.jsonl`이 항상 진실원본, 노션은 거울.
+- **프라이버시**: 노트 제목·경로가 노션 클라우드로 올라갈 수 있음 — 민감하면 끄도록 안내(Organize 스킬 C5와 동일 원칙).
 
 ## 보고 형식
 ```
