@@ -17,6 +17,9 @@ try {
   await mkdir(join(root, ".obsidian"), { recursive: true });
   await writeFile(join(root, "30_Notes", "중복B.md"), "---\ntitle: 중복B\n---\n중복본", "utf8");
   await writeFile(join(root, "30_Notes", "링크원본.md"), "---\ntitle: 링크원본\n---\n- [[없는노트]]\n- [[연결대상]]", "utf8");
+  // replace_link의 to(치환 대상)는 실제 존재하는 노트여야 하므로(안전 불변 조건 #4), 아래 두 노트를 fixture로 미리 만들어 둔다.
+  await writeFile(join(root, "30_Notes", "연결대상.md"), "---\ntitle: 연결대상\n---\n치환 대상 노트", "utf8");
+  await writeFile(join(root, "30_Notes", "새이름.md"), "---\ntitle: 새이름\n---\n치환 대상 노트", "utf8");
 
   // 1) archive dry-run (이동 안 함)
   const a1 = await fix({ vaultPath: root, action: "archive", note: "30_Notes/중복B.md", dryRun: true });
@@ -35,6 +38,15 @@ try {
   const body = await readFile(join(root, "30_Notes", "링크원본.md"), "utf8");
   check("replace_link 실제: [[없는노트]]→[[연결대상]] 치환됨", r2.replaced === 1 && !body.includes("[[없는노트]]") && (body.match(/\[\[연결대상\]\]/g) || []).length === 2);
   check("replace_link: 수정 전 백업 생성됨", !!r2.backup && await exists(join(root, r2.backup)));
+
+  // 4b) ★실측으로 발견한 결함 회귀 방지: to(치환 대상)가 실제로 없는 노트면 거부(깨진 링크 생성 금지, 안전 불변 조건 #4)
+  //     — add_links/build_moc은 이미 대상 존재를 검증하는데 replace_link만 빠져 있어서, 존재하지 않는 이름으로도
+  //     조용히 링크가 만들어졌었음(실제 재현 확인). 파일이 그대로인지까지 함께 확인한다.
+  await writeFile(join(root, "30_Notes", "깨진링크테스트.md"), "---\ntitle: 깨진링크테스트\n---\n- [[없는노트]]", "utf8");
+  const r2b = await fix({ vaultPath: root, action: "replace_link", note: "30_Notes/깨진링크테스트.md", from: "없는노트", to: "존재하지않는노트XYZ", dryRun: false });
+  check("replace_link: 존재하지 않는 to는 거부(ok:false)", r2b.ok === false);
+  const bodyAfterReject = await readFile(join(root, "30_Notes", "깨진링크테스트.md"), "utf8");
+  check("replace_link: 거부 후 파일 미변경([[없는노트]] 그대로)", bodyAfterReject.includes("[[없는노트]]"));
 
   // 5) 경로 이탈 차단
   const t1 = await fix({ vaultPath: root, action: "archive", note: "../밖으로.md", dryRun: true });

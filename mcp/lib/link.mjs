@@ -189,21 +189,33 @@ function findMocHeading(body) {
   return null;
 }
 
+// 헤딩 바로 다음 줄부터, 다음 "## " 헤딩 직전(또는 본문 끝)까지의 절대 위치를 찾는다.
+// (과거 `(?=\r?\n## |\r?\n?$)` 형태는 m 플래그에서 $가 "매 줄 끝"에도 매칭돼 첫 멤버 줄 뒤에서 조기 종료되는 결함이 있었음 — 실측으로 발견.)
+function findMocMembersRange(body) {
+  const heading = findMocHeading(body);
+  if (!heading) return null;
+  const startRe = new RegExp(`^${escapeRe(heading)}\\r?\\n`, "m");
+  const startMatch = startRe.exec(body || "");
+  if (!startMatch) return null;
+  const contentStart = startMatch.index + startMatch[0].length;
+  const rest = body.slice(contentStart);
+  const nextHeading = /\r?\n## /.exec(rest);
+  const contentEnd = nextHeading ? contentStart + nextHeading.index : body.length;
+  return { heading, headingStart: startMatch.index, contentStart, contentEnd };
+}
+
 // 멤버 섹션만 잘라낸다(다른 섹션은 손대지 않기 위한 경계 탐지). 없으면 "".
 function getMocMembersSection(body) {
-  const heading = findMocHeading(body);
-  if (!heading) return "";
-  const re = new RegExp(`^${escapeRe(heading)}\\r?\\n([\\s\\S]*?)(?=\\r?\\n## |\\r?\\n?$)`, "m");
-  const m = re.exec(body || "");
-  return m ? m[1] : "";
+  const range = findMocMembersRange(body);
+  return range ? body.slice(range.contentStart, range.contentEnd) : "";
 }
 
 // 멤버 섹션만 surgical 치환(기존 헤딩이 무엇이든 그 헤딩 유지, 없으면 canonical 헤딩으로 본문 끝에 추가) — 다른 섹션은 보존.
 function replaceMocMembersSection(body, newSectionBody) {
-  const heading = findMocHeading(body) || MOC_SECTION_HEADING;
-  const re = new RegExp(`^${escapeRe(heading)}\\r?\\n[\\s\\S]*?(?=\\r?\\n## |\\r?\\n?$)`, "m");
+  const range = findMocMembersRange(body);
+  const heading = (range && range.heading) || MOC_SECTION_HEADING;
   const replacement = `${heading}\n${newSectionBody}`;
-  if (re.test(body || "")) return body.replace(re, replacement);
+  if (range) return body.slice(0, range.headingStart) + replacement + body.slice(range.contentEnd);
   const base = (body || "").replace(/\s+$/, "");
   return `${base}\n\n${replacement}\n`;
 }

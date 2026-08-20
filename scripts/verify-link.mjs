@@ -135,6 +135,40 @@ try {
   const m13 = await link({ vaultPath: vault, action: "build_moc", topic: "테스트주제2", targets: ["없는노트2"], dryRun: false });
   check("build_moc: 존재하지 않는 노트 거부", m13.ok === false);
 
+  // 13b) build_moc: 3개 이상 멤버 상태에서 새 멤버 추가 시 전부 보존 + 정확한 줄 수(중복/절삭 없음)
+  //      실측으로 발견한 회귀 — 과거 정규식은 헤딩 다음 첫 멤버 줄 뒤에서 조기 종료돼, 여러 멤버 중 마지막 것들을
+  //      갱신 때마다 놓치고(멱등성 오판) 원본 그대로 남겨 다음 갱신에서 중복이 계속 쌓였음(sandbox-vault 실측: 노트 1개가
+  //      11번 중복). `.includes()`만 쓰는 검사로는 이 결함이 안 드러나 이번엔 정확한 bullet 줄 수까지 센다.
+  const m13b1 = await link({ vaultPath: vault, action: "build_moc", topic: "다중멤버", targets: ["X", "Y", "Z"], dryRun: false });
+  check("build_moc 다중멤버 신규: ok", m13b1.ok === true && m13b1.created === true);
+  const moc13bPath = join(vault, "30_Notes", "MOC_다중멤버.md");
+  const m13b2 = await link({ vaultPath: vault, action: "build_moc", topic: "다중멤버", targets: ["B"], dryRun: false });
+  check("build_moc 다중멤버 갱신: ok + added", m13b2.ok === true && m13b2.added.includes("[[B]]"));
+  const moc13bText = await readFile(moc13bPath, "utf8");
+  const bulletCount13b = (moc13bText.match(/^- \[\[/gm) || []).length;
+  check("build_moc 다중멤버 갱신: 기존 X/Y/Z + 신규 B 전부 보존", ["X", "Y", "Z", "B"].every((t) => moc13bText.includes(`[[${t}]]`)));
+  check("build_moc 다중멤버 갱신: bullet 줄 수 정확히 4개(중복 없음)", bulletCount13b === 4);
+
+  // 13c) build_moc: 다중 멤버 상태에서 "마지막" 멤버(Z)를 재요청해도 정확히 skipped_duplicate
+  //      (과거 결함은 헤딩 바로 다음 첫 줄만 검사해, 목록 뒤쪽 멤버 재요청은 "이미 있음"을 못 알아채고 중복 추가했었음)
+  const m13c = await link({ vaultPath: vault, action: "build_moc", topic: "다중멤버", targets: ["Z"], dryRun: false });
+  check("build_moc 다중멤버: 마지막 멤버 재요청 → skipped_duplicate", m13c.skipped_duplicate === true);
+  const moc13cText = await readFile(moc13bPath, "utf8");
+  check("build_moc 다중멤버: 재요청 후에도 bullet 줄 수 그대로 4개", (moc13cText.match(/^- \[\[/gm) || []).length === 4);
+
+  // 13d) build_moc: 레거시 alias 헤딩("## 묶인 노트 (members)")에서도 다중 멤버 보존 + 중복 없음
+  const legacyMocPath = join(vault, "30_Notes", "MOC_레거시.md");
+  await writeFile(
+    legacyMocPath,
+    ["---", 'title: "MOC_레거시"', "type: moc", "topic: \"레거시\"", "created: 2026-01-01", "---", "", "## 묶인 노트 (members)", "- [[X]]", "- [[Y]]", ""].join("\n"),
+    "utf8"
+  );
+  const m13d = await link({ vaultPath: vault, action: "build_moc", topic: "레거시", targets: ["Z"], dryRun: false });
+  check("build_moc 레거시 헤딩: ok + added", m13d.ok === true && m13d.added.includes("[[Z]]"));
+  const legacyText = await readFile(legacyMocPath, "utf8");
+  check("build_moc 레거시 헤딩: 기존 X/Y + 신규 Z 전부 보존", ["X", "Y", "Z"].every((t) => legacyText.includes(`[[${t}]]`)));
+  check("build_moc 레거시 헤딩: bullet 줄 수 정확히 3개(중복 없음)", (legacyText.match(/^- \[\[/gm) || []).length === 3);
+
   // 14) 셀프링크 거부 (실측으로 발견한 결함 회귀 방지 — X.md가 자기 자신 "X"를 targets로 요청)
   const a14 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/X.md", targets: ["X"], dryRun: false });
   check("셀프링크 요청 거부", a14.ok === false && /자기 자신/.test(a14.reason || ""));

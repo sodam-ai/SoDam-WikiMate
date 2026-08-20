@@ -210,7 +210,7 @@ GitHub에 새 버전이 올라가도, 내 PC의 **마켓플레이스 캐시는 �
 > ```
 > npm install     # 검증용 도구 설치(@modelcontextprotocol/sdk)
 > npm start       # MCP 서버를 직접 실행 (보통은 안 해도 됨)
-> npm run verify  # 핵심 로직 전부 자동 검증(180개 체크)
+> npm run verify  # 핵심 로직 전부 자동 검증(189개 체크)
 > ```
 
 ---
@@ -361,7 +361,7 @@ Wikimate는 **안전을 가장 중요하게** 만들었어요. 항상 이 순서
 ### 개발·검증용 (터미널, 고급)
 ```
 npm install      # 검증용 도구 설치(@modelcontextprotocol/sdk)
-npm run verify   # 핵심 로직 전부 자동 검증(180개 체크)
+npm run verify   # 핵심 로직 전부 자동 검증(189개 체크)
 npm start        # MCP 서버 실행
 ```
 

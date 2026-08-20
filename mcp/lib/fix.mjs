@@ -9,9 +9,19 @@
 import { readFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, basename } from "node:path";
-import { resolveVaultPath, listVaults } from "./collect.mjs";
+import { resolveVaultPath, listVaults, walkVault } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
 import { safeInside, backupFile, writeFileAtomic } from "./shared.mjs";
+
+// to(치환 대상)가 실제로 볼트에 있는 노트인지 확인(존재 검증된 노트로만 링크 — 안전 불변 조건 #4).
+// add_links/build_moc은 이미 이 검증을 하는데 replace_link만 빠져 있어서 실측으로 발견 — 여기서만 새로 추가.
+async function noteExists(root, title) {
+  const target = String(title).toLowerCase();
+  for await (const p of walkVault(root)) {
+    if (basename(p).replace(/\.md$/i, "").toLowerCase() === target) return true;
+  }
+  return false;
+}
 
 // 정규식 메타문자 이스케이프(링크 대상에 특수문자가 와도 리터럴로)
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -55,6 +65,9 @@ export async function fix({ vault, vaultPath, action, note, from = "", to = "", 
     const fromTok = `[[${from}]]`;
     const toTok = to ? `[[${to}]]` : "(제거)";
     if (occurrences === 0) return { ok: false, reason: `노트에 [[${from}]] 링크가 없어요.` };
+    if (to && !(await noteExists(root, to))) {
+      return { ok: false, reason: `존재하지 않는 노트로는 링크를 바꿀 수 없어요(깨진 링크 방지): ${to}` };
+    }
     if (dryRun) return { ok: true, dry_run: true, action, note, from: fromTok, to: toTok, occurrences };
     const backup = await backupFile(root, abs, stamp);
     const next = text.replace(re, (_m, bang, suffix) => (to ? `${bang}[[${to}${suffix || ""}]]` : ""));
