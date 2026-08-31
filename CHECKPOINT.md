@@ -249,6 +249,10 @@
 - **커밋/푸시는 아직 안 함** — 사용자가 명시적으로 요청할 때만 커밋하는 것이 원칙이라(git 안전 규칙), 이 세션은 구현·검증까지만 완료하고 대기 중. `git status`로 변경 파일 11개(`.PRD/02_DATA_MODEL.md`, `AGENTS.md`, `commands/wikimate-classify.md`, `commands/wikimate-link.md`, `mcp/lib/link.mjs`, `mcp/server.mjs`, `scripts/smoke-tools.mjs`, `scripts/verify-link.mjs`, `skills/wikimate-classify/SKILL.md`, `skills/wikimate-link/SKILL.md`, `skills/wikimate-organize/SKILL.md`) 확인 가능.
 - **다음 세션 후보(2026-08-31 시점 기록, 아래 2026-09-01 절에서 (d) 실행됨)**: (a) 위 변경분 커밋/푸시(사용자 승인 필요), (b) `chore/remove-guide-pdfs` 브랜치 병합(사용자 직접, PR 링크는 2026-08-21 갱신(7) 참고), (c) `Link.kind`(관계 종류 구분)는 여전히 미구현·미결, (d) README(ko/en × md/html 4종)에 이번 변경 미반영 — 다음 "README 갱신" 세션에서 함께 반영할 것(이번엔 의도적으로 범위 밖).
 
+## 🟢 2026-09-01(4) — `02_DATA_MODEL.md` "[NEEDS CLARIFICATION]" 완전 종결
+`02_DATA_MODEL.md`에 남은 마지막 미결 사항 2건(신뢰도 자동 판정 기준·태그 체계)을 코드·스킬 문서와 직접 대조. **둘 다 새로 결정할 필요 없이 PRD 추천값 그대로 이미 구현돼 있었음** — 신뢰도는 `skills/wikimate-organize/SKILL.md` C4 규칙(출처 도메인 자동추정+확인필요 표시, 2026-08-19에 이미 반영)에, 태그는 `mcp/lib/classify.mjs`(고정 사전 없는 자유 문자열, `existing_tags`로 재사용만 유도)에 이미 있었음. 체크박스만 갱신, 코드 변경 0. `.PRD/README.md`의 "데이터/운영" 미결 목록도 동일하게 갱신. `npm run verify` 215/215·`security-scan.mjs --all` 72개 재확인.
+**의미**: 이로써 `.PRD/` 6개 문서 전체를 통틀어 "PRD가 정의했는데 아직 코드/문서로 확인 안 된" 항목이 소진됨 — 이번 세션(6회 반복된 "PRD 전수재독" 요청)에서 실제로 찾아 고친 결함 총 목록: README 낡음(테스트개수·날짜) → `.PRD/README.md` 자체 낡음(제목-본문 모순) → 미결사항 4개 오판정 → 3문서(01/04/.PRD-README) 상호모순 → `03_PHASES.md` Phase3 표 모순 → `Link.kind` 미구현(진짜 신기능) → 버전 미동기화(12커밋 무릴리즈) → `02_DATA_MODEL.md` 미결 2건 오판정.
+
 ## 🟢 v0.10.0 릴리즈 (2026-09-01(3))
 
 > 사용자 질문("마켓플레이스+플러그인을 원했는데 로컬 플러그인이 아니라 GitHub 저장소에도 올라가야 하는 거 아니야?")에 답하며 발견: 이 작업 폴더 자체가 이미 마켓플레이스 저장소(`sodam-ai/SoDam-WikiMate`)이고 이번 세션 커밋들도 전부 `origin/main`에 push는 됐으나, **`v0.9.0`(2026-08-20) 이후 커밋 12개(신기능 2개 포함)가 쌓였는데 버전 번호는 그대로**였음 — 이 프로젝트가 예전에 이미 겪은 "로컬 마켓플레이스 캐시가 버전 안 바뀌면 업데이트를 인식 못함" 함정과 정확히 같은 위험. 사용자 확인 후 진행.
