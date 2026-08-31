@@ -8,9 +8,9 @@ description: 관련 노트끼리 [[링크]]로 연결(자동 링크, 노트당 �
 ## A. 노트끼리 연결 (`add_links`)
 1. 볼트 확정(이름 또는 경로). 모르면 `wikimate_vaults`로 후보를 묻는다.
 2. `wikimate_link`를 `action:"suggest"`로 호출해 후보(title·summary·tags)를 읽기전용으로 본다.
-3. 유사도 엔진 없이 **직접 관련도를 판단**한다 — 확실한 것만, 노트당 최대 5개. 왜 관련 있는지 한 줄 이유도 정리해 둔다.
+3. 유사도 엔진 없이 **직접 관련도를 판단**한다 — 확실한 것만, 노트당 최대 5개. 왜 관련 있는지 한 줄 이유도 정리해 둔다. 확실하면 관계 종류(`kind`: `related`/`reference`)도 판단(애매하면 생략).
 4. 계획을 보고하고 `AskUserQuestion`으로 [연결하기/건너뛰기/수정] 개별 승인을 받는다(비가역 편집이라 사전승인 무관).
-5. 승인된 것만 `wikimate_link`를 `action:"add_links", dry_run:false, reason:<3번 이유>`로 호출한다(reason은 노트 본문 "## 왜 연결했는지" 섹션에 기록됨).
+5. 승인된 것만 `wikimate_link`를 `action:"add_links", dry_run:false, reason:<3번 이유>, kind:<3번 종류(선택)>`로 호출한다(둘 다 노트 본문 "## 왜 연결했는지" 섹션의 같은 불릿 줄에 기록됨 — kind는 괄호로).
 6. 결과(반영된 related·백업 경로)를 재확인 후 보고하고, 그래프뷰 확인은 사용자에게 안내한다.
 
 ## B. 목차(MOC) 만들기·갱신 (`build_moc`)

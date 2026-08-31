@@ -125,6 +125,7 @@ const linkTool = {
       topic: { type: "string", description: "build_moc: MOC 주제(예: 'MCP'). 파일명은 MOC_<주제>.md" },
       targets: { type: "array", items: { type: "string" }, description: "add_links: 연결할 노트 제목 배열(최대 5개까지). build_moc: 묶을 노트 제목 배열(상한 없음). 둘 다 존재하는 노트만 허용." },
       reason: { type: "string", description: "add_links(선택): 이번 요청에서 새로 추가되는 링크들에 공통으로 적용할 '왜 연결했는지' 한 줄 이유. 대상 노트 본문의 '## 왜 연결했는지' 섹션에 불릿으로 추가됨(기존 불릿은 보존). 생략하면 섹션 자체가 생기지 않음(하위호환)." },
+      kind: { type: "string", enum: ["related", "reference"], description: "add_links(선택): 이번 요청에서 새로 추가되는 링크들의 관계 종류. related(단순 관련) 또는 reference(참고자료). 같은 '## 왜 연결했는지' 섹션의 불릿에 괄호로 병기됨(예: '- [[노트]] (reference) — 이유'). reason 없이 kind만 지정해도 됨." },
       notion_id: { type: "string", description: "set_notion_id: 대상 노트에 기록할 노션 페이지 ID 또는 URL(호출자가 노션 도구로 행을 만든 뒤 그 결과를 넘김). 연결을 지우려면 빈 문자열." },
       vault: { type: "string", description: "옵시디언 볼트 '이름'(미지정 시 OBSIDIAN_VAULT_NAME)" },
       vault_path: { type: "string", description: "볼트 폴더 절대경로(미지정 시 OBSIDIAN_VAULT_PATH)" },
@@ -277,6 +278,7 @@ async function runLink(args = {}) {
       targets: args.targets || [],
       notionId: args.notion_id,
       reason: args.reason,
+      kind: args.kind,
       dryRun: args.dry_run !== false, // 기본 true
     });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };

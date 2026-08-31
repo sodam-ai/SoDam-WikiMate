@@ -54,6 +54,10 @@ await writeFile(join(vault, "30_Notes", "이유R2.md"), note("이유R2"), "utf8"
 await writeFile(join(vault, "30_Notes", "이유R3.md"), note("이유R3"), "utf8");
 await writeFile(join(vault, "30_Notes", "이유R4.md"), note("이유R4"), "utf8");
 await writeFile(join(vault, "30_Notes", "이유R5.md"), note("이유R5"), "utf8");
+await writeFile(join(vault, "30_Notes", "종류K1.md"), note("종류K1"), "utf8");
+await writeFile(join(vault, "30_Notes", "종류K2.md"), note("종류K2"), "utf8");
+await writeFile(join(vault, "30_Notes", "종류K3.md"), note("종류K3"), "utf8");
+await writeFile(join(vault, "30_Notes", "종류K4.md"), note("종류K4"), "utf8");
 
 try {
   // 1) suggest: related 키 없는 노트 → 후보 목록 + remaining_slots=5
@@ -270,6 +274,31 @@ try {
   const r1AfterUserSection = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
   check("reason 실제: 사용자가 직접 쓴 다른 섹션 보존됨", r1AfterUserSection.includes("건드리면 안 됨"));
   check("reason 실제: 새 불릿도 정상 추가됨(사용자 섹션은 안 건드림)", r1AfterUserSection.includes("- [[이유R5]] — 다섯 번째"));
+
+  // 29) Link.kind(2026-09-01 신규): 잘못된 값 거부 — 파일 미변경, 크래시 아님
+  const r29 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/종류K1.md", targets: ["종류K2"], kind: "임의값", dryRun: false });
+  check("kind 잘못된 값: 거부(ok:false)", r29.ok === false && /kind는 다음 중 하나/.test(r29.reason));
+  const k1AfterInvalid = await readFile(join(vault, "30_Notes", "종류K1.md"), "utf8");
+  check("kind 잘못된 값 거부: frontmatter related 미변경(값 자체가 안 써짐)", !k1AfterInvalid.includes("종류K2"));
+
+  // 30) Link.kind: reason 없이 kind만 지정해도 섹션이 생기고 괄호로 기록됨
+  const r30 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/종류K1.md", targets: ["종류K2"], kind: "related", dryRun: false });
+  check("kind만 지정: ok + kind_recorded:true + reason_recorded 없음", r30.ok === true && r30.kind_recorded === true && !("reason_recorded" in r30));
+  const k1AfterKindOnly = await readFile(join(vault, "30_Notes", "종류K1.md"), "utf8");
+  check("kind만 지정: 불릿에 괄호로 기록됨(이유 없이)", k1AfterKindOnly.includes("- [[종류K2]] (related)") && !k1AfterKindOnly.includes("- [[종류K2]] (related) —"));
+
+  // 31) Link.kind: kind+reason 동시 지정 → 같은 불릿 한 줄에 괄호+이유 순서로 병기
+  const r31 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/종류K1.md", targets: ["종류K3"], kind: "reference", reason: "참고 자료라서", dryRun: false });
+  check("kind+reason 동시: ok", r31.ok === true);
+  const k1AfterBoth = await readFile(join(vault, "30_Notes", "종류K1.md"), "utf8");
+  check("kind+reason 동시: 괄호+이유 순서로 한 줄에 기록", k1AfterBoth.includes("- [[종류K3]] (reference) — 참고 자료라서"));
+  check("kind+reason 동시: 이전 kind-only 불릿(종류K2)도 보존(append)", k1AfterBoth.includes("- [[종류K2]] (related)"));
+
+  // 32) Link.kind: dry-run에서 would_add_kind 미리보기, 파일 변경 없음
+  const r32 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/종류K1.md", targets: ["종류K4"], kind: "related", dryRun: true });
+  check("kind dry-run: would_add_kind 반환", r32.would_add_kind === "related");
+  const k1AfterDry = await readFile(join(vault, "30_Notes", "종류K1.md"), "utf8");
+  check("kind dry-run: 파일 미변경(종류K4 미기록)", !k1AfterDry.includes("종류K4"));
 
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {

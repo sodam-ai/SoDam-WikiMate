@@ -25,6 +25,8 @@ import {
 const MAX_RELATED_PER_NOTE = 5; // A: 링크 과잉 연결 방지(03_PHASES.md Phase 2 주의사항) — 코드 레벨 강제
 // MOC(members)는 한 주제를 포괄하는 목차라 개념상 5개 상한을 적용하지 않는다(주제 색인 vs 노트간 과잉연결은 다른 문제 — 의도적 구분).
 
+const KIND_VALUES = ["related", "reference"]; // Link.kind(02_DATA_MODEL.md) — status(classify.mjs)와 동일한 고정 enum 패턴, 오타·임의값 방지
+
 const MOC_SECTION_HEADING = "## 관련 노트";
 
 function resolveRoot(vault, vaultPath) {
@@ -100,9 +102,18 @@ async function suggest({ root, note }) {
 
 // action:"add_links" — 승인된 링크를 note의 frontmatter related에 멱등 병합.
 // 대상 존재 검증(깨진 링크 방지) → 5개 상한 검사(침묵 절삭 금지, 초과 시 에러로 명시) → dry_run 보고 → 백업 → surgical 치환 → RunLog.
-async function addLinks({ root, note, targets = [], dryRun = true, ts, reason }) {
+async function addLinks({ root, note, targets = [], dryRun = true, ts, reason, kind }) {
   if (!note) return { ok: false, reason: "대상 note(볼트 내 상대경로)가 필요해요." };
   if (!targets.length) return { ok: false, reason: "연결할 targets(노트 제목 배열)가 필요해요." };
+
+  // kind 검증 — 파일 I/O 전에 먼저(빠른 실패). 빈 값/undefined는 "지정 안 함"으로 허용.
+  let cleanKind = "";
+  if (kind != null && String(kind).trim() !== "") {
+    cleanKind = String(kind).trim();
+    if (!KIND_VALUES.includes(cleanKind)) {
+      return { ok: false, reason: `kind는 다음 중 하나여야 해요: ${KIND_VALUES.join(", ")} (받은 값: ${JSON.stringify(kind)}).` };
+    }
+  }
 
   const abs = safeInside(root, note);
   if (!abs) return { ok: false, reason: "볼트 밖 경로이거나 .obsidian이라 수정할 수 없어요(차단)." };
@@ -154,13 +165,15 @@ async function addLinks({ root, note, targets = [], dryRun = true, ts, reason })
     };
   }
 
-  // Link.reason(왜 연결했는지) — frontmatter가 아니라 본문 "## 왜 연결했는지" 섹션에 병행 기록(2026-08-31 확정).
+  // Link.reason(왜 연결했는지)·Link.kind(연결 종류) — frontmatter가 아니라 본문 "## 왜 연결했는지" 섹션에
+  // 병행 기록(reason=2026-08-31, kind=2026-09-01 확정, 같은 불릿 줄에 kind는 괄호로 표기).
   // 개행은 불릿 한 줄 구조를 깨서 한 줄로 정규화. 빈 문자열/공백만 있으면 기록하지 않음(섹션 생성 강요 안 함).
   const cleanReason = reason != null ? String(reason).replace(/\r?\n+/g, " ").trim() : "";
 
   if (dryRun) {
     const result = { ok: true, dry_run: true, note, would_add: newTokens, resulting_related: merged };
     if (cleanReason) result.would_add_reason = cleanReason;
+    if (cleanKind) result.would_add_kind = cleanKind;
     return result;
   }
 
@@ -169,9 +182,9 @@ async function addLinks({ root, note, targets = [], dryRun = true, ts, reason })
   const newLine = serializeRelatedList(merged);
   let next = replaceFrontmatterLine(text, "related", newLine);
 
-  if (cleanReason) {
+  if (cleanReason || cleanKind) {
     const existingSection = getReasonSection(next);
-    const newSectionBody = appendReasonBullets(existingSection, newTokens, cleanReason);
+    const newSectionBody = appendLinkBullets(existingSection, newTokens, cleanKind, cleanReason);
     next = replaceReasonSection(next, newSectionBody);
   }
 
@@ -181,12 +194,13 @@ async function addLinks({ root, note, targets = [], dryRun = true, ts, reason })
     action: "add_links",
     request: note,
     changed: note,
-    detail: `+${newTokens.join(", ")}${cleanReason ? ` (이유: ${cleanReason})` : ""}`,
+    detail: `+${newTokens.join(", ")}${cleanKind ? ` (종류: ${cleanKind})` : ""}${cleanReason ? ` (이유: ${cleanReason})` : ""}`,
     backup,
     result: "ok",
   });
   const result = { ok: true, dry_run: false, note, added: newTokens, resulting_related: merged, backup };
   if (cleanReason) result.reason_recorded = true;
+  if (cleanKind) result.kind_recorded = true;
   return result;
 }
 
@@ -236,15 +250,22 @@ const replaceMocMembersSection = (body, newSectionBody) => replaceHeadingSection
 // 정규식이라 frontmatter 구조를 바꾸면 기존 노트 전량이 영향받음(마이그레이션 위험) → frontmatter는 그대로 두고
 // 본문에 "## 왜 연결했는지" 섹션을 병행(무위험·되돌리기 쉬움). add_links에 reason을 안 넘기면 이 섹션 자체가 생기지
 // 않아 기존 노트/워크플로우에 전혀 영향 없다(하위호환).
+// Link.kind 저장 방식 — 2026-09-01 사용자 확정: 별도 섹션을 만들지 않고 같은 섹션·같은 불릿 줄에 괄호로 병기
+// (`- [[노트]] (kind) — 이유`). reason 없이 kind만 지정해도 이 섹션이 생긴다(둘 중 하나만 있어도 됨). 헤딩 자체는
+// 그대로 "## 왜 연결했는지"를 재사용 — kind 전용 섹션을 새로 만들면 같은 링크에 대한 정보가 두 곳으로 흩어져
+// (reason 목록과 kind 목록이 서로 다른 링크 집합을 가리키는) 정합성 드리프트 위험이 생기기 때문에 의도적으로 피함.
 const REASON_SECTION_HEADING = "## 왜 연결했는지";
 const REASON_HEADING_ALIASES = [REASON_SECTION_HEADING];
 const getReasonSection = (body) => getHeadingSection(body, REASON_HEADING_ALIASES);
 const replaceReasonSection = (body, newSectionBody) => replaceHeadingSection(body, REASON_HEADING_ALIASES, REASON_SECTION_HEADING, newSectionBody);
 
-// 기존 이유 불릿은 그대로 두고(사람이 손으로 고쳤을 수 있음 — 재작성하지 않음) 새로 추가된 링크만 뒤에 덧붙인다.
-function appendReasonBullets(existingSectionBody, newTokens, reason) {
+// 기존 불릿은 그대로 두고(사람이 손으로 고쳤을 수 있음 — 재작성하지 않음) 새로 추가된 링크만 뒤에 덧붙인다.
+// kind는 괄호로, reason은 " — "로 이어붙임. 둘 다 없으면 호출 자체가 안 됨(addLinks에서 cleanReason||cleanKind로 가드).
+function appendLinkBullets(existingSectionBody, newTokens, kind, reason) {
   const existingTrimmed = (existingSectionBody || "").replace(/\s+$/, "");
-  const newLines = newTokens.map((tok) => `- ${tok} — ${reason}`).join("\n");
+  const kindPart = kind ? ` (${kind})` : "";
+  const reasonPart = reason ? ` — ${reason}` : "";
+  const newLines = newTokens.map((tok) => `- ${tok}${kindPart}${reasonPart}`).join("\n");
   return existingTrimmed ? `${existingTrimmed}\n${newLines}` : newLines;
 }
 
@@ -381,7 +402,7 @@ async function setNotionId({ root, note, notionId, dryRun = true, ts }) {
 }
 
 // 메인 진입점. action: "suggest" | "add_links" | "build_moc" | "set_notion_id"
-export async function link({ vault, vaultPath, action, note, targets, topic, notionId, reason, dryRun = true, ts } = {}) {
+export async function link({ vault, vaultPath, action, note, targets, topic, notionId, reason, kind, dryRun = true, ts } = {}) {
   const root = resolveRoot(vault, vaultPath);
   if (!root) {
     const cand = listVaults();
@@ -394,7 +415,7 @@ export async function link({ vault, vaultPath, action, note, targets, topic, not
     };
   }
   if (action === "suggest") return suggest({ root, note });
-  if (action === "add_links") return addLinks({ root, note, targets, dryRun, ts, reason });
+  if (action === "add_links") return addLinks({ root, note, targets, dryRun, ts, reason, kind });
   if (action === "build_moc") return buildMoc({ root, topic, targets, dryRun, ts });
   if (action === "set_notion_id") return setNotionId({ root, note, notionId, dryRun, ts });
   return { ok: false, reason: `알 수 없는 action: ${action} (지원: suggest | add_links | build_moc | set_notion_id)` };

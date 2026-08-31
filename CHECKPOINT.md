@@ -249,6 +249,27 @@
 - **커밋/푸시는 아직 안 함** — 사용자가 명시적으로 요청할 때만 커밋하는 것이 원칙이라(git 안전 규칙), 이 세션은 구현·검증까지만 완료하고 대기 중. `git status`로 변경 파일 11개(`.PRD/02_DATA_MODEL.md`, `AGENTS.md`, `commands/wikimate-classify.md`, `commands/wikimate-link.md`, `mcp/lib/link.mjs`, `mcp/server.mjs`, `scripts/smoke-tools.mjs`, `scripts/verify-link.mjs`, `skills/wikimate-classify/SKILL.md`, `skills/wikimate-link/SKILL.md`, `skills/wikimate-organize/SKILL.md`) 확인 가능.
 - **다음 세션 후보(2026-08-31 시점 기록, 아래 2026-09-01 절에서 (d) 실행됨)**: (a) 위 변경분 커밋/푸시(사용자 승인 필요), (b) `chore/remove-guide-pdfs` 브랜치 병합(사용자 직접, PR 링크는 2026-08-21 갱신(7) 참고), (c) `Link.kind`(관계 종류 구분)는 여전히 미구현·미결, (d) README(ko/en × md/html 4종)에 이번 변경 미반영 — 다음 "README 갱신" 세션에서 함께 반영할 것(이번엔 의도적으로 범위 밖).
 
+## 🟢 2026-09-01(2) 갱신 — `Link.kind` 구현: PRD의 마지막 미구현 데이터 필드 종결
+
+> "PRD 재감사" 요청이 계속 같은 템플릿으로 반복돼(5회 이상) `AskUserQuestion`으로 실제 의도를 확인 → 사용자가 "Link.kind 저장 방식부터 논의"를 선택 → 저장 방식·값 범위 두 가지를 `AskUserQuestion`으로 다시 확인받은 뒤 구현.
+
+### 설계(사용자 확정)
+- **저장 방식**: 별도 섹션을 새로 만들지 않고, `Link.reason`과 **같은 "## 왜 연결했는지" 섹션·같은 불릿 줄에 괄호로 병기**(`- [[노트]] (kind) — 이유`). kind만 지정하고 reason은 생략 가능. 이유: 별도 섹션으로 분리하면 같은 링크에 대한 reason 목록과 kind 목록이 서로 다른 링크 집합을 가리키게 될(정합성 드리프트) 위험이 있어 기각.
+- **값 범위**: `related`/`reference` 2종 고정(자유 문자열 아님) — `classify.mjs`의 `status` 검증과 동일한 고정 enum 패턴, 오타·임의값 방지.
+
+### 구현
+- `mcp/lib/link.mjs`: `KIND_VALUES` 상수 + `addLinks`에 `kind` 검증(파일 I/O 전 빠른 실패) 추가. `appendReasonBullets` → `appendLinkBullets`로 일반화(kind 괄호 + reason 순서로 한 줄 조립). dry-run엔 `would_add_kind`, 실제 실행엔 `kind_recorded` 필드 추가. `link()` 메인 진입점에 `kind` 스레딩.
+- `mcp/server.mjs`: `wikimate_link` 스키마에 `kind`(enum: related/reference) 추가, `runLink` 핸들러 배선.
+- `skills/wikimate-link/SKILL.md`·`commands/wikimate-link.md`·`AGENTS.md`: 워크플로우 4·5·7·8단계에 kind 판단·전달·보고 반영.
+- `.PRD/02_DATA_MODEL.md`(결정됨 절)·`.PRD/README.md`(미결사항 체크+신규 서술절)에 설계 결정 기록.
+- `README.md`/`README.en.md`: 테스트 개수(206→215)·날짜(2026-08-31→2026-09-01) 갱신, §13에 신규 토글, §17 상태표 갱신, 직전 배치(Link.reason)의 "커밋 아직" 문구도 실제 커밋 완료 반영해 정정. `README.html`/`README.en.html`은 2026-08-21 확립 방법(pandoc 재생성)으로 재생성 — h2(22)·h3(29)·details(6→8) 개수 대조로 콘텐츠 손실 없음 확인.
+
+### 검증
+`scripts/verify-link.mjs` 신규 회귀 9개(74→83: 잘못된 값 거부, kind만 지정, kind+reason 동시, dry-run 미리보기, append 보존). `scripts/smoke-tools.mjs` 서버경유 배선 확인 1개(16→18). `npm run verify` 총계 206→**215**(전부 PASS). `security-scan.mjs --all` 72개 통과. `node --check` 전체 clean.
+
+### 현재 상태
+`.PRD/README.md` 자체 판단대로 **"`02_DATA_MODEL.md`가 정의한 Note/Link 필드 중 AI가 구현 가능한 항목은 이로써 전부 소진"** — 남은 미결은 신뢰도 자동판정 기준·태그 체계(둘 다 저위험, "추천 기본값으로 진행 가능"으로 이미 표시돼 있음)와, 사람 전담 라이브 검증 4건뿐.
+
 ## 🟢 커밋/푸시 완료 — 커밋 `8906423`(2026-09-01, `main == origin/main`)
 > 아래 "2026-09-01 갱신" 절 전체(Link.reason 구현·classify 트리거 보강·노션 안전규칙 문서화·README/PRD 5종 정합화, 총 20개 파일)가 이 커밋 하나로 push 완료됨. 이 문서 곳곳의 "커밋/푸시는 아직 안 함" 문구는 각 작성 시점 기준 정확한 기록이라 그대로 두되(과거 기록 임의수정 금지 원칙), **지금부터는 전부 커밋됨**이 맞음. `npm run security-check`(스테이징 파일 20개 전수) 통과 확인.
 

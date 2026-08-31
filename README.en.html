@@ -53,10 +53,10 @@ tablets</strong> (Claude Code and Codex, the AI programs you talk to,
 are themselves PC-only programs).</p>
 </blockquote>
 <blockquote>
-<p>✅ <strong>Current status (as of 2026-08-31, honestly)</strong>:
+<p>✅ <strong>Current status (as of 2026-09-01, honestly)</strong>:
 Current version <strong>v0.9.0</strong>. All <strong>8</strong> MCP
 tools are merged into <code>main</code> and pushed to GitHub.
-<strong>All 206 automated tests pass</strong>
+<strong>All 215 automated tests pass</strong>
 (<code>npm run verify</code>), verified via the real server protocol and
 via real Obsidian-vault end-to-end runs. <strong>Every push to
 <code>main</code> triggers GitHub's own server to re-run the same checks
@@ -511,7 +511,7 @@ see the 8 tools above.</li>
 yourself directly, in the cloned folder's terminal:</p>
 <pre><code>npm install     # installs verification tooling (@modelcontextprotocol/sdk)
 npm start       # runs the MCP server directly (usually unnecessary)
-npm run verify  # runs the full automated verification (206 checks)</code></pre>
+npm run verify  # runs the full automated verification (215 checks)</code></pre>
 </blockquote>
 <hr />
 <h2 id="8-quick-start-3-minute-walkthrough">8. Quick start (3-minute
@@ -672,7 +672,11 @@ table of contents"</p>
 <strong>title, summary, and tags only</strong> (never the body, for
 safety), and proposes matches — only the ones you approve get added to a
 note's info table (<code>related:</code>) as <code>[[links]]</code> (up
-to 5 per note). For a table-of-contents request, it creates or updates a
+to 5 per note). If you're confident, you can also record <strong>why
+it's linked</strong> and <strong>what kind of link it is</strong>
+(related = simple relation / reference = reference material) — both
+optional, saved in the note body (omit either and it behaves exactly as
+before). For a table-of-contents request, it creates or updates a
 per-topic <strong>table-of-contents note (MOC)</strong> in
 <code>30_Notes</code> (any content a person wrote by hand is preserved).
 (Tool: <code>wikimate_link</code> / Skill:
@@ -793,7 +797,7 @@ vaults) · <code>wikimate_link</code> (auto-link · MOC) ·
 <h3 id="devverification-terminal-advanced">Dev/verification (terminal,
 advanced)</h3>
 <pre><code>npm install      # install verification tooling (@modelcontextprotocol/sdk)
-npm run verify   # run all automated checks (206 checks)
+npm run verify   # run all automated checks (215 checks)
 npm start        # run the MCP server</code></pre>
 <hr />
 <h2 id="13-whats-new--changelog">13. What's new — changelog</h2>
@@ -932,7 +936,7 @@ tests grew from 180 to 191.</li>
 </details>
 
 <details>
-<summary><b>🆕 Link.reason recorded + classify natural-language trigger strengthened + Notion safety rules documented (2026-08-31, implemented & verified — not yet committed/pushed to main) (click to expand)</b></summary>
+<summary><b>🆕 Link.reason recorded + classify natural-language trigger strengthened + Notion safety rules documented (2026-08-31, click to expand)</b></summary>
 
 <ul>
 <li>🔗 <strong>Recording "why" a link was made is now possible</strong>
@@ -940,9 +944,7 @@ tests grew from 180 to 191.</li>
 when linking notes, you can now attach a reason like "both cover MCP
 setup," written into the note body's "## Why linked" section. Omit
 <code>reason</code> and everything works exactly as before (fully
-backward-compatible, no section gets created). <strong>"What kind" of
-link it is (<code>kind</code>, e.g. related vs. reference) still isn't
-stored</strong> — see "What's left" below.</li>
+backward-compatible, no section gets created).</li>
 <li>🏷️ <strong>Classify's "mark as done" trigger actually
 strengthened</strong> — fixed the gap found on 2026-08-21 (the feature
 was complete, but the guidance docs hadn't caught up, so plain language
@@ -956,15 +958,32 @@ once or twice on failure). These were already supposed-to-follow
 principles (<code>04_PROJECT_SPEC.md</code> "never do this"), just
 missing from the actual guidance docs (<code>AGENTS.md</code>, skills)
 until now.</li>
-<li>Automated tests grew from 191 to <strong>206</strong> (15 new
-regression checks for the link-reason feature, plus updated
-server-protocol checks). Also newly confirmed by direct testing:
-injecting an instruction-like sentence into <code>reason</code> gets
-stored only as data, never executed as a command.</li>
-<li>⚠️ <strong>Honest disclosure</strong>: this batch is implemented and
-verified locally, but <strong>not yet committed to <code>main</code> or
-pushed to GitHub</strong> (pending user go-ahead — this project only
-commits when the user explicitly asks).</li>
+<li>Automated tests grew from 191 to 206 (15 new regression checks for
+the link-reason feature, plus updated server-protocol checks). Also
+newly confirmed by direct testing: injecting an instruction-like
+sentence into <code>reason</code> gets stored only as data, never
+executed as a command.</li>
+<li>✅ Committed and pushed to <code>main</code>.</li>
+</ul>
+</details>
+
+<details>
+<summary><b>🆕 Link.kind recorded — related vs. reference (2026-09-01, click to expand)</b></summary>
+
+<ul>
+<li>🏷️ <strong>You can now record what kind of link it is</strong>
+(<code>wikimate_link</code> add_links, optional <code>kind</code>) —
+mark a relationship as a simple relation (<code>related</code>) or
+reference material (<code>reference</code>). It's shown on the same
+bullet line as the "why linked" note, in parentheses (e.g.
+<code>- [[note]] (reference) — the reason</code>). You can set
+<code>kind</code> without <code>reason</code>, and omitting both behaves
+exactly as before (backward-compatible).</li>
+<li>🔒 Only two values are allowed — <code>related</code> or
+<code>reference</code> — anything else is rejected before it's saved
+(prevents typos and arbitrary values).</li>
+<li>Automated tests grew from 206 to <strong>215</strong> (9 new
+regression checks), all PASS.</li>
 </ul>
 </details>
 
@@ -972,11 +991,6 @@ commits when the user explicitly asks).</li>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
 <ul>
-<li><strong>Recording "what kind" of link it is (Link.kind) is still not
-implemented (design under review)</strong>: the "why" was added on
-2026-08-31 (see above), but distinguishing relationship
-<strong>types</strong> (e.g. "related" vs. "reference") still needs a
-storage-format decision before it can be added.</li>
 <li>The Codex natural-language rule file (<code>AGENTS.md</code>)
 already describes natural-language triggers for auto-link,
 auto-classify, and auto-summarize too (added 2026-08-17). A live check
@@ -1340,15 +1354,14 @@ MOC trigger fix)</td>
 <td>✅ Done (2026-08-31)</td>
 <td>Added optional <code>reason</code> to <code>wikimate_link</code>
 add_links, recorded in the note body's "## Why linked" section. 15 new
-regression checks PASS. <strong>Not yet committed or pushed</strong>
-(pending user go-ahead)</td>
+regression checks PASS</td>
 </tr>
 <tr>
 <td>Recording what kind of link it is (Link.kind)</td>
-<td>🔴 Not implemented (design under review)</td>
-<td>Distinguishing relationship types like "related" vs. "reference"
-still has no storage space. A storage-format decision is needed before
-this can move forward</td>
+<td>✅ Done (2026-09-01)</td>
+<td>Fixed to <code>related</code>/<code>reference</code>, shown in
+parentheses on the same line as <code>reason</code>. 9 new regression
+checks PASS</td>
 </tr>
 <tr>
 <td>Notion permission scope &amp; rate-limit guidance</td>

@@ -77,6 +77,12 @@ try {
   const linkerText = await readFile(join(vault, "30_Notes", "linker.md"), "utf8");
   check("서버경유 link add_links reason: 본문에 '왜 연결했는지' 섹션 반영", linkerText.includes("## 왜 연결했는지") && linkerText.includes("서버경유 배선 확인용"));
 
+  // 6.7) link(add_links + kind, 2026-09-01 신규) — kind 인자가 서버 배선을 거쳐 실제로 괄호로 반영되는지
+  const kindR = parse(await client.callTool({ name: "wikimate_link", arguments: { vault_path: vault, action: "add_links", note: "30_Notes/linker.md", targets: ["target"], kind: "reference", dry_run: false } }));
+  check("서버경유 link add_links kind: kind_recorded:true", kindR.ok === true && kindR.kind_recorded === true);
+  const linkerText2 = await readFile(join(vault, "30_Notes", "linker.md"), "utf8");
+  check("서버경유 link add_links kind: 본문 불릿에 (reference) 괄호 반영", linkerText2.includes("- [[target]] (reference)"));
+
   // 7) classify를 서버 통해 호출 → suggest(읽기전용 조회) + apply(실제 폴더 이동)
   const clsSuggest = parse(await client.callTool({ name: "wikimate_classify", arguments: { vault_path: vault, action: "suggest", note: "00_Inbox/classifyme.md" } }));
   check("서버경유 classify suggest: ok + current_folder", clsSuggest.ok === true && clsSuggest.target?.current_folder === "00_Inbox");
