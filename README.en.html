@@ -54,7 +54,7 @@ are themselves PC-only programs).</p>
 </blockquote>
 <blockquote>
 <p>✅ <strong>Current status (as of 2026-09-01, honestly)</strong>:
-Current version <strong>v0.9.0</strong>. All <strong>8</strong> MCP
+Current version <strong>v0.10.0</strong>. All <strong>8</strong> MCP
 tools are merged into <code>main</code> and pushed to GitHub.
 <strong>All 215 automated tests pass</strong>
 (<code>npm run verify</code>), verified via the real server protocol and
@@ -413,10 +413,10 @@ finishes):</p>
 <code>wikimate_summarize</code></p>
 <blockquote>
 <p>ℹ️ This repo is currently versioned
-<strong><code>v0.9.0</code></strong> (released 2026-08-20), and the
-<code>main</code> branch code already includes all 8 tools. Installing
-via the method above gets you every feature described in this
-document.</p>
+<strong><code>v0.10.0</code></strong> (released 2026-09-01), and the
+<code>main</code> branch code already includes all 8 tools (including
+link-reason and link-kind recording). Installing via the method above
+gets you every feature described in this document.</p>
 </blockquote>
 <h3 id="codex">Codex</h3>
 <p>Codex has <strong>no</strong> <code>/plugin</code> marketplace.
@@ -988,6 +988,22 @@ regression checks), all PASS.</li>
 </details>
 
 <details>
+<summary><b>🏷️ v0.10.0 official release (2026-09-01) (click to expand)</b></summary>
+
+<ul>
+<li>Bumped the minor version to reflect everything accumulated since
+v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify
+natural-language trigger fix, Notion safety-rule documentation, and
+more. Synced across <code>package.json</code>, <code>plugin.json</code>,
+<code>marketplace.json</code>, and <code>mcp/server.mjs</code>.</li>
+<li>Live verification of Codex/Gemini natural-language triggers and a
+fresh marketplace install is still pending user confirmation, so this
+isn't yet a <code>1.0.0</code> "done" declaration — disclosing that
+honestly upfront.</li>
+</ul>
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
 <ul>
@@ -1302,7 +1318,7 @@ connected Notion environment is still pending</td>
 <td>🟡 Structure &amp; security check done, live verification
 pending</td>
 <td><code>plugin.json</code>/<code>marketplace.json</code> structure
-confirmed valid (currently v0.9.0); Phase 3 precondition (automated
+confirmed valid (currently v0.10.0); Phase 3 precondition (automated
 deployment security scan, <code>scripts/security-scan.mjs</code> +
 GitHub Actions CI) met (2026-08-20). Live verification of a real user's
 fresh install is still pending</td>

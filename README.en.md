@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it takes your scattered materials (web
 
 > 📱 **Device note**: Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets** (Claude Code and Codex, the AI programs you talk to, are themselves PC-only programs).
 
-> ✅ **Current status (as of 2026-09-01, honestly)**: Current version **v0.9.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 215 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
+> ✅ **Current status (as of 2026-09-01, honestly)**: Current version **v0.10.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 215 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
 
 This document is written so that **someone who has never touched AI, a computer, a mobile device, or any electronic device before** can follow it step by step from top to bottom. Every hard term is spelled out in plain language.
 
@@ -160,7 +160,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 To verify, check `/mcp` — success means you see all **8**:
 `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog` · `wikimate_vaults` · `wikimate_link` · `wikimate_classify` · `wikimate_summarize`
 
-> ℹ️ This repo is currently versioned **`v0.9.0`** (released 2026-08-20), and the `main` branch code already includes all 8 tools. Installing via the method above gets you every feature described in this document.
+> ℹ️ This repo is currently versioned **`v0.10.0`** (released 2026-09-01), and the `main` branch code already includes all 8 tools (including link-reason and link-kind recording). Installing via the method above gets you every feature described in this document.
 
 ### Codex
 
@@ -451,6 +451,14 @@ npm start        # run the MCP server
 </details>
 
 <details>
+<summary><b>🏷️ v0.10.0 official release (2026-09-01) (click to expand)</b></summary>
+
+- Bumped the minor version to reflect everything accumulated since v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify natural-language trigger fix, Notion safety-rule documentation, and more. Synced across `package.json`, `plugin.json`, `marketplace.json`, and `mcp/server.mjs`.
+- Live verification of Codex/Gemini natural-language triggers and a fresh marketplace install is still pending user confirmation, so this isn't yet a `1.0.0` "done" declaration — disclosing that honestly upfront.
+
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
 - The Codex natural-language rule file (`AGENTS.md`) already describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
@@ -591,7 +599,7 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Codex — the MCP tools themselves | ✅ Confirmed working | All 8 tools confirmed responding correctly via the server protocol (2026-08-04) |
 | Codex — natural-language auto-trigger (link/classify/summarize) | 🟡 Documented, live-unverified | `AGENTS.md` was updated on 2026-08-17 with rules for these 3 tools. Whether `codex exec` actually fires them from natural language is not yet live-tested (pending user go-ahead) |
 | Notion indexing | 🟡 Code complete, live-unverified | Notion row creation (skill), the `notion_id` link-back (`wikimate_link` set_notion_id), and **Notion Run Log mirroring (2026-08-19 to 21, wired into all 6 skills)** are all structurally/skill-level complete. User confirmation in a real, connected Notion environment is still pending |
-| Formal marketplace registration | 🟡 Structure & security check done, live verification pending | `plugin.json`/`marketplace.json` structure confirmed valid (currently v0.9.0); Phase 3 precondition (automated deployment security scan, `scripts/security-scan.mjs` + GitHub Actions CI) met (2026-08-20). Live verification of a real user's fresh install is still pending |
+| Formal marketplace registration | 🟡 Structure & security check done, live verification pending | `plugin.json`/`marketplace.json` structure confirmed valid (currently v0.10.0); Phase 3 precondition (automated deployment security scan, `scripts/security-scan.mjs` + GitHub Actions CI) met (2026-08-20). Live verification of a real user's fresh install is still pending |
 | Python advanced extractor | 🔴 Not implemented | Planned only, no code yet |
 | Gemini adapter | 🟡 Code complete, live-unverified | Registration commands (`gemini mcp add/list/remove`) verified live (2026-08-20, Gemini CLI 0.52.0). Actual natural-language triggering needs a real Gemini API call, so it's pending user confirmation (same principle as Codex) |
 | Automated release security scan + CI | ✅ Done (2026-08-20) | `scripts/security-scan.mjs` + GitHub Actions (auto re-runs on every `main` push/PR). Confirmed by actually seeing it block a commit with a fake API key |

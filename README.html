@@ -54,7 +54,7 @@ PC(데스크톱·노트북) 전용</strong>이에요. <strong>스마트폰·태�
 </blockquote>
 <blockquote>
 <p>✅ <strong>현재 상태 (2026-09-01 기준, 정직하게)</strong>: 현재 버전
-<strong>v0.9.0</strong>. MCP 도구 <strong>8개</strong> 전부
+<strong>v0.10.0</strong>. MCP 도구 <strong>8개</strong> 전부
 <code>main</code> 브랜치에 병합·GitHub에 푸시 완료. 자동 테스트
 <strong>215개 전부 통과</strong>(<code>npm run verify</code>), 실제 서버
 프로토콜 검증, 실제 옵시디언 볼트로 직접 실행해 본 검증(E2E)까지 완료.
@@ -392,10 +392,10 @@ Codex용·개발용</h3>
 <code>wikimate_link</code> · <code>wikimate_classify</code> ·
 <code>wikimate_summarize</code></p>
 <blockquote>
-<p>ℹ️ 이 저장소는 현재 <strong><code>v0.9.0</code></strong>(2026-08-20
-릴리즈)로 버전이 맞춰져 있고, <code>main</code> 브랜치 코드에 도구 8개가
-전부 포함돼 있어요. 위 방법으로 설치하면 이 문서에 적힌 전체 기능을
-그대로 받게 됩니다.</p>
+<p>ℹ️ 이 저장소는 현재 <strong><code>v0.10.0</code></strong>(2026-09-01
+릴리즈)로 버전이 맞춰져 있고, <code>main</code> 브랜치 코드에 도구
+8개(연결 이유·연결 종류 기록 포함)가 전부 포함돼 있어요. 위 방법으로
+설치하면 이 문서에 적힌 전체 기능을 그대로 받게 됩니다.</p>
 </blockquote>
 <h3 id="codex">Codex</h3>
 <p>Codex에는 마켓플레이스(<code>/plugin</code>)가
@@ -919,6 +919,20 @@ PASS.</li>
 </details>
 
 <details>
+<summary><b>🏷️ v0.10.0 정식 릴리즈(2026-09-01) (클릭해서 펼치기)</b></summary>
+
+<ul>
+<li>v0.9.0(2026-08-20) 이후 쌓인 커밋(연결 이유·연결 종류 기록, 분류
+자연어 트리거 보강, 노션 안전규칙 문서화 등)을 반영해 마이너 버전 승격.
+<code>package.json</code>·<code>plugin.json</code>·<code>marketplace.json</code>·<code>mcp/server.mjs</code>
+버전 동기화.</li>
+<li>Codex/Gemini 자연어 트리거·마켓플레이스 신규설치 라이브 검증은
+여전히 사람 확인 대기라 <code>1.0.0</code>(완성 선언)은 아직 아니에요 —
+정직하게 미리 알려드려요.</li>
+</ul>
+</details>
+
+<details>
 <summary><b>🔜 앞으로 남은 것 (다음 계획, 아직 안 됨 — 클릭해서 펼치기)</b></summary>
 
 <ul>
@@ -1211,7 +1225,7 @@ Claude Code/Codex가 AI 모델과 통신할 때 <strong>대화 내용이 AI 제�
 <td>마켓플레이스 정식 등록</td>
 <td>🟡 구조·보안검증 완료, 라이브 검증 전</td>
 <td><code>plugin.json</code>·<code>marketplace.json</code> 정상 구조
-확인됨(현재 v0.9.0), Phase 3 전제조건(배포물 보안 자동 점검,
+확인됨(현재 v0.10.0), Phase 3 전제조건(배포물 보안 자동 점검,
 <code>scripts/security-scan.mjs</code> + GitHub Actions CI)
 충족(2026-08-20). 신규 사용자의 실제 설치 라이브 검증은 사용자 확인
 대기</td>

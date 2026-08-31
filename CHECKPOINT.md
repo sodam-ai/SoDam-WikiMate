@@ -249,6 +249,15 @@
 - **커밋/푸시는 아직 안 함** — 사용자가 명시적으로 요청할 때만 커밋하는 것이 원칙이라(git 안전 규칙), 이 세션은 구현·검증까지만 완료하고 대기 중. `git status`로 변경 파일 11개(`.PRD/02_DATA_MODEL.md`, `AGENTS.md`, `commands/wikimate-classify.md`, `commands/wikimate-link.md`, `mcp/lib/link.mjs`, `mcp/server.mjs`, `scripts/smoke-tools.mjs`, `scripts/verify-link.mjs`, `skills/wikimate-classify/SKILL.md`, `skills/wikimate-link/SKILL.md`, `skills/wikimate-organize/SKILL.md`) 확인 가능.
 - **다음 세션 후보(2026-08-31 시점 기록, 아래 2026-09-01 절에서 (d) 실행됨)**: (a) 위 변경분 커밋/푸시(사용자 승인 필요), (b) `chore/remove-guide-pdfs` 브랜치 병합(사용자 직접, PR 링크는 2026-08-21 갱신(7) 참고), (c) `Link.kind`(관계 종류 구분)는 여전히 미구현·미결, (d) README(ko/en × md/html 4종)에 이번 변경 미반영 — 다음 "README 갱신" 세션에서 함께 반영할 것(이번엔 의도적으로 범위 밖).
 
+## 🟢 v0.10.0 릴리즈 (2026-09-01(3))
+
+> 사용자 질문("마켓플레이스+플러그인을 원했는데 로컬 플러그인이 아니라 GitHub 저장소에도 올라가야 하는 거 아니야?")에 답하며 발견: 이 작업 폴더 자체가 이미 마켓플레이스 저장소(`sodam-ai/SoDam-WikiMate`)이고 이번 세션 커밋들도 전부 `origin/main`에 push는 됐으나, **`v0.9.0`(2026-08-20) 이후 커밋 12개(신기능 2개 포함)가 쌓였는데 버전 번호는 그대로**였음 — 이 프로젝트가 예전에 이미 겪은 "로컬 마켓플레이스 캐시가 버전 안 바뀌면 업데이트를 인식 못함" 함정과 정확히 같은 위험. 사용자 확인 후 진행.
+> **`gh release create`는 실행하지 않음** — 전역 규칙(`~/.claude/CLAUDE.md` 하네스 운영 절)이 PR·머지·릴리스·저장소생성·저장소편집 5종을 deny로 기계 차단해 AI가 절대 실행하지 않기로 확정돼 있음. 버전 동기화·커밋·git 태그(순수 git 명령, GitHub Release 객체 아님)까지만 AI가 처리하고, 실제 GitHub Release 발행은 사용자가 직접 할 명령을 안내함.
+
+- **버전 동기화**: `npm version minor --no-git-tag-version`(package.json·package-lock.json) + `.claude-plugin/plugin.json`·`.claude-plugin/marketplace.json`·`mcp/server.mjs`(SERVER_INFO) 수동 동기화 — 0.9.0 → **0.10.0**(2026-08-20 0.8.0→0.9.0 승격 때와 동일 판단 기준: 신기능 추가로 패치는 축소 표기지만, Codex/Gemini 라이브 검증 미완이라 1.0.0 "완성 선언"은 시기상조).
+- **README(ko/en × md/html 4종)**: 상단 배너·설치 안내·§17 상태표의 버전 표기 3곳을 v0.10.0으로 갱신(2026-08-20 이력 서술은 과거 기록이라 그대로 둠), §13에 "v0.10.0 정식 릴리즈" 신규 토글 추가. HTML 재생성 후 h2(22)·h3(29)·details(8→9) 개수 대조로 검증.
+- **검증**: `node --check mcp/server.mjs` clean, `npm run verify` 215/215, `security-scan.mjs --all` 72개 통과.
+
 ## 🟢 2026-09-01(2) 갱신 — `Link.kind` 구현: PRD의 마지막 미구현 데이터 필드 종결
 
 > "PRD 재감사" 요청이 계속 같은 템플릿으로 반복돼(5회 이상) `AskUserQuestion`으로 실제 의도를 확인 → 사용자가 "Link.kind 저장 방식부터 논의"를 선택 → 저장 방식·값 범위 두 가지를 `AskUserQuestion`으로 다시 확인받은 뒤 구현.
