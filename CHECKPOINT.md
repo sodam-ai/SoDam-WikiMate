@@ -249,6 +249,9 @@
 - **커밋/푸시는 아직 안 함** — 사용자가 명시적으로 요청할 때만 커밋하는 것이 원칙이라(git 안전 규칙), 이 세션은 구현·검증까지만 완료하고 대기 중. `git status`로 변경 파일 11개(`.PRD/02_DATA_MODEL.md`, `AGENTS.md`, `commands/wikimate-classify.md`, `commands/wikimate-link.md`, `mcp/lib/link.mjs`, `mcp/server.mjs`, `scripts/smoke-tools.mjs`, `scripts/verify-link.mjs`, `skills/wikimate-classify/SKILL.md`, `skills/wikimate-link/SKILL.md`, `skills/wikimate-organize/SKILL.md`) 확인 가능.
 - **다음 세션 후보(2026-08-31 시점 기록, 아래 2026-09-01 절에서 (d) 실행됨)**: (a) 위 변경분 커밋/푸시(사용자 승인 필요), (b) `chore/remove-guide-pdfs` 브랜치 병합(사용자 직접, PR 링크는 2026-08-21 갱신(7) 참고), (c) `Link.kind`(관계 종류 구분)는 여전히 미구현·미결, (d) README(ko/en × md/html 4종)에 이번 변경 미반영 — 다음 "README 갱신" 세션에서 함께 반영할 것(이번엔 의도적으로 범위 밖).
 
+## 🟢 커밋/푸시 완료 — 커밋 `8906423`(2026-09-01, `main == origin/main`)
+> 아래 "2026-09-01 갱신" 절 전체(Link.reason 구현·classify 트리거 보강·노션 안전규칙 문서화·README/PRD 5종 정합화, 총 20개 파일)가 이 커밋 하나로 push 완료됨. 이 문서 곳곳의 "커밋/푸시는 아직 안 함" 문구는 각 작성 시점 기준 정확한 기록이라 그대로 두되(과거 기록 임의수정 금지 원칙), **지금부터는 전부 커밋됨**이 맞음. `npm run security-check`(스테이징 파일 20개 전수) 통과 확인.
+
 ## 🟢 2026-09-01 갱신 — README(ko/en×md/html 4종)·PRD 성공기준 최신화 (아래가 최신, 위 "2026-08-31 갱신"은 참고용 이력)
 
 > 사용자에게 "다음 작업 방향"을 강력 추천 형식으로 제안(README·PRD 문서 최신화 — "AI가 다시 읽을 수 있는 정확한 문서를 만드는" 도구 자신의 README가 낡아 있는 게 목적과 모순된다는 근거 제시) → 사용자 승인("진행하기") 받아 실행.
