@@ -32,7 +32,6 @@ li { margin: 0.2em 0; }
 </style>
 </head>
 <body>
-
 <h1 id="wikimate">Wikimate</h1>
 <p>Tell an AI agent <strong>"organize this,"</strong> and it takes your
 scattered materials (web links, PDFs, chat logs, text),
@@ -413,7 +412,7 @@ finishes):</p>
 <code>wikimate_summarize</code></p>
 <blockquote>
 <p>ℹ️ This repo is currently versioned
-<strong><code>v0.10.0</code></strong> (released 2026-09-01), and the
+<strong><code>v0.10.0</code></strong> (as of 2026-09-01), and the
 <code>main</code> branch code already includes all 8 tools (including
 link-reason and link-kind recording). Installing via the method above
 gets you every feature described in this document.</p>
@@ -988,14 +987,21 @@ regression checks), all PASS.</li>
 </details>
 
 <details>
-<summary><b>🏷️ v0.10.0 official release (2026-09-01) (click to expand)</b></summary>
+<summary><b>🏷️ v0.10.0 version bump (2026-09-01) (click to expand)</b></summary>
 
 <ul>
 <li>Bumped the minor version to reflect everything accumulated since
 v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify
 natural-language trigger fix, Notion safety-rule documentation, and
 more. Synced across <code>package.json</code>, <code>plugin.json</code>,
-<code>marketplace.json</code>, and <code>mcp/server.mjs</code>.</li>
+<code>marketplace.json</code>, and <code>mcp/server.mjs</code>; the
+<code>v0.10.0</code> git tag was created and pushed.</li>
+<li>⚠️ <strong>Honest disclosure</strong>: the actual GitHub "Release"
+page has <strong>not</strong> been published yet (only the tag exists;
+no Release notes yet). This project's policy is that publicly-visible
+actions like publishing a release are never done by AI on the user's
+behalf — the tag was pushed, but the final publish step is left for the
+user to do themselves.</li>
 <li>Live verification of Codex/Gemini natural-language triggers and a
 fresh marketplace install is still pending user confirmation, so this
 isn't yet a <code>1.0.0</code> "done" declaration — disclosing that
@@ -1744,6 +1750,5 @@ License:                 Apache-2.0 © SoDam AI Studio (external tools have thei
 <p>If something goes wrong, check <a href="#18-troubleshooting">§18
 Troubleshooting</a> or <a href="#19-faq">§19 FAQ</a> first. Still stuck?
 Open an issue on the GitHub repo.</p>
-
 </body>
 </html>

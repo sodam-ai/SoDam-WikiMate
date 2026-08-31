@@ -160,7 +160,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 To verify, check `/mcp` — success means you see all **8**:
 `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog` · `wikimate_vaults` · `wikimate_link` · `wikimate_classify` · `wikimate_summarize`
 
-> ℹ️ This repo is currently versioned **`v0.10.0`** (released 2026-09-01), and the `main` branch code already includes all 8 tools (including link-reason and link-kind recording). Installing via the method above gets you every feature described in this document.
+> ℹ️ This repo is currently versioned **`v0.10.0`** (as of 2026-09-01), and the `main` branch code already includes all 8 tools (including link-reason and link-kind recording). Installing via the method above gets you every feature described in this document.
 
 ### Codex
 
@@ -451,9 +451,10 @@ npm start        # run the MCP server
 </details>
 
 <details>
-<summary><b>🏷️ v0.10.0 official release (2026-09-01) (click to expand)</b></summary>
+<summary><b>🏷️ v0.10.0 version bump (2026-09-01) (click to expand)</b></summary>
 
-- Bumped the minor version to reflect everything accumulated since v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify natural-language trigger fix, Notion safety-rule documentation, and more. Synced across `package.json`, `plugin.json`, `marketplace.json`, and `mcp/server.mjs`.
+- Bumped the minor version to reflect everything accumulated since v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify natural-language trigger fix, Notion safety-rule documentation, and more. Synced across `package.json`, `plugin.json`, `marketplace.json`, and `mcp/server.mjs`; the `v0.10.0` git tag was created and pushed.
+- ⚠️ **Honest disclosure**: the actual GitHub "Release" page has **not** been published yet (only the tag exists; no Release notes yet). This project's policy is that publicly-visible actions like publishing a release are never done by AI on the user's behalf — the tag was pushed, but the final publish step is left for the user to do themselves.
 - Live verification of Codex/Gemini natural-language triggers and a fresh marketplace install is still pending user confirmation, so this isn't yet a `1.0.0` "done" declaration — disclosing that honestly upfront.
 
 </details>
