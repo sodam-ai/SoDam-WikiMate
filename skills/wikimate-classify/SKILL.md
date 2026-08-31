@@ -1,6 +1,6 @@
 ---
 name: Wikimate Classify
-description: This skill should be used when the user asks to organize/classify/tag notes already sitting in Inbox — e.g. "Inbox 노트 분류해줘", "이 노트 폴더 정해줘", "태그 좀 정리해줘", "classify these notes", "sort my inbox". It reads a note's title/summary/body-excerpt/current tags plus the vault's existing tag vocabulary via the read-only `wikimate_classify` suggest action, judges the right folder (one of 00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts) and tags itself (no ML classifier), proposes it for individual human approval, then applies via `apply`. Never targets 90_Templates or 99_Archive (those are out of scope — archiving is wikimate_fix's job).
+description: This skill should be used when the user asks to organize/classify/tag notes already sitting in Inbox — e.g. "Inbox 노트 분류해줘", "이 노트 폴더 정해줘", "태그 좀 정리해줘", "classify these notes", "sort my inbox" — OR when the user asks to mark a note's progress status or project — e.g. "이 노트 완료로 표시해줘", "다 봤어, 완료 처리해줘", "이 노트 초안 상태로 바꿔줘", "이거 아직 진행중이야", "mark this note as done/draft", "이 노트 무슨 프로젝트 거야", "프로젝트 이름 붙여줘", "관련 프로젝트 지정해줘", "set the project field on this note". It reads a note's title/summary/body-excerpt/current tags/current status/current project plus the vault's existing tag vocabulary via the read-only `wikimate_classify` suggest action, judges the right folder (one of 00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts)/tags/status(inbox·draft·done)/project itself (no ML classifier), proposes it for individual human approval, then applies via `apply`. Never targets 90_Templates or 99_Archive (those are out of scope — archiving is wikimate_fix's job).
 version: 0.1.0
 ---
 
@@ -17,16 +17,16 @@ version: 0.1.0
 
 ## 워크플로우
 1. **볼트 확정**: `wikimate_vaults`로 후보 확인(Organize·Link와 동일 기준).
-2. **후보 조회**: `wikimate_classify`를 `action:"suggest"`로 호출 — 현재 폴더·태그·본문 일부·`folder_options`·`existing_tags`를 본다.
-3. **판단**: `folder_options` 중 하나(애매하면 현재 유지) + `existing_tags` 우선 재사용한 태그를 정한다.
-4. **계획 보고(dry-run)**: 무엇을 어디로 옮기고 어떤 태그를 붙일지 보고(`apply`를 `dry_run=true`로 먼저 호출해도 됨).
+2. **후보 조회**: `wikimate_classify`를 `action:"suggest"`로 호출 — 현재 폴더·태그·본문 일부·`folder_options`·`existing_tags`·`current_status`·`current_project`·`status_options`를 본다.
+3. **판단**: 폴더/태그 분류 요청이면 `folder_options` 중 하나(애매하면 현재 유지) + `existing_tags` 우선 재사용한 태그를 정한다. **status/project 변경 요청이면**(예: "완료로 표시해줘", "이 프로젝트 소속으로") `status_options`(inbox/draft/done) 중 사용자가 명시한 값 또는 `project` 문자열을 정한다 — **자동 전환 금지**: 사용자가 명시적으로 요청한 경우에만 바꾸고, 애매하면 현재 값을 유지한다(폴더/태그와 동일하게 추측 금지).
+4. **계획 보고(dry-run)**: 무엇을 어디로 옮기고 어떤 태그/status/project를 바꿀지 보고(`apply`를 `dry_run=true`로 먼저 호출해도 됨).
 5. **개별 승인**: `AskUserQuestion`으로 [적용/건너뛰기/수정] — 비가역 편집이라 항상 확인.
 6. **실행**: 승인분만 `apply`를 `dry_run=false`로. 이미 같은 상태면 `changed:false`로 조용히 스킵.
-7. **결과 보고**: 실제 이동/태그 반영을 재확인 후에만 "완료"라 말한다. 백업 경로(있으면)를 언급. 노션 Run Log 기록 여부(성공/실패/생략)도 같이 보고한다(아래 "노션 Run Log" 절 참고).
+7. **결과 보고**: 실제 이동/태그/status/project 반영을 재확인 후에만 "완료"라 말한다. 백업 경로(있으면)를 언급. 노션 Run Log 기록 여부(성공/실패/생략)도 같이 보고한다(아래 "노션 Run Log" 절 참고).
 
 ## 도구: wikimate_classify
 - `action:"suggest"` — `note`(필수). 읽기전용.
-- `action:"apply"` — `note`(필수), `folder`(선택, 00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts만), `tags`(선택, 배열), `importance`(선택, 1~5), `dry_run`(기본 true).
+- `action:"apply"` — `note`(필수), `folder`(선택, 00_Inbox/10_Projects/20_Resources/30_Notes/40_Drafts만), `tags`(선택, 배열), `importance`(선택, 1~5), `status`(선택, inbox/draft/done만 — **사용자가 명시 요청했을 때만**, 자동 판단 기준 없음), `project`(선택, 자유 문자열), `dry_run`(기본 true).
 
 ### 노션 Run Log (안전 기록 — 실제 쓰기 뒤 매번)
 - **범위**: `apply`가 실제로 쓰기를 한(`dry_run=false`이고 `ok:true`이며 **`changed:false`(멱등 무변경) 응답이 아닌**) 모든 경우, 로컬 Run Log(`.wikimate/runlog.jsonl`, 코어가 자동 기록)와 1:1로 대응하는 행을 노션에도 남긴다.

@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it takes your scattered materials (web
 
 > 📱 **Device note**: Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets** (Claude Code and Codex, the AI programs you talk to, are themselves PC-only programs).
 
-> ✅ **Current status (as of 2026-08-21, honestly)**: Current version **v0.9.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 191 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
+> ✅ **Current status (as of 2026-08-31, honestly)**: Current version **v0.9.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 206 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
 
 This document is written so that **someone who has never touched AI, a computer, a mobile device, or any electronic device before** can follow it step by step from top to bottom. Every hard term is spelled out in plain language.
 
@@ -210,7 +210,7 @@ If that still fails, in the `/plugin` menu **remove → re-add → install** the
 > ```
 > npm install     # installs verification tooling (@modelcontextprotocol/sdk)
 > npm start       # runs the MCP server directly (usually unnecessary)
-> npm run verify  # runs the full automated verification (191 checks)
+> npm run verify  # runs the full automated verification (206 checks)
 > ```
 
 ---
@@ -361,7 +361,7 @@ Install → (automatic) MCP registered → (session-start Obsidian/vault auto-de
 ### Dev/verification (terminal, advanced)
 ```
 npm install      # install verification tooling (@modelcontextprotocol/sdk)
-npm run verify   # run all automated checks (191 checks)
+npm run verify   # run all automated checks (206 checks)
 npm start        # run the MCP server
 ```
 
@@ -431,10 +431,20 @@ npm start        # run the MCP server
 </details>
 
 <details>
+<summary><b>🆕 Link.reason recorded + classify natural-language trigger strengthened + Notion safety rules documented (2026-08-31, implemented & verified — not yet committed/pushed to main) (click to expand)</b></summary>
+
+- 🔗 **Recording "why" a link was made is now possible** (`wikimate_link` add_links, optional `reason`) — when linking notes, you can now attach a reason like "both cover MCP setup," written into the note body's "## Why linked" section. Omit `reason` and everything works exactly as before (fully backward-compatible, no section gets created). **"What kind" of link it is (`kind`, e.g. related vs. reference) still isn't stored** — see "What's left" below.
+- 🏷️ **Classify's "mark as done" trigger actually strengthened** — fixed the gap found on 2026-08-21 (the feature was complete, but the guidance docs hadn't caught up, so plain language could miss it) by adding real trigger phrases and workflow steps to the skill's guidance.
+- 🔒 **Two Notion safety rules newly documented**: (1) only connect the two designated tables (Research Library, Run Log) — never the whole workspace, and (2) don't fire requests at Notion back-to-back when processing many notes at once (space them out, retry once or twice on failure). These were already supposed-to-follow principles (`04_PROJECT_SPEC.md` "never do this"), just missing from the actual guidance docs (`AGENTS.md`, skills) until now.
+- Automated tests grew from 191 to **206** (15 new regression checks for the link-reason feature, plus updated server-protocol checks). Also newly confirmed by direct testing: injecting an instruction-like sentence into `reason` gets stored only as data, never executed as a command.
+- ⚠️ **Honest disclosure**: this batch is implemented and verified locally, but **not yet committed to `main` or pushed to GitHub** (pending user go-ahead — this project only commits when the user explicitly asks).
+
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
-- **Classify's "mark as done" natural-language trigger needs strengthening (newly found, 2026-08-21)**: the status/project feature itself is complete, but the guidance the AI relies on to auto-trigger it hasn't fully caught up yet, so a plain-language request may not reliably fire it. To be sure, use the `/wikimate-classify` slash command or name the tool directly ("use wikimate_classify to change the status"). A fix is planned for the next update.
-- **Recording "why" or "what kind" a link was made is not implemented yet (design under review)**: right now only the fact that two notes are related gets saved — the reason or relationship type doesn't. This needs a storage-format decision before it can be added.
+- **Recording "what kind" of link it is (Link.kind) is still not implemented (design under review)**: the "why" was added on 2026-08-31 (see above), but distinguishing relationship **types** (e.g. "related" vs. "reference") still needs a storage-format decision before it can be added.
 - The Codex natural-language rule file (`AGENTS.md`) already describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.
 - The **Gemini CLI adapter**'s registration commands are verified, but live verification of real natural-language triggering is still pending user confirmation.
 - **Live marketplace fresh-install verification**: the structure/security checks are done (2026-08-20) — only a live check of a brand-new user installing it from scratch remains.
@@ -476,7 +486,7 @@ SoDam-WikiMate/
 ├── adapters/codex/       Codex setup guide (SETUP.md)
 ├── adapters/gemini/      Gemini CLI setup guide (SETUP.md)
 ├── templates/note.md     Note template
-├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 6 e2e scripts) + automated security scan (security-scan.mjs)
+├── scripts/              Verification scripts (verify-*·smoke-*·e2e-*, 8 verify scripts + 5 e2e scripts) + automated security scan (security-scan.mjs)
 ├── .github/workflows/    GitHub Actions CI (ci.yml, auto re-runs on every push/PR)
 ├── .githooks/            Optional pre-commit security hook (enable via git config core.hooksPath)
 ├── .mcp.json             Auto-registers the MCP server on install
@@ -579,8 +589,10 @@ Copy `.env.example` to `.env`. **Never commit real values (tokens, etc.) to git.
 | Automated release security scan + CI | ✅ Done (2026-08-20) | `scripts/security-scan.mjs` + GitHub Actions (auto re-runs on every `main` push/PR). Confirmed by actually seeing it block a commit with a fake API key |
 | `npm audit` vulnerabilities | ✅ 0 (2026-08-20) | 5 → 0. Only patched transitive dependencies of a verification-only devDependency the real server never uses |
 | Progress status (status) & related project (project) | ✅ Done (2026-08-20) | Added to `wikimate_classify`, changes only when asked (never inferred). **However, the natural-language auto-trigger still needs strengthening** (see next row) |
-| Classify's "mark as done" natural-language auto-trigger | 🟡 Feature complete, trigger wiring needs strengthening (newly found, 2026-08-21) | The feature itself (changing status/project) works correctly, but the guidance that makes it fire reliably from plain language still needs work. For now, naming `/wikimate-classify` or the tool directly triggers it reliably |
-| Recording why/what-kind a link was made (Link.reason/kind) | 🔴 Not implemented (design under review) | Only the fact that notes are related gets saved — not why or what kind of relationship. A storage-format decision is needed before this can move forward |
+| Classify's "mark as done" natural-language auto-trigger | ✅ Done (2026-08-31) | Trigger phrases and a judgment step were added to the skill's guidance and workflow. Whether the natural-language auto-trigger actually fires reliably can only be **finally confirmed by live use after a session restart** (same limitation as the 2026-08-18 MOC trigger fix) |
+| Recording why a link was made (Link.reason) | ✅ Done (2026-08-31) | Added optional `reason` to `wikimate_link` add_links, recorded in the note body's "## Why linked" section. 15 new regression checks PASS. **Not yet committed or pushed** (pending user go-ahead) |
+| Recording what kind of link it is (Link.kind) | 🔴 Not implemented (design under review) | Distinguishing relationship types like "related" vs. "reference" still has no storage space. A storage-format decision is needed before this can move forward |
+| Notion permission scope & rate-limit guidance | ✅ Done (2026-08-31) | `AGENTS.md` and the `wikimate-organize` skill now state "only connect the 2 designated DBs" and "space out + retry on bulk operations." This was already a `04_PROJECT_SPEC.md` "never do this" rule that was simply missing from the guidance docs (docs only, no code change) |
 | Re-verification defect fixes | ✅ Done (2026-08-21) | Save/re-read value mismatch, MOC duplicate buildup, and link creation to a nonexistent note — all 3 reproduced, root-caused, fixed, and re-verified. Automated tests grew from 180 to 191 |
 
 ---

@@ -48,6 +48,12 @@ await writeFile(join(vault, "30_Notes", "X.md"), note("X"), "utf8");
 await writeFile(join(vault, "30_Notes", "Y.md"), note("Y"), "utf8"); // 상한 테스트용 — 가득참.md에 아직 없는 별개 노트
 // Z: set_notion_id 전용 픽스처(다른 테스트가 안 건드리는 독립 노트)
 await writeFile(join(vault, "30_Notes", "Z.md"), note("Z"), "utf8");
+// R1~R5: Link.reason 전용 픽스처(다른 테스트가 안 건드리는 독립 노트, 2026-08-31 신규)
+await writeFile(join(vault, "30_Notes", "이유R1.md"), note("이유R1"), "utf8");
+await writeFile(join(vault, "30_Notes", "이유R2.md"), note("이유R2"), "utf8");
+await writeFile(join(vault, "30_Notes", "이유R3.md"), note("이유R3"), "utf8");
+await writeFile(join(vault, "30_Notes", "이유R4.md"), note("이유R4"), "utf8");
+await writeFile(join(vault, "30_Notes", "이유R5.md"), note("이유R5"), "utf8");
 
 try {
   // 1) suggest: related 키 없는 노트 → 후보 목록 + remaining_slots=5
@@ -227,6 +233,43 @@ try {
   check("set_notion_id: 특수문자·대용량 값 저장 성공", n23.ok === true);
   const zWeird = await readFile(join(vault, "30_Notes", "Z.md"), "utf8");
   check("set_notion_id: 저장 후에도 frontmatter 블록 정상(title 보존)", zWeird.startsWith("---") && zWeird.includes('title: "Z"'));
+
+  // 24) Link.reason(2026-08-31 신규): reason 없이 add_links → "왜 연결했는지" 섹션 자체가 안 생김(하위호환)
+  const r24 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/이유R1.md", targets: ["이유R2"], dryRun: false });
+  check("reason 없음: add_links 정상 동작", r24.ok === true && r24.added.includes("[[이유R2]]"));
+  check("reason 없음: reason_recorded 필드 자체가 없음", !("reason_recorded" in r24));
+  const r1AfterNoReason = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  check("reason 없음: 본문에 '왜 연결했는지' 섹션 안 생김(하위호환)", !r1AfterNoReason.includes("왜 연결했는지"));
+
+  // 25) Link.reason: dry-run에서 would_add_reason 미리보기, 파일 변경 없음
+  const r25 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/이유R1.md", targets: ["이유R3"], reason: "같은 MCP 설정 주제라서", dryRun: true });
+  check("reason dry-run: would_add_reason 반환", r25.would_add_reason === "같은 MCP 설정 주제라서");
+  const r1AfterDry = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  check("reason dry-run: 파일 미변경(섹션 안 생김)", !r1AfterDry.includes("왜 연결했는지"));
+
+  // 26) Link.reason: 실제 실행 → 본문에 surgical 섹션 생성 + 불릿 반영 + frontmatter related도 정상 갱신
+  const r26 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/이유R1.md", targets: ["이유R3"], reason: "같은 MCP 설정 주제라서", dryRun: false });
+  check("reason 실제: ok + reason_recorded:true", r26.ok === true && r26.reason_recorded === true);
+  const r1AfterReal = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  check("reason 실제: '## 왜 연결했는지' 섹션 생성됨", r1AfterReal.includes("## 왜 연결했는지"));
+  check("reason 실제: 불릿에 대상+이유 반영", r1AfterReal.includes("- [[이유R3]] — 같은 MCP 설정 주제라서"));
+  check("reason 실제: frontmatter related도 정상 갱신(기존 이유R2 유지 + 신규 이유R3 추가)", r1AfterReal.includes(`related: ["[[이유R2]]", "[[이유R3]]"]`));
+
+  // 27) Link.reason: 개행이 섞인 이유 → 불릿 구조 안 깨지게 한 줄로 정규화 + 기존 불릿(append, 재작성 아님) 보존
+  const r27 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/이유R1.md", targets: ["이유R4"], reason: "여러 줄\n이유 텍스트", dryRun: false });
+  check("reason 개행 정규화: ok", r27.ok === true);
+  const r1AfterMultiline = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  check("reason 개행 정규화: 불릿 한 줄로 정규화됨", r1AfterMultiline.includes("- [[이유R4]] — 여러 줄 이유 텍스트"));
+  check("reason 개행 정규화: 이전 불릿(이유R3) 보존됨(append, 재작성 아님)", r1AfterMultiline.includes("- [[이유R3]] — 같은 MCP 설정 주제라서"));
+
+  // 28) Link.reason: 사용자가 본문에 직접 쓴 다른 섹션은 보존(surgical, build_moc과 동일 원칙)
+  const beforeUserSection = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  await writeFile(join(vault, "30_Notes", "이유R1.md"), beforeUserSection.replace(/$/, "\n## 사용자가 직접 쓴 메모\n건드리면 안 됨\n"), "utf8");
+  const r28 = await link({ vaultPath: vault, action: "add_links", note: "30_Notes/이유R1.md", targets: ["이유R5"], reason: "다섯 번째", dryRun: false });
+  check("reason 실제(사용자 섹션 존재): ok", r28.ok === true);
+  const r1AfterUserSection = await readFile(join(vault, "30_Notes", "이유R1.md"), "utf8");
+  check("reason 실제: 사용자가 직접 쓴 다른 섹션 보존됨", r1AfterUserSection.includes("건드리면 안 됨"));
+  check("reason 실제: 새 불릿도 정상 추가됨(사용자 섹션은 안 건드림)", r1AfterUserSection.includes("- [[이유R5]] — 다섯 번째"));
 
   console.log(`\n=== 총계: PASS ${pass} / FAIL ${fail} ===`);
 } finally {

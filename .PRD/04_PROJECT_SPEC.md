@@ -184,11 +184,13 @@ wikimate/
 
 ## 10. [NEEDS CLARIFICATION]
 
-- [ ] MCP 코어 언어 — Node/TS(추천) vs Python(FastMCP)
-- [ ] 옵시디언 기본 접근 — **notesmd-cli(추천·헤드리스)** vs mcp-obsidian(MCP 통합·앱 필요) vs 파일시스템
-- [ ] 노션 기본 접근(Win) — **npx notion-mcp-server 또는 remote MCP(추천)** vs `ntn`(Git Bash/WSL 필요) ⚠️ 설치 경로 확인 필요
-- [ ] `ntn` Windows 설치 가능 여부 직접 확인 (Git Bash/WSL 도입 의향?)
-- [ ] notion-mcp-server sunset 대비 — remote MCP(`mcp.notion.com`)로 갈지
-- [ ] 백업 방식 — git 커밋(추천) vs 폴더 복사
-- [ ] dry-run 기본값 여부(추천: 기본 dry-run)
-- [ ] 배포 라이선스/공개 범위
+> 🔴 **2026-09-01 정정**: 아래 8개 중 5개가 이미 결정·구현까지 끝났는데 `[ ]`로 방치돼 있었음을 코드와 직접 대조해 발견·정정(상세 근거는 `.PRD/README.md` "미결 사항 종합" 참고). 노션 관련 3개만 진짜 미결로 남겨둠.
+
+- [x] MCP 코어 언어 — 결정·구현됨: **Node.js**(TS 아님, 순수 JavaScript)
+- [x] 옵시디언 기본 접근 — 결정·구현됨: **파일시스템 직접**이 검증된 기본값(notesmd-cli는 미검증 선택 옵션, mcp-obsidian은 채택 안 함)
+- [ ] 노션 기본 접근(Win) — **npx notion-mcp-server 또는 remote MCP(추천)** vs `ntn`(Git Bash/WSL 필요) ⚠️ 설치 경로 확인 필요 — 여전히 열려 있음(의도적: "연결된 도구 자동 감지"가 설계 자체)
+- [ ] `ntn` Windows 설치 가능 여부 직접 확인 (Git Bash/WSL 도입 의향?) — 진짜 미결
+- [ ] notion-mcp-server sunset 대비 — remote MCP(`mcp.notion.com`)로 갈지 — 진짜 미결
+- [x] 백업 방식 — 결정·구현됨: **폴더 복사 방식**(`.wikimate/backups/`에 편집 전 원본을 타임스탬프와 함께 백업, `backupFile` 함수) — PRD 원문의 추천값("git 커밋")이 아니라 폴더 복사 쪽으로 구현됨. git 커밋 병행은 채택 안 함
+- [x] dry-run 기본값 여부 — 결정·구현됨: **기본값 dry-run**(모든 쓰기 도구의 `dryRun` 파라미터 기본값 `true`)
+- [x] 배포 라이선스/공개 범위 — 결정·구현됨: **Apache-2.0, PUBLIC**(`sodam-ai/SoDam-WikiMate`, 태그·Release 실재)

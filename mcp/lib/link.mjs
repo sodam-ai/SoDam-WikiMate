@@ -100,7 +100,7 @@ async function suggest({ root, note }) {
 
 // action:"add_links" — 승인된 링크를 note의 frontmatter related에 멱등 병합.
 // 대상 존재 검증(깨진 링크 방지) → 5개 상한 검사(침묵 절삭 금지, 초과 시 에러로 명시) → dry_run 보고 → 백업 → surgical 치환 → RunLog.
-async function addLinks({ root, note, targets = [], dryRun = true, ts }) {
+async function addLinks({ root, note, targets = [], dryRun = true, ts, reason }) {
   if (!note) return { ok: false, reason: "대상 note(볼트 내 상대경로)가 필요해요." };
   if (!targets.length) return { ok: false, reason: "연결할 targets(노트 제목 배열)가 필요해요." };
 
@@ -154,70 +154,98 @@ async function addLinks({ root, note, targets = [], dryRun = true, ts }) {
     };
   }
 
+  // Link.reason(왜 연결했는지) — frontmatter가 아니라 본문 "## 왜 연결했는지" 섹션에 병행 기록(2026-08-31 확정).
+  // 개행은 불릿 한 줄 구조를 깨서 한 줄로 정규화. 빈 문자열/공백만 있으면 기록하지 않음(섹션 생성 강요 안 함).
+  const cleanReason = reason != null ? String(reason).replace(/\r?\n+/g, " ").trim() : "";
+
   if (dryRun) {
-    return { ok: true, dry_run: true, note, would_add: newTokens, resulting_related: merged };
+    const result = { ok: true, dry_run: true, note, would_add: newTokens, resulting_related: merged };
+    if (cleanReason) result.would_add_reason = cleanReason;
+    return result;
   }
 
   const stamp = ts || new Date().toISOString().replace(/[:.]/g, "-");
   const backup = await backupFile(root, abs, stamp);
   const newLine = serializeRelatedList(merged);
-  const next = replaceFrontmatterLine(text, "related", newLine);
+  let next = replaceFrontmatterLine(text, "related", newLine);
+
+  if (cleanReason) {
+    const existingSection = getReasonSection(next);
+    const newSectionBody = appendReasonBullets(existingSection, newTokens, cleanReason);
+    next = replaceReasonSection(next, newSectionBody);
+  }
+
   await writeFileAtomic(abs, next, "utf8");
   await appendRunLog(root, {
     tool: "link",
     action: "add_links",
     request: note,
     changed: note,
-    detail: `+${newTokens.join(", ")}`,
+    detail: `+${newTokens.join(", ")}${cleanReason ? ` (이유: ${cleanReason})` : ""}`,
     backup,
     result: "ok",
   });
-  return { ok: true, dry_run: false, note, added: newTokens, resulting_related: merged, backup };
+  const result = { ok: true, dry_run: false, note, added: newTokens, resulting_related: merged, backup };
+  if (cleanReason) result.reason_recorded = true;
+  return result;
 }
 
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
-// 기존 손시뮬 픽스처는 "## 묶인 노트 (members)"를 쓰고, 이 도구는 "## 관련 노트"를 쓴다 — 둘 다 인식해야
-// 레거시 노트에 실행했을 때 새 섹션을 중복 생성하지 않고 기존 섹션을 올바르게 갱신한다(실측으로 발견한 문제).
-const MOC_HEADING_ALIASES = [MOC_SECTION_HEADING, "## 묶인 노트 (members)", "## 묶인 노트"];
-
-// 이미 있는 멤버 섹션의 헤딩을 찾는다(별칭 포함). 없으면 null(신규 섹션은 canonical 헤딩으로 추가).
-function findMocHeading(body) {
-  for (const h of MOC_HEADING_ALIASES) {
-    if (new RegExp(`^${escapeRe(h)}\\r?\\n`, "m").test(body || "")) return h;
+// 범용 "## 헤딩" 섹션 위치 탐색(별칭 지원) — MOC members 섹션과 Link.reason 섹션이 공유한다(중복 로직 방지).
+// 헤딩 바로 다음 줄부터, 다음 "## " 헤딩 직전(또는 본문 끝)까지의 절대 위치를 찾는다.
+// (과거 `(?=\r?\n## |\r?\n?$)` 형태는 m 플래그에서 $가 "매 줄 끝"에도 매칭돼 첫 멤버 줄 뒤에서 조기 종료되는 결함이 있었음 — 실측으로 발견.)
+function findHeadingSectionRange(body, aliases) {
+  for (const h of aliases) {
+    const startRe = new RegExp(`^${escapeRe(h)}\\r?\\n`, "m");
+    const startMatch = startRe.exec(body || "");
+    if (startMatch) {
+      const contentStart = startMatch.index + startMatch[0].length;
+      const rest = body.slice(contentStart);
+      const nextHeading = /\r?\n## /.exec(rest);
+      const contentEnd = nextHeading ? contentStart + nextHeading.index : body.length;
+      return { heading: h, headingStart: startMatch.index, contentStart, contentEnd };
+    }
   }
   return null;
 }
 
-// 헤딩 바로 다음 줄부터, 다음 "## " 헤딩 직전(또는 본문 끝)까지의 절대 위치를 찾는다.
-// (과거 `(?=\r?\n## |\r?\n?$)` 형태는 m 플래그에서 $가 "매 줄 끝"에도 매칭돼 첫 멤버 줄 뒤에서 조기 종료되는 결함이 있었음 — 실측으로 발견.)
-function findMocMembersRange(body) {
-  const heading = findMocHeading(body);
-  if (!heading) return null;
-  const startRe = new RegExp(`^${escapeRe(heading)}\\r?\\n`, "m");
-  const startMatch = startRe.exec(body || "");
-  if (!startMatch) return null;
-  const contentStart = startMatch.index + startMatch[0].length;
-  const rest = body.slice(contentStart);
-  const nextHeading = /\r?\n## /.exec(rest);
-  const contentEnd = nextHeading ? contentStart + nextHeading.index : body.length;
-  return { heading, headingStart: startMatch.index, contentStart, contentEnd };
-}
-
-// 멤버 섹션만 잘라낸다(다른 섹션은 손대지 않기 위한 경계 탐지). 없으면 "".
-function getMocMembersSection(body) {
-  const range = findMocMembersRange(body);
+// 섹션 본문만 잘라낸다(다른 섹션은 손대지 않기 위한 경계 탐지). 없으면 "".
+function getHeadingSection(body, aliases) {
+  const range = findHeadingSectionRange(body, aliases);
   return range ? body.slice(range.contentStart, range.contentEnd) : "";
 }
 
-// 멤버 섹션만 surgical 치환(기존 헤딩이 무엇이든 그 헤딩 유지, 없으면 canonical 헤딩으로 본문 끝에 추가) — 다른 섹션은 보존.
-function replaceMocMembersSection(body, newSectionBody) {
-  const range = findMocMembersRange(body);
-  const heading = (range && range.heading) || MOC_SECTION_HEADING;
+// 섹션 본문만 surgical 치환(기존 헤딩이 무엇이든 그 헤딩 유지, 없으면 canonical 헤딩으로 본문 끝에 추가) — 다른 섹션은 보존.
+function replaceHeadingSection(body, aliases, canonicalHeading, newSectionBody) {
+  const range = findHeadingSectionRange(body, aliases);
+  const heading = (range && range.heading) || canonicalHeading;
   const replacement = `${heading}\n${newSectionBody}`;
   if (range) return body.slice(0, range.headingStart) + replacement + body.slice(range.contentEnd);
   const base = (body || "").replace(/\s+$/, "");
   return `${base}\n\n${replacement}\n`;
+}
+
+// 기존 손시뮬 픽스처는 "## 묶인 노트 (members)"를 쓰고, 이 도구는 "## 관련 노트"를 쓴다 — 둘 다 인식해야
+// 레거시 노트에 실행했을 때 새 섹션을 중복 생성하지 않고 기존 섹션을 올바르게 갱신한다(실측으로 발견한 문제).
+const MOC_HEADING_ALIASES = [MOC_SECTION_HEADING, "## 묶인 노트 (members)", "## 묶인 노트"];
+const getMocMembersSection = (body) => getHeadingSection(body, MOC_HEADING_ALIASES);
+const replaceMocMembersSection = (body, newSectionBody) => replaceHeadingSection(body, MOC_HEADING_ALIASES, MOC_SECTION_HEADING, newSectionBody);
+
+// Link.reason(02_DATA_MODEL.md) 저장 방식 — 2026-08-31 사용자 확정: related: 파서가 "한 줄 배열만" 읽는 자체
+// 정규식이라 frontmatter 구조를 바꾸면 기존 노트 전량이 영향받음(마이그레이션 위험) → frontmatter는 그대로 두고
+// 본문에 "## 왜 연결했는지" 섹션을 병행(무위험·되돌리기 쉬움). add_links에 reason을 안 넘기면 이 섹션 자체가 생기지
+// 않아 기존 노트/워크플로우에 전혀 영향 없다(하위호환).
+const REASON_SECTION_HEADING = "## 왜 연결했는지";
+const REASON_HEADING_ALIASES = [REASON_SECTION_HEADING];
+const getReasonSection = (body) => getHeadingSection(body, REASON_HEADING_ALIASES);
+const replaceReasonSection = (body, newSectionBody) => replaceHeadingSection(body, REASON_HEADING_ALIASES, REASON_SECTION_HEADING, newSectionBody);
+
+// 기존 이유 불릿은 그대로 두고(사람이 손으로 고쳤을 수 있음 — 재작성하지 않음) 새로 추가된 링크만 뒤에 덧붙인다.
+function appendReasonBullets(existingSectionBody, newTokens, reason) {
+  const existingTrimmed = (existingSectionBody || "").replace(/\s+$/, "");
+  const newLines = newTokens.map((tok) => `- ${tok} — ${reason}`).join("\n");
+  return existingTrimmed ? `${existingTrimmed}\n${newLines}` : newLines;
 }
 
 function mocMembersBullets(notesByBaseLower, tokens) {
@@ -353,7 +381,7 @@ async function setNotionId({ root, note, notionId, dryRun = true, ts }) {
 }
 
 // 메인 진입점. action: "suggest" | "add_links" | "build_moc" | "set_notion_id"
-export async function link({ vault, vaultPath, action, note, targets, topic, notionId, dryRun = true, ts } = {}) {
+export async function link({ vault, vaultPath, action, note, targets, topic, notionId, reason, dryRun = true, ts } = {}) {
   const root = resolveRoot(vault, vaultPath);
   if (!root) {
     const cand = listVaults();
@@ -366,7 +394,7 @@ export async function link({ vault, vaultPath, action, note, targets, topic, not
     };
   }
   if (action === "suggest") return suggest({ root, note });
-  if (action === "add_links") return addLinks({ root, note, targets, dryRun, ts });
+  if (action === "add_links") return addLinks({ root, note, targets, dryRun, ts, reason });
   if (action === "build_moc") return buildMoc({ root, topic, targets, dryRun, ts });
   if (action === "set_notion_id") return setNotionId({ root, note, notionId, dryRun, ts });
   return { ok: false, reason: `알 수 없는 action: ${action} (지원: suggest | add_links | build_moc | set_notion_id)` };
