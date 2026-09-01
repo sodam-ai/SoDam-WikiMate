@@ -314,7 +314,10 @@
 
 ### 현재 상태
 - **커밋/푸시는 여전히 안 함** — `git status` 기준 추적 대상 파일 **20개**가 전부 작업 트리에만 있음(Link.reason 구현분 12개 + README/HTML 4개 + `.PRD/README.md`·`01_PRD.md`·`04_PROJECT_SPEC.md`·`03_PHASES.md` 4개, `CHECKPOINT.md`는 전 구간에 걸쳐 누적 수정). 사용자가 명시적으로 요청할 때만 커밋한다는 원칙 유지.
-- **다음 세션 후보(문서 정리 계열은 이번 절로 종결)**: (a) 위 20개 파일 커밋/푸시(사용자 승인 필요·최우선 추천), (b) `chore/remove-guide-pdfs` 브랜치 병합(사용자 직접), (c) `Link.kind` 설계 방향 확인 후 구현, (d) 노션/Codex/Gemini/마켓플레이스 라이브 검증(전부 사람 전담으로 확정, 재조사 불필요). **PRD 문서 4종(01/03/04·`.PRD/README.md`)의 상태·미결 정합성은 이번 절로 종결** — 다음 세션에서 "PRD 재감사"를 또 반복하기보다 (a) 커밋 여부부터 먼저 물을 것.
+- **다음 세션 후보(문서 정리 계열은 이번 절로 종결)**: (a) 위 20개 파일 커밋/푸시(사용자 승인 필요·최우선 추천), (b) ~~`chore/remove-guide-pdfs` 브랜치 병합(사용자 직접)~~ ✅ **완료(2026-09-01, 아래 절 참고)**, (c) `Link.kind` 설계 방향 확인 후 구현, (d) 노션/Codex/Gemini/마켓플레이스 라이브 검증(전부 사람 전담으로 확정, 재조사 불필요). **PRD 문서 4종(01/03/04·`.PRD/README.md`)의 상태·미결 정합성은 이번 절로 종결** — 다음 세션에서 "PRD 재감사"를 또 반복하기보다 (a) 커밋 여부부터 먼저 물을 것.
+
+### [후속 5] `chore/remove-guide-docs-v2` PR #19 병합 완료 + 브랜치 정리(2026-09-01)
+`GUIDE.en.pdf`/`GUIDE.ko.pdf` 삭제 + README(ko/en·md/html) "v0.10.0 정식 릴리즈" 과장 문구 정정을 담은 브랜치를 사용자가 직접 PR #19로 생성·병합 완료(`gh pr create`/`gh pr merge`는 정책상 AI 실행 금지 — 사용자가 Claude Code `!` 직접실행으로 진행). 병합 후 `main`에서 직접 재검증: `npm run verify` 215/215, `smoke-tools.mjs` 18/18, `security-scan.mjs --all` 70/70(GUIDE 2개 삭제 반영으로 72→70) 전부 통과. 이어서 완전히 흡수·중복된 브랜치 3개 정리(로컬+원격): `chore/remove-guide-pdfs`(구버전, GUIDE 삭제만 — 커밋 해시는 다르지만 파일 내용 기준 main과 완전 동일함을 직접 diff로 확인 후 삭제), `docs/readme-overhaul-remove-guide`(2026-08-04에 이미 병합되고 방치된 빈 브랜치, ancestor 확인 후 삭제), `chore/remove-guide-docs-v2`(병합 완료로 용도 소진, ancestor 확인 후 삭제). 이 `CHECKPOINT.md` 갱신은 로컬 파일 수정만 — **커밋/푸시는 하지 않음**(이번 배치의 명시 지시 유지).
 
 ## 안전 불변 조건 (모든 M 관통 — 절대 위반 금지, 요약 사본)
 1. 기존 노트 편집 전 **백업 + 개별 승인** (신규 생성만 사전승인 가능, 편집은 항상 개별 승인)
