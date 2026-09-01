@@ -460,6 +460,17 @@ npm start        # MCP 서버 실행
 </details>
 
 <details>
+<summary><b>🧹 저장소 정리 — 낡은 GUIDE PDF 제거·릴리즈 문구 정정(2026-09-01) (클릭해서 펼치기)</b></summary>
+
+- 🗑️ **낡은 GUIDE PDF 2개 삭제**(`GUIDE.en.pdf`/`GUIDE.ko.pdf`) — 2026-08-04 README 개편 이후 어디서도 참조되지 않던 파일, 안전 확인(파일 내용 대조) 후 삭제.
+- ✏️ **"v0.10.0 정식 릴리즈" 과장 문구 정정** — 실제로는 태그만 push됐고 GitHub Release는 아직 미발행인데 "정식 릴리즈"로 표기하던 오류를 "버전 올림"으로 고치고, 정직한 고지 문구 추가(바로 위 v0.10.0 항목).
+- 📋 `CHECKPOINT.md`에 병합·정리 내역 기록.
+- 🌿 **중복·소진된 브랜치 3개 정리**(`chore/remove-guide-pdfs`, `docs/readme-overhaul-remove-guide`, `chore/remove-guide-docs-v2`) — 전부 `main`에 흡수/중복 확인 후 로컬+원격 삭제.
+- PR #19·#20으로 `main`에 병합 완료. 코드 변경 없음(문서·정리 작업만), `npm run verify` 215/215 그대로.
+
+</details>
+
+<details>
 <summary><b>🔜 앞으로 남은 것 (다음 계획, 아직 안 됨 — 클릭해서 펼치기)</b></summary>
 
 - Codex용 자연어 규칙 파일(`AGENTS.md`)엔 자동 링크·자동 분류·자동 요약의 자연어 트리거 설명이 이미 있음(도구 자체는 Codex에서도 직접 호출하면 정상 동작 확인됨) — **실제 `codex exec`로 자연어 트리거가 정말 발동하는지**는 아직 라이브 검증 전.
