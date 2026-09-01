@@ -369,17 +369,78 @@ npm start        # run the MCP server
 
 ## 13. What's new — changelog
 
-<details>
-<summary><b>✅ v0.7.1 — first stable release (click to expand)</b></summary>
+> Sorted newest-first, so the most recent work is visible without scrolling.
 
-- 🧹 Natural-language organize (`wikimate_collect`) — auto-creates notes from material
-- 🧭 Vault auto-discovery (`wikimate_vaults`) — proposes "organize into here?"
-- 🩺 Vault health-check (`wikimate_lint`) — detects duplicates, broken links, orphan notes, missing frontmatter (read-only)
-- 🔧 Safe fix (`wikimate_fix`) — moves to archive instead of deleting, link replacement (auto-backup before fixing)
-- 🧾 Run log (`wikimate_runlog`) — auto-records what the AI did in the vault
-- 🗂️ Optional Notion indexing — adds an index row automatically when a Notion tool is connected
-- 3 skills (organize/query/lint)
-- 5 MCP tools
+<details>
+<summary><b>🧹 Repo cleanup — removed stale GUIDE PDFs, fixed release wording (2026-09-01, click to expand)</b></summary>
+
+- 🗑️ **Removed 2 stale GUIDE PDFs** (`GUIDE.en.pdf`/`GUIDE.ko.pdf`) — unreferenced anywhere since the 2026-08-04 README overhaul; deleted after verifying file-content safety.
+- ✏️ **Fixed an overclaiming "v0.10.0 official release" wording** — only the git tag had actually been pushed and no GitHub Release was published yet; corrected to "version bump" with an honest-disclosure note added (see the v0.10.0 entry below).
+- 📋 Recorded the merge and cleanup in `CHECKPOINT.md`.
+- 🌿 **Cleaned up 3 redundant/exhausted branches** (`chore/remove-guide-pdfs`, `docs/readme-overhaul-remove-guide`, `chore/remove-guide-docs-v2`) — each verified as fully absorbed into or duplicated by `main` before deleting locally and remotely.
+- Merged into `main` via PR #19 and #20. No code changes (docs/cleanup only); `npm run verify` still 215/215.
+
+</details>
+
+<details>
+<summary><b>🏷️ v0.10.0 version bump (2026-09-01) (click to expand)</b></summary>
+
+- Bumped the minor version to reflect everything accumulated since v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify natural-language trigger fix, Notion safety-rule documentation, and more. Synced across `package.json`, `plugin.json`, `marketplace.json`, and `mcp/server.mjs`; the `v0.10.0` git tag was created and pushed.
+- ⚠️ **Honest disclosure**: the actual GitHub "Release" page has **not** been published yet (only the tag exists; no Release notes yet). This project's policy is that publicly-visible actions like publishing a release are never done by AI on the user's behalf — the tag was pushed, but the final publish step is left for the user to do themselves.
+- Live verification of Codex/Gemini natural-language triggers and a fresh marketplace install is still pending user confirmation, so this isn't yet a `1.0.0` "done" declaration — disclosing that honestly upfront.
+
+</details>
+
+<details>
+<summary><b>🆕 Link.kind recorded — related vs. reference (2026-09-01, click to expand)</b></summary>
+
+- 🏷️ **You can now record what kind of link it is** (`wikimate_link` add_links, optional `kind`) — mark a relationship as a simple relation (`related`) or reference material (`reference`). It's shown on the same bullet line as the "why linked" note, in parentheses (e.g. `- [[note]] (reference) — the reason`). You can set `kind` without `reason`, and omitting both behaves exactly as before (backward-compatible).
+- 🔒 Only two values are allowed — `related` or `reference` — anything else is rejected before it's saved (prevents typos and arbitrary values).
+- Automated tests grew from 206 to **215** (9 new regression checks), all PASS.
+
+</details>
+
+<details>
+<summary><b>🆕 Link.reason recorded + classify natural-language trigger strengthened + Notion safety rules documented (2026-08-31, click to expand)</b></summary>
+
+- 🔗 **Recording "why" a link was made is now possible** (`wikimate_link` add_links, optional `reason`) — when linking notes, you can now attach a reason like "both cover MCP setup," written into the note body's "## Why linked" section. Omit `reason` and everything works exactly as before (fully backward-compatible, no section gets created).
+- 🏷️ **Classify's "mark as done" trigger actually strengthened** — fixed the gap found on 2026-08-21 (the feature was complete, but the guidance docs hadn't caught up, so plain language could miss it) by adding real trigger phrases and workflow steps to the skill's guidance.
+- 🔒 **Two Notion safety rules newly documented**: (1) only connect the two designated tables (Research Library, Run Log) — never the whole workspace, and (2) don't fire requests at Notion back-to-back when processing many notes at once (space them out, retry once or twice on failure). These were already supposed-to-follow principles (`04_PROJECT_SPEC.md` "never do this"), just missing from the actual guidance docs (`AGENTS.md`, skills) until now.
+- Automated tests grew from 191 to 206 (15 new regression checks for the link-reason feature, plus updated server-protocol checks). Also newly confirmed by direct testing: injecting an instruction-like sentence into `reason` gets stored only as data, never executed as a command.
+- ✅ Committed and pushed to `main`.
+
+</details>
+
+<details>
+<summary><b>✅ Status/project fields + full Notion Run Log wiring (2026-08-20 to 21) (click to expand)</b></summary>
+
+- 🏷️ **Added "progress status" and "related project" to classify** — say something like "I'm done with this note, mark it done" and it also updates the progress status (inbox/draft/done) and project name (only when asked, never inferred).
+- ⚠️ **Secret-looking-string detection** — if the material you're organizing (a web page, a chat log, etc.) contains something that looks like an API key or password, the preview screen warns you before saving ("there's something like this, want to remove it first?") — it never force-deletes it (raw-text-preservation principle).
+- 📇 **Notion Run Log wired into every feature** — the "log what the AI did" write to Notion, previously wired only into the organize feature, is now wired into linking, classifying, summarizing, and the fix side of health-check too.
+- 🐛 **3 real defects found and fixed during re-verification**: (1) a saved value with a backslash or quote came back different when read again, (2) re-running "build a table of contents" kept silently piling up duplicate entries, (3) the "replace a link" feature could create a link to a note that didn't even exist. All three were reproduced, root-caused, fixed, and re-verified; automated tests grew from 180 to 191.
+
+</details>
+
+<details>
+<summary><b>✅ Phase 3: automated security scan, CI, Gemini adapter, v0.9.0 release (2026-08-20) (click to expand)</b></summary>
+
+- 🔒 **Automated release security scan** (`scripts/security-scan.mjs`) — matches only real API-key/token/private-key formats (minimizes false positives). An optional pre-commit hook (`.githooks/pre-commit`) can also check before every commit.
+- 🤖 **New GitHub Actions CI** — every push/PR to `main` makes GitHub's own server automatically re-run `npm run verify` (core logic), the server-protocol checks, and the security scan, with no human involved. A second safety net even if you forget to check locally.
+- 🌐 **Gemini CLI adapter added** — `GEMINI.md` + `adapters/gemini/SETUP.md`. The registration commands (`gemini mcp add/list/remove`) were actually run and verified.
+- 🧹 **`npm audit` vulnerabilities: 5 → 0** — safely patched only the verification-only devDependency's transitive dependencies (confirmed in code to have zero effect on the actual server).
+- 🏷️ **v0.9.0 official release** — GitHub tag and Release published.
+- Most of this is docs/config only, so it doesn't affect the core behavior (organizing, linking, classifying, summarizing notes).
+
+</details>
+
+<details>
+<summary><b>✅ Summarize · atomic notes — merged into main (2026-08-04) (click to expand)</b></summary>
+
+- 📝 **Summarize · atomic notes** (`wikimate_summarize`, action=`suggest`/`apply`) — fills a one-line summary (up to 200 chars) on a long note, or creates a separate atomic note with just the key points.
+- 🛡️ **Raw-content preservation enforced structurally** — this tool has no code path that modifies a note's body (the original text) at all. It only surgically replaces the `summary` field (leaving every other field untouched), or creates a brand-new, separate file.
+- 🕵️ Extended the review subagent (`wikimate-reviewer`) to also check summarize results.
+- 20 unit tests + 8 real-vault E2E checks + the full 126-check regression suite all PASS.
+- 7 MCP tools → **8**
 
 </details>
 
@@ -398,75 +459,16 @@ npm start        # run the MCP server
 </details>
 
 <details>
-<summary><b>✅ Summarize · atomic notes — merged into main (2026-08-04) (click to expand)</b></summary>
+<summary><b>✅ v0.7.1 — first stable release (click to expand)</b></summary>
 
-- 📝 **Summarize · atomic notes** (`wikimate_summarize`, action=`suggest`/`apply`) — fills a one-line summary (up to 200 chars) on a long note, or creates a separate atomic note with just the key points.
-- 🛡️ **Raw-content preservation enforced structurally** — this tool has no code path that modifies a note's body (the original text) at all. It only surgically replaces the `summary` field (leaving every other field untouched), or creates a brand-new, separate file.
-- 🕵️ Extended the review subagent (`wikimate-reviewer`) to also check summarize results.
-- 20 unit tests + 8 real-vault E2E checks + the full 126-check regression suite all PASS.
-- 7 MCP tools → **8**
-
-</details>
-
-<details>
-<summary><b>✅ Phase 3: automated security scan, CI, Gemini adapter, v0.9.0 release (2026-08-20) (click to expand)</b></summary>
-
-- 🔒 **Automated release security scan** (`scripts/security-scan.mjs`) — matches only real API-key/token/private-key formats (minimizes false positives). An optional pre-commit hook (`.githooks/pre-commit`) can also check before every commit.
-- 🤖 **New GitHub Actions CI** — every push/PR to `main` makes GitHub's own server automatically re-run `npm run verify` (core logic), the server-protocol checks, and the security scan, with no human involved. A second safety net even if you forget to check locally.
-- 🌐 **Gemini CLI adapter added** — `GEMINI.md` + `adapters/gemini/SETUP.md`. The registration commands (`gemini mcp add/list/remove`) were actually run and verified.
-- 🧹 **`npm audit` vulnerabilities: 5 → 0** — safely patched only the verification-only devDependency's transitive dependencies (confirmed in code to have zero effect on the actual server).
-- 🏷️ **v0.9.0 official release** — GitHub tag and Release published.
-- Most of this is docs/config only, so it doesn't affect the core behavior (organizing, linking, classifying, summarizing notes).
-
-</details>
-
-<details>
-<summary><b>✅ Status/project fields + full Notion Run Log wiring (2026-08-20 to 21) (click to expand)</b></summary>
-
-- 🏷️ **Added "progress status" and "related project" to classify** — say something like "I'm done with this note, mark it done" and it also updates the progress status (inbox/draft/done) and project name (only when asked, never inferred).
-- ⚠️ **Secret-looking-string detection** — if the material you're organizing (a web page, a chat log, etc.) contains something that looks like an API key or password, the preview screen warns you before saving ("there's something like this, want to remove it first?") — it never force-deletes it (raw-text-preservation principle).
-- 📇 **Notion Run Log wired into every feature** — the "log what the AI did" write to Notion, previously wired only into the organize feature, is now wired into linking, classifying, summarizing, and the fix side of health-check too.
-- 🐛 **3 real defects found and fixed during re-verification**: (1) a saved value with a backslash or quote came back different when read again, (2) re-running "build a table of contents" kept silently piling up duplicate entries, (3) the "replace a link" feature could create a link to a note that didn't even exist. All three were reproduced, root-caused, fixed, and re-verified; automated tests grew from 180 to 191.
-
-</details>
-
-<details>
-<summary><b>🆕 Link.reason recorded + classify natural-language trigger strengthened + Notion safety rules documented (2026-08-31, click to expand)</b></summary>
-
-- 🔗 **Recording "why" a link was made is now possible** (`wikimate_link` add_links, optional `reason`) — when linking notes, you can now attach a reason like "both cover MCP setup," written into the note body's "## Why linked" section. Omit `reason` and everything works exactly as before (fully backward-compatible, no section gets created).
-- 🏷️ **Classify's "mark as done" trigger actually strengthened** — fixed the gap found on 2026-08-21 (the feature was complete, but the guidance docs hadn't caught up, so plain language could miss it) by adding real trigger phrases and workflow steps to the skill's guidance.
-- 🔒 **Two Notion safety rules newly documented**: (1) only connect the two designated tables (Research Library, Run Log) — never the whole workspace, and (2) don't fire requests at Notion back-to-back when processing many notes at once (space them out, retry once or twice on failure). These were already supposed-to-follow principles (`04_PROJECT_SPEC.md` "never do this"), just missing from the actual guidance docs (`AGENTS.md`, skills) until now.
-- Automated tests grew from 191 to 206 (15 new regression checks for the link-reason feature, plus updated server-protocol checks). Also newly confirmed by direct testing: injecting an instruction-like sentence into `reason` gets stored only as data, never executed as a command.
-- ✅ Committed and pushed to `main`.
-
-</details>
-
-<details>
-<summary><b>🆕 Link.kind recorded — related vs. reference (2026-09-01, click to expand)</b></summary>
-
-- 🏷️ **You can now record what kind of link it is** (`wikimate_link` add_links, optional `kind`) — mark a relationship as a simple relation (`related`) or reference material (`reference`). It's shown on the same bullet line as the "why linked" note, in parentheses (e.g. `- [[note]] (reference) — the reason`). You can set `kind` without `reason`, and omitting both behaves exactly as before (backward-compatible).
-- 🔒 Only two values are allowed — `related` or `reference` — anything else is rejected before it's saved (prevents typos and arbitrary values).
-- Automated tests grew from 206 to **215** (9 new regression checks), all PASS.
-
-</details>
-
-<details>
-<summary><b>🏷️ v0.10.0 version bump (2026-09-01) (click to expand)</b></summary>
-
-- Bumped the minor version to reflect everything accumulated since v0.9.0 (2026-08-20): link-reason and link-kind recording, the classify natural-language trigger fix, Notion safety-rule documentation, and more. Synced across `package.json`, `plugin.json`, `marketplace.json`, and `mcp/server.mjs`; the `v0.10.0` git tag was created and pushed.
-- ⚠️ **Honest disclosure**: the actual GitHub "Release" page has **not** been published yet (only the tag exists; no Release notes yet). This project's policy is that publicly-visible actions like publishing a release are never done by AI on the user's behalf — the tag was pushed, but the final publish step is left for the user to do themselves.
-- Live verification of Codex/Gemini natural-language triggers and a fresh marketplace install is still pending user confirmation, so this isn't yet a `1.0.0` "done" declaration — disclosing that honestly upfront.
-
-</details>
-
-<details>
-<summary><b>🧹 Repo cleanup — removed stale GUIDE PDFs, fixed release wording (2026-09-01, click to expand)</b></summary>
-
-- 🗑️ **Removed 2 stale GUIDE PDFs** (`GUIDE.en.pdf`/`GUIDE.ko.pdf`) — unreferenced anywhere since the 2026-08-04 README overhaul; deleted after verifying file-content safety.
-- ✏️ **Fixed an overclaiming "v0.10.0 official release" wording** — only the git tag had actually been pushed and no GitHub Release was published yet; corrected to "version bump" with an honest-disclosure note added (see the v0.10.0 entry above).
-- 📋 Recorded the merge and cleanup in `CHECKPOINT.md`.
-- 🌿 **Cleaned up 3 redundant/exhausted branches** (`chore/remove-guide-pdfs`, `docs/readme-overhaul-remove-guide`, `chore/remove-guide-docs-v2`) — each verified as fully absorbed into or duplicated by `main` before deleting locally and remotely.
-- Merged into `main` via PR #19 and #20. No code changes (docs/cleanup only); `npm run verify` still 215/215.
+- 🧹 Natural-language organize (`wikimate_collect`) — auto-creates notes from material
+- 🧭 Vault auto-discovery (`wikimate_vaults`) — proposes "organize into here?"
+- 🩺 Vault health-check (`wikimate_lint`) — detects duplicates, broken links, orphan notes, missing frontmatter (read-only)
+- 🔧 Safe fix (`wikimate_fix`) — moves to archive instead of deleting, link replacement (auto-backup before fixing)
+- 🧾 Run log (`wikimate_runlog`) — auto-records what the AI did in the vault
+- 🗂️ Optional Notion indexing — adds an index row automatically when a Notion tool is connected
+- 3 skills (organize/query/lint)
+- 5 MCP tools
 
 </details>
 
