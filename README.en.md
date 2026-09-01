@@ -460,6 +460,17 @@ npm start        # run the MCP server
 </details>
 
 <details>
+<summary><b>🧹 Repo cleanup — removed stale GUIDE PDFs, fixed release wording (2026-09-01, click to expand)</b></summary>
+
+- 🗑️ **Removed 2 stale GUIDE PDFs** (`GUIDE.en.pdf`/`GUIDE.ko.pdf`) — unreferenced anywhere since the 2026-08-04 README overhaul; deleted after verifying file-content safety.
+- ✏️ **Fixed an overclaiming "v0.10.0 official release" wording** — only the git tag had actually been pushed and no GitHub Release was published yet; corrected to "version bump" with an honest-disclosure note added (see the v0.10.0 entry above).
+- 📋 Recorded the merge and cleanup in `CHECKPOINT.md`.
+- 🌿 **Cleaned up 3 redundant/exhausted branches** (`chore/remove-guide-pdfs`, `docs/readme-overhaul-remove-guide`, `chore/remove-guide-docs-v2`) — each verified as fully absorbed into or duplicated by `main` before deleting locally and remotely.
+- Merged into `main` via PR #19 and #20. No code changes (docs/cleanup only); `npm run verify` still 215/215.
+
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
 - The Codex natural-language rule file (`AGENTS.md`) already describes natural-language triggers for auto-link, auto-classify, and auto-summarize too (added 2026-08-17). A live check that `codex exec` actually fires these from natural language is still pending.

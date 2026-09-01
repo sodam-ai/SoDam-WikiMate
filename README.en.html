@@ -1010,6 +1010,31 @@ honestly upfront.</li>
 </details>
 
 <details>
+<summary><b>🧹 Repo cleanup — removed stale GUIDE PDFs, fixed release wording (2026-09-01, click to expand)</b></summary>
+
+<ul>
+<li>🗑️ <strong>Removed 2 stale GUIDE PDFs</strong>
+(<code>GUIDE.en.pdf</code>/<code>GUIDE.ko.pdf</code>) — unreferenced
+anywhere since the 2026-08-04 README overhaul; deleted after verifying
+file-content safety.</li>
+<li>✏️ <strong>Fixed an overclaiming "v0.10.0 official release"
+wording</strong> — only the git tag had actually been pushed and no
+GitHub Release was published yet; corrected to "version bump" with an
+honest-disclosure note added (see the v0.10.0 entry above).</li>
+<li>📋 Recorded the merge and cleanup in
+<code>CHECKPOINT.md</code>.</li>
+<li>🌿 <strong>Cleaned up 3 redundant/exhausted branches</strong>
+(<code>chore/remove-guide-pdfs</code>,
+<code>docs/readme-overhaul-remove-guide</code>,
+<code>chore/remove-guide-docs-v2</code>) — each verified as fully
+absorbed into or duplicated by <code>main</code> before deleting locally
+and remotely.</li>
+<li>Merged into <code>main</code> via PR #19 and #20. No code changes
+(docs/cleanup only); <code>npm run verify</code> still 215/215.</li>
+</ul>
+</details>
+
+<details>
 <summary><b>🔜 What's left (next steps, not done yet — click to expand)</b></summary>
 
 <ul>
@@ -1750,5 +1775,4 @@ License:                 Apache-2.0 © SoDam AI Studio (external tools have thei
 <p>If something goes wrong, check <a href="#18-troubleshooting">§18
 Troubleshooting</a> or <a href="#19-faq">§19 FAQ</a> first. Still stuck?
 Open an issue on the GitHub repo.</p>
-</body>
-</html>
+</body></html>
