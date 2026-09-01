@@ -32,7 +32,6 @@ li { margin: 0.2em 0; }
 </style>
 </head>
 <body>
-
 <h1 id="wikimate-위키메이트">Wikimate (위키메이트)</h1>
 <p>AI 에이전트에게 <strong>"정리해줘"</strong> 라고 말하면, 흩어진
 자료(웹 링크·PDF·대화 로그·텍스트)를 <strong>내 옵시디언 볼트에 노트로
@@ -393,7 +392,7 @@ Codex용·개발용</h3>
 <code>wikimate_summarize</code></p>
 <blockquote>
 <p>ℹ️ 이 저장소는 현재 <strong><code>v0.10.0</code></strong>(2026-09-01
-릴리즈)로 버전이 맞춰져 있고, <code>main</code> 브랜치 코드에 도구
+버전 기준)으로 버전이 맞춰져 있고, <code>main</code> 브랜치 코드에 도구
 8개(연결 이유·연결 종류 기록 포함)가 전부 포함돼 있어요. 위 방법으로
 설치하면 이 문서에 적힌 전체 기능을 그대로 받게 됩니다.</p>
 </blockquote>
@@ -919,13 +918,18 @@ PASS.</li>
 </details>
 
 <details>
-<summary><b>🏷️ v0.10.0 정식 릴리즈(2026-09-01) (클릭해서 펼치기)</b></summary>
+<summary><b>🏷️ v0.10.0 버전 올림(2026-09-01) (클릭해서 펼치기)</b></summary>
 
 <ul>
 <li>v0.9.0(2026-08-20) 이후 쌓인 커밋(연결 이유·연결 종류 기록, 분류
 자연어 트리거 보강, 노션 안전규칙 문서화 등)을 반영해 마이너 버전 승격.
 <code>package.json</code>·<code>plugin.json</code>·<code>marketplace.json</code>·<code>mcp/server.mjs</code>
-버전 동기화.</li>
+버전 동기화, <code>git tag v0.10.0</code> 생성·push 완료.</li>
+<li>⚠️ <strong>정직한 고지</strong>: GitHub 저장소의 정식 "Release"
+페이지 발행은 <strong>아직 안 됐어요</strong>(태그만 올라가 있고 Release
+노트는 미발행). 이 프로젝트는 릴리즈 발행처럼 외부에 공개적으로 보이는
+행동은 AI가 대신 누르지 않고 사람이 직접 확인 후 발행하기로 정해서,
+태그까지만 올리고 최종 발행은 사용자 몫으로 남겨뒀어요.</li>
 <li>Codex/Gemini 자연어 트리거·마켓플레이스 신규설치 라이브 검증은
 여전히 사람 확인 대기라 <code>1.0.0</code>(완성 선언)은 아직 아니에요 —
 정직하게 미리 알려드려요.</li>
@@ -1625,6 +1629,5 @@ href="./DEVELOPMENT.md"><code>DEVELOPMENT.md</code></a>를
 <p>문제가 생기면 <a href="#18-문제오류-대처-방법">18번(문제
 대처)</a>이나 <a href="#19-faq-자주-묻는-질문">19번(FAQ)</a>을 먼저
 보세요. 그래도 안 되면 GitHub 저장소의 Issues에 남겨 주세요.</p>
-
 </body>
 </html>

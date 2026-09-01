@@ -160,7 +160,7 @@ git clone https://github.com/sodam-ai/SoDam-WikiMate.git
 설치 확인: `/mcp` 입력 → 아래 **8개**가 모두 보이면 성공이에요.
 `wikimate_collect` · `wikimate_lint` · `wikimate_fix` · `wikimate_runlog` · `wikimate_vaults` · `wikimate_link` · `wikimate_classify` · `wikimate_summarize`
 
-> ℹ️ 이 저장소는 현재 **`v0.10.0`**(2026-09-01 릴리즈)로 버전이 맞춰져 있고, `main` 브랜치 코드에 도구 8개(연결 이유·연결 종류 기록 포함)가 전부 포함돼 있어요. 위 방법으로 설치하면 이 문서에 적힌 전체 기능을 그대로 받게 됩니다.
+> ℹ️ 이 저장소는 현재 **`v0.10.0`**(2026-09-01 버전 기준)으로 버전이 맞춰져 있고, `main` 브랜치 코드에 도구 8개(연결 이유·연결 종류 기록 포함)가 전부 포함돼 있어요. 위 방법으로 설치하면 이 문서에 적힌 전체 기능을 그대로 받게 됩니다.
 
 ### Codex
 
@@ -451,9 +451,10 @@ npm start        # MCP 서버 실행
 </details>
 
 <details>
-<summary><b>🏷️ v0.10.0 정식 릴리즈(2026-09-01) (클릭해서 펼치기)</b></summary>
+<summary><b>🏷️ v0.10.0 버전 올림(2026-09-01) (클릭해서 펼치기)</b></summary>
 
-- v0.9.0(2026-08-20) 이후 쌓인 커밋(연결 이유·연결 종류 기록, 분류 자연어 트리거 보강, 노션 안전규칙 문서화 등)을 반영해 마이너 버전 승격. `package.json`·`plugin.json`·`marketplace.json`·`mcp/server.mjs` 버전 동기화.
+- v0.9.0(2026-08-20) 이후 쌓인 커밋(연결 이유·연결 종류 기록, 분류 자연어 트리거 보강, 노션 안전규칙 문서화 등)을 반영해 마이너 버전 승격. `package.json`·`plugin.json`·`marketplace.json`·`mcp/server.mjs` 버전 동기화, `git tag v0.10.0` 생성·push 완료.
+- ⚠️ **정직한 고지**: GitHub 저장소의 정식 "Release" 페이지 발행은 **아직 안 됐어요**(태그만 올라가 있고 Release 노트는 미발행). 이 프로젝트는 릴리즈 발행처럼 외부에 공개적으로 보이는 행동은 AI가 대신 누르지 않고 사람이 직접 확인 후 발행하기로 정해서, 태그까지만 올리고 최종 발행은 사용자 몫으로 남겨뒀어요.
 - Codex/Gemini 자연어 트리거·마켓플레이스 신규설치 라이브 검증은 여전히 사람 확인 대기라 `1.0.0`(완성 선언)은 아직 아니에요 — 정직하게 미리 알려드려요.
 
 </details>
