@@ -31,6 +31,7 @@ li { margin: 0.2em 0; }
 .status-no::before { content: "🔴 "; }
 </style>
 </head>
+
 <body>
 <h1 id="wikimate">Wikimate</h1>
 <p>Tell an AI agent <strong>"organize this,"</strong> and it takes your
@@ -62,7 +63,9 @@ via real Obsidian-vault end-to-end runs. <strong>Every push to
 plus a security scan automatically</strong> (GitHub Actions). The
 session-start auto-detection (hook) and the Obsidian graph-view
 reflection have been <strong>confirmed on real screens in the user's own
-environment</strong> (screenshot evidence). See <a
+environment</strong> (screenshot evidence). <strong>Notion round-trip
+indexing and a marketplace reinstall have also been confirmed live in
+the user's own environment</strong> (2026-09-01). See <a
 href="#17-current-status-honestly">17. Current status, honestly</a> for
 the item-by-item breakdown.</p>
 </blockquote>
@@ -805,6 +808,65 @@ npm start        # run the MCP server</code></pre>
 scrolling.</p>
 </blockquote>
 <details>
+<summary><b>✅ Notion indexing · marketplace reinstall — live-verified with real accounts (2026-09-01, click to expand)</b></summary>
+
+<ul>
+<li>🔁 <strong>Notion round-trip verified live</strong> — in an
+environment with a real Notion account connected, ran
+<code>/wikimate &lt;URL&gt;</code> on a Wikipedia article → a "Research
+Library" row was created in Notion → that result (page URL) was written
+back into the Obsidian note's <code>notion_id</code> field, confirming
+the full round trip end to end. The Notion "Wikimate Run Log" DB was
+also actually created for the first time during this run. The resulting
+note file (<code>대한민국.md</code>) was opened directly and its
+frontmatter <code>notion_id</code> field checked byte-for-byte (not
+inferred — checked directly against the file).</li>
+<li>🕵️ <strong>The review subagent (<code>wikimate-reviewer</code>)
+caught 2 real defects for the first time in a live run</strong> — it
+found and reported 2 factual errors in the note body during review,
+which were fixed after approval. This is the first real-world
+confirmation (not a simulation) that the "another AI double-checks after
+writing" safeguard actually works.</li>
+<li>🔧 <strong>2 real environment-setup bugs found during live use, both
+fixed</strong>: (1) the marketplace cache was stuck on a stale version
+(v0.7.2) and <code>/plugin marketplace update</code> didn't clear it —
+fixed via a full <code>remove</code> → <code>add</code> →
+<code>install</code> re-registration (confirmed all 8 tools at v0.10.0
+afterward). (2) <code>OBSIDIAN_VAULT_PATH</code> failed with "Missing
+environment variables" — the root cause was that <code>.mcp.json</code>
+reads this value only from a <strong>real OS environment
+variable</strong> (there is no <code>.env</code>-file-loading code
+anywhere in <code>mcp/server.mjs</code> or <code>mcp/lib/*.mjs</code> —
+checked directly), while the prior guidance could be misread as "just
+edit the project's <code>.env</code> file." Fixed by setting a real
+environment variable with Windows <code>setx</code> and fully restarting
+Claude Code. This experience is now reflected in the <a
+href="#14-files--docs-folder-structure">14. Files &amp; docs —
+environment variables</a> section and in <code>.env.example</code>'s own
+wording (see below).</li>
+<li>⚠️ <strong>Honest distinction</strong>: the marketplace check was
+not literally "a computer that has never installed this before" — it was
+"an existing install's cache, fully reset, then re-registered." That
+said, <code>remove</code> fully clears the local registration/cache
+before <code>add</code>+<code>install</code> re-fetches everything from
+GitHub from scratch, so the commands and mechanism executed are
+identical to a fresh install (only the computer being the same one
+differs). Keeping this distinction explicit to avoid overclaiming.</li>
+<li>With this, the "Notion indexing" and "Formal marketplace
+registration" rows in the <a href="#17-current-status-honestly">17.
+status table</a> move from 🟡 (live-unverified) to ✅ (done) — 2 of the
+4 items that needed a real human account (Notion, Codex, Gemini,
+marketplace) are now closed. The remaining 2 (Codex/Gemini live porting)
+were <strong>explicitly deferred by the user's own decision</strong>
+("I'll port it once the implementation is further along and solid enough
+to actually use") — not cancelled, just not to be raised again until the
+user brings it up.</li>
+<li>No code changes (documentation corrections only);
+<code>npm run verify</code> still 215/215.</li>
+</ul>
+</details>
+
+<details>
 <summary><b>🧹 Repo cleanup — removed stale GUIDE PDFs, fixed release wording (2026-09-01, click to expand)</b></summary>
 
 <ul>
@@ -1046,19 +1108,22 @@ Notion tool is connected</li>
 already describes natural-language triggers for auto-link,
 auto-classify, and auto-summarize too (added 2026-08-17). A live check
 that <code>codex exec</code> actually fires these from natural language
-is still pending.</li>
+is still pending. <strong>The user has explicitly decided to defer
+this</strong> (2026-09-01: "I'll port it once the implementation is
+further along and solid enough to actually use" — not cancelled, just
+not raised again until the user brings it up).</li>
 <li>The <strong>Gemini CLI adapter</strong>'s registration commands are
 verified, but live verification of real natural-language triggering is
-still pending user confirmation.</li>
-<li><strong>Live marketplace fresh-install verification</strong>: the
-structure/security checks are done (2026-08-20) — only a live check of a
-brand-new user installing it from scratch remains.</li>
-<li><strong>Live Notion-indexing verification</strong>: the structure,
-logic, bidirectional link (<code>notion_id</code>), and Run Log are all
-complete in code (2026-08-21) — only a check in a real, connected Notion
-account remains.</li>
+deferred for the same reason.</li>
 <li>A Python-based advanced extractor is not implemented yet.</li>
 </ul>
+<blockquote>
+<p>✅ <strong>Moved to done</strong>: "Live marketplace fresh-install
+verification" and "Live Notion-indexing verification" were confirmed
+live with real accounts on 2026-09-01 and removed from this list. See
+the "✅ Notion indexing · marketplace reinstall" entry just above and
+the <a href="#17-current-status-honestly">17. status table</a>.</p>
+</blockquote>
 </details>
 
 <hr />
@@ -1144,8 +1209,34 @@ check)</td>
 </tr>
 </tbody>
 </table>
-<p>Copy <code>.env.example</code> to <code>.env</code>. <strong>Never
-commit real values (tokens, etc.) to git.</strong></p>
+<blockquote>
+<p>⚠️ <strong>Know this exactly — the <code>.env</code> file is never
+loaded automatically.</strong> The Wikimate server
+(<code>mcp/server.mjs</code>) is zero-dependency by design, so there is
+no code anywhere that auto-loads a <code>.env</code> file (checked
+directly). <code>.env.example</code> is just a <strong>reference showing
+which values are needed</strong> — how a value actually reaches the
+server depends on your install method:</p>
+<ul>
+<li><strong>Claude Code (marketplace install)</strong> → set a real
+<strong>Windows environment variable</strong>. In PowerShell:
+<code>setx OBSIDIAN_VAULT_PATH "D:\your\vault\path"</code> → then
+<strong>fully restart Claude Code</strong> (<code>.mcp.json</code>'s
+<code>${OBSIDIAN_VAULT_PATH}</code> reads it from the OS
+environment).</li>
+<li><strong>Codex</strong> → pass the value directly in the
+<code>codex mcp add ... --env OBSIDIAN_VAULT_PATH=... -- ...</code>
+command from <a href="#6-installation">section 6</a>. Unrelated to
+<code>.env</code>.</li>
+<li><strong>Notion DB variables (<code>NOTION_RESEARCH_DB_ID</code>,
+etc.)</strong> → the core server never reads these at all. The AI
+assistant either finds the table in Notion during the conversation, or
+you just tell it the table link in plain language — <strong>usually the
+simplest path is skipping the environment variable entirely and just
+saying it out loud.</strong> <strong>Never commit real values (tokens,
+etc.) to git.</strong></li>
+</ul>
+</blockquote>
 <hr />
 <h2 id="15-architecture">15. Architecture</h2>
 <blockquote>
@@ -1341,22 +1432,24 @@ natural language is not yet live-tested (pending user go-ahead)</td>
 </tr>
 <tr>
 <td>Notion indexing</td>
-<td>🟡 Code complete, live-unverified</td>
-<td>Notion row creation (skill), the <code>notion_id</code> link-back
-(<code>wikimate_link</code> set_notion_id), and <strong>Notion Run Log
-mirroring (2026-08-19 to 21, wired into all 6 skills)</strong> are all
-structurally/skill-level complete. User confirmation in a real,
-connected Notion environment is still pending</td>
+<td>✅ Done (live-verified 2026-09-01)</td>
+<td>Full round trip confirmed live with a real Notion account:
+<code>/wikimate &lt;URL&gt;</code> → a Notion row is created →
+<code>notion_id</code> is written back — verified by opening the
+resulting note file's frontmatter directly (not inferred). The review
+subagent also caught 2 real factual errors in a live run. Details:
+latest entry in <a href="#13-whats-new-changelog">13. changelog</a></td>
 </tr>
 <tr>
 <td>Formal marketplace registration</td>
-<td>🟡 Structure &amp; security check done, live verification
-pending</td>
-<td><code>plugin.json</code>/<code>marketplace.json</code> structure
-confirmed valid (currently v0.10.0); Phase 3 precondition (automated
-deployment security scan, <code>scripts/security-scan.mjs</code> +
-GitHub Actions CI) met (2026-08-20). Live verification of a real user's
-fresh install is still pending</td>
+<td>✅ Done (live-verified 2026-09-01)</td>
+<td>The <code>add</code> → <code>install</code> install/reinstall
+mechanism was confirmed live (a stale cache was reset via
+<code>remove</code>, then re-registered — all 8 tools came back
+correctly at v0.10.0). <strong>Honest distinction</strong>: this was not
+literally "a computer that never had it installed" — it was the same
+machine's cache fully reset and re-registered. The commands and
+mechanism executed are identical to a fresh install either way</td>
 </tr>
 <tr>
 <td>Python advanced extractor</td>
@@ -1754,6 +1847,159 @@ material is recommended.</li>
 <li>The guidance in this document is <strong>not legal advice.</strong>
 Consult a lawyer or other professional if needed for
 commercial/enterprise use.</li>
+</ul>
+<h3
+id="20-5-commercial-use-scope-at-a-glance-beginner-friendly-table">20-5.
+Commercial-use scope at a glance (beginner-friendly table)</h3>
+<table>
+<thead>
+<tr>
+<th>What you want to do</th>
+<th>Allowed?</th>
+<th>Conditions / notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modify (edit the code)</td>
+<td>✅ Yes</td>
+<td>Marking that you changed a file is good practice (Apache-2.0
+condition)</td>
+</tr>
+<tr>
+<td>Copy (duplicate as-is)</td>
+<td>✅ Yes</td>
+<td>Always include LICENSE and the copyright notice</td>
+</tr>
+<tr>
+<td>Fork (maintain your own copy on GitHub)</td>
+<td>✅ Yes</td>
+<td>Keep the original copyright notice</td>
+</tr>
+<tr>
+<td>Redistribute (share with others)</td>
+<td>✅ Yes</td>
+<td>Distribute LICENSE and NOTICE together with it</td>
+</tr>
+<tr>
+<td>Sell (charge money for it)</td>
+<td>✅ Yes</td>
+<td>But <strong>don't use the "Wikimate" or "SoDam AI Studio" names as
+if they were your own product's name</strong> (trademark rights are
+separate from Apache-2.0, and need permission)</td>
+</tr>
+<tr>
+<td>Run it as a service (SaaS-style)</td>
+<td>✅ Yes</td>
+<td>Check the terms of any connected external service (e.g. Notion API)
+separately</td>
+</tr>
+<tr>
+<td>Use it as teaching material</td>
+<td>✅ Yes</td>
+<td>Attribution (a copyright notice) is recommended</td>
+</tr>
+<tr>
+<td>Deliver it to a company/client</td>
+<td>✅ Yes</td>
+<td><strong>Check external-tool terms yourself before delivery</strong>
+(e.g. Obsidian's commercial license)</td>
+</tr>
+<tr>
+<td>Use "Wikimate" itself as your own product name</td>
+<td>⚠️ Needs separate permission</td>
+<td>Apache-2.0 licenses the <strong>code</strong> only — trademark
+rights are separate</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>This table restates what Apache License 2.0 generally allows, in
+plain language — it is <strong>not legal advice.</strong> Discuss actual
+contract/delivery terms directly with the other party. This table does
+not guarantee any right that hasn't actually been confirmed.</p>
+</blockquote>
+<h3 id="20-6-a-note-on-ai-generated-content-please-read">20-6. A note on
+AI-generated content (please read)</h3>
+<p>Wikimate is itself an AI tool that organizes, summarizes, links, and
+classifies material, so keep the following in mind:</p>
+<ul>
+<li>The copyright of the notes Wikimate produces
+(organized/summarized/auto-linked results) is treated as yours, per <a
+href="#20-3-data--content-copyright">20-3</a> — but <strong>if the
+summary or organized content ends up too close to the original source
+material (a copyrighted web page, PDF, etc.), the original copyright
+holder's rights may still apply separately.</strong> Check the source's
+license/terms yourself before redistributing commercially.</li>
+<li>Parts of this project's own code and docs were written with AI
+assistance (e.g. Claude Code). <strong>Whether AI-generated content is
+eligible for copyright, and questions of similarity to (infringement of)
+other works, vary by jurisdiction and this area of law is still
+evolving.</strong> Before redistributing or selling this project
+commercially, we recommend checking the relevant law yourself or
+consulting a professional.</li>
+<li>Both points above mean <strong>"this needs checking," not "there is
+a known problem"</strong> — we're not asserting either safety or risk
+without evidence.</li>
+</ul>
+<h3
+id="20-7-dependency-license-check-results-2026-09-01-run-via-npx-license-checker">20-7.
+Dependency license check results (2026-09-01, run via
+<code>npx license-checker</code>)</h3>
+<ul>
+<li>Checked <strong>all 93 packages</strong> in the full dependency tree
+(including devDependency's transitive dependencies) — MIT: 83, ISC: 7,
+BSD-3-Clause: 2, BSD-2-Clause: 1. <strong>Zero copyleft licenses
+(GPL/AGPL/LGPL-family, which force source disclosure on redistribution)
+were found.</strong></li>
+<li>The project itself (<code>wikimate@0.10.0</code>) shows up as
+"UNLICENSED" in the tool's report — <strong>this does not mean it
+actually has no license.</strong> It's simply how the tool classifies a
+package with <code>"private": true</code> in <code>package.json</code>
+(meaning "not published to the public npm registry"). The actual license
+is clearly declared in three places: <code>package.json</code>
+(<code>"license": "Apache-2.0"</code>), <code>LICENSE</code>, and
+<code>NOTICE</code> (the tool itself correctly located the
+<code>LICENSE</code>/<code>NOTICE</code> files). Other automated
+scanners may produce the same false flag — flagging this in
+advance.</li>
+<li>Because the server is zero-dependency by design
+(<code>mcp/server.mjs</code>), the actual deployment/execution path uses
+<strong>none</strong> of these 93 packages (they're all transitive
+dependencies of a verification-only devDependency). We judge the risk of
+a dependency-driven license conflict in commercial deployment to be
+effectively zero.</li>
+</ul>
+<h3
+id="20-8-items-that-need-legalprofessional-review-kept-separate-from-confirmed-facts">20-8.
+Items that need legal/professional review (kept separate from confirmed
+facts)</h3>
+<p>The following are <strong>not concluded by us</strong> — they're
+items you should verify yourself or discuss with a professional:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Whether AI-generated code/docs/note
+content qualifies for copyright protection (varies by
+jurisdiction)</label></li>
+<li><label><input type="checkbox" />Trademark risk if launching a paid
+product/service using the "Wikimate"/"SoDam AI Studio"
+names</label></li>
+<li><label><input type="checkbox" />Exactly what counts as "commercial
+use" under Obsidian's own terms when used for company work or a paid
+service (check Obsidian's terms directly)</label></li>
+<li><label><input type="checkbox" />Notion's Developer Terms and
+pricing-plan conditions if running a paid service that handles client
+data via the Notion API</label></li>
+<li><label><input type="checkbox" />Your relationship with the original
+copyright holder (license/quotation scope) when commercially
+redistributing collected material (web pages, etc.)</label></li>
+<li><label><input type="checkbox" />Alignment with a company/client's
+own security/compliance requirements when delivering to
+them</label></li>
+<li><label><input type="checkbox" />GDPR / data-protection law, etc. —
+Wikimate itself is designed with local-only storage and no central
+server, but <strong>if you operate a service that handles other people's
+personal data using this tool, your legal responsibility as the operator
+needs separate review</strong></label></li>
 </ul>
 <blockquote>
 <p>For development/testing/deployment methods, see <a
