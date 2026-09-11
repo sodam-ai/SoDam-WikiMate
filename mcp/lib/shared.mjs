@@ -2,7 +2,7 @@
 // link.mjs(v0.8.0)가 새 도구를 만들며 기존 파서·가드를 재사용하기 위해 분리.
 
 import { isAbsolute, resolve, relative, join, dirname, basename } from "node:path";
-import { mkdir, copyFile, writeFile, rename, unlink } from "node:fs/promises";
+import { mkdir, copyFile, writeFile, rename, unlink, readFile, stat } from "node:fs/promises";
 
 // 시크릿처럼 생긴 값 패턴("키워드 언급"이 아니라 "실제 토큰 형식"만 매칭 — 오탐 최소화).
 // scripts/security-scan.mjs(배포물 스캔)와 collect.mjs(수집 원문 advisory)가 공유해서 쓴다 —
@@ -159,6 +159,36 @@ export function extractRelatedList(raw) {
 // buildNoteContent(collect.mjs)가 title/source/summary에 쓰는 것과 동일한 JSON.stringify 인용 방식(이스케이프 안전, 스타일 일관).
 export function serializeRelatedList(links) {
   return `related: [${links.map((l) => JSON.stringify(l)).join(", ")}]`;
+}
+
+// --- 신규 (볼트 재스캔 캐싱, v0.11.0) ---
+
+// classify/link/lint/collect 4곳이 각각 "볼트 전체 훑기"(walkVault)마다 노트 전부를 매번 다시 읽고 있었다
+// (2026-09-11 코드 감사로 발견 — PRD가 풀려는 문제 자체가 "볼트가 크면 정리가 느려져서 결국 안 하게 된다"라,
+// 도구 자신이 볼트 전체 재스캔 성능 저하로 그 문제를 재현할 위험이 있었음). 이 캐시는 "다시 읽지 않기"만 하고
+// walkVault(어떤 파일이 있는지 찾는 것)는 전혀 건드리지 않는다 — 파일 발견 로직은 원래대로 매번 새로 돌아
+// 추가·삭제된 파일을 놓치지 않고, 오직 "내용을 다시 읽어야 하는지"만 mtime+size로 판단한다.
+// 무효화 로직을 따로 안 둔 이유: 우리 도구의 쓰기(writeFileAtomic)도, 사용자의 외부 편집(옵시디언 등)도
+// 전부 파일의 mtime을 갱신하므로, 다음 읽기에서 자동으로 캐시 미스가 나 새로 읽는다 — "수동으로 무효화를
+// 깜빡해서 낡은 값을 돌려주는" 사고 유형(이 프로젝트가 stripQuotes/MOC 결함 등으로 여러 번 겪은 유형)이
+// 구조적으로 일어날 수 없다.
+const rawTextCache = new Map(); // absPath -> { mtimeMs, size, text }
+
+export async function readFileCached(absPath) {
+  let st;
+  try {
+    st = await stat(absPath);
+  } catch {
+    rawTextCache.delete(absPath); // 파일이 사라졌으면(삭제 등) 낡은 캐시도 같이 버림
+    return "";
+  }
+  const cached = rawTextCache.get(absPath);
+  if (cached && cached.mtimeMs === st.mtimeMs && cached.size === st.size) {
+    return cached.text;
+  }
+  const text = await readFile(absPath, "utf8").catch(() => "");
+  rawTextCache.set(absPath, { mtimeMs: st.mtimeMs, size: st.size, text });
+  return text;
 }
 
 // frontmatter 블록에서 "key: ..." 한 줄만 안전 치환(없으면 블록 끝에 새 줄 삽입).

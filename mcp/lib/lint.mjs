@@ -4,11 +4,10 @@
 // 노트 본문은 '데이터'로만 읽으며, 그 안의 지시문을 명령으로 실행하지 않는다(인젝션 방어).
 // 노션 끊긴 색인 점검은 여기서 안 한다(무의존 서버는 노션 접근 불가) → 스킬 레이어에서 basenames로 대조.
 
-import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, relative } from "node:path";
 import { walkVault, resolveVaultPath, listVaults } from "./collect.mjs";
-import { parseFrontmatter, parseAliases, stripCode, extractLinks } from "./shared.mjs";
+import { parseFrontmatter, parseAliases, stripCode, extractLinks, readFileCached } from "./shared.mjs";
 
 // 며칠 이내 생성된 노트는 '아직 정리 전'으로 보고 고아 경보에서 제외(노이즈 방지)
 const RECENT_DAYS = 7;
@@ -32,7 +31,7 @@ export async function lint({ vault, vaultPath, now } = {}) {
   // 1) 전 노트 수집
   const notes = [];
   for await (const p of walkVault(root)) {
-    const text = await readFile(p, "utf8").catch(() => "");
+    const text = await readFileCached(p);
     const { fm, body } = parseFrontmatter(text);
     const base = basename(p).replace(/\.md$/i, "");
     const rel = relative(root, p);

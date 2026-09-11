@@ -10,7 +10,7 @@ import { existsSync } from "node:fs";
 import { basename, dirname, relative } from "node:path";
 import { resolveVaultPath, listVaults, walkVault } from "./collect.mjs";
 import { appendRunLog } from "./runlog.mjs";
-import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, writeFileAtomic, stripQuotes, FOLDERS } from "./shared.mjs";
+import { parseFrontmatter, replaceFrontmatterLine, safeInside, backupFile, writeFileAtomic, stripQuotes, FOLDERS, readFileCached } from "./shared.mjs";
 
 const CLASSIFY_TARGET_FOLDERS = [FOLDERS.INBOX, FOLDERS.PROJECTS, FOLDERS.RESOURCES, FOLDERS.NOTES, FOLDERS.DRAFTS];
 // 02_DATA_MODEL.md가 정의한 Note.status(진행 상태) 값. 언제 draft/done이 되는지는 PRD가 정하지 않았으므로
@@ -45,7 +45,7 @@ function serializeTagList(tags) {
 async function loadAll(root) {
   const notes = [];
   for await (const p of walkVault(root)) {
-    const text = await readFile(p, "utf8").catch(() => "");
+    const text = await readFileCached(p);
     const { fm, body } = parseFrontmatter(text);
     const rel = relative(root, p).replace(/\\/g, "/");
     notes.push({ rel, fm: fm || {}, body: body || "", folder: folderOf(rel) });

@@ -9,7 +9,7 @@ import { join, resolve, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { appendRunLog } from "./runlog.mjs";
-import { safeComponent, writeFileAtomic, SECRET_PATTERNS } from "./shared.mjs";
+import { safeComponent, writeFileAtomic, SECRET_PATTERNS, readFileCached } from "./shared.mjs";
 
 const execFileP = promisify(execFile);
 
@@ -162,7 +162,7 @@ export async function* walkVault(dir) {
 async function findDuplicate(vaultPath, hash) {
   if (!vaultPath || !hash) return null;
   for await (const p of walkVault(vaultPath)) {
-    const txt = await readFile(p, "utf8").catch(() => "");
+    const txt = await readFileCached(p);
     if (txt.includes("source_hash") && txt.includes(hash)) return p;
   }
   return null;

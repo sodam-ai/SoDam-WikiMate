@@ -20,6 +20,7 @@ import {
   writeFileAtomic,
   stripQuotes,
   FOLDERS,
+  readFileCached,
 } from "./shared.mjs";
 
 const MAX_RELATED_PER_NOTE = 5; // A: 링크 과잉 연결 방지(03_PHASES.md Phase 2 주의사항) — 코드 레벨 강제
@@ -37,7 +38,7 @@ function resolveRoot(vault, vaultPath) {
 async function loadNotes(root) {
   const notes = [];
   for await (const p of walkVault(root)) {
-    const text = await readFile(p, "utf8").catch(() => "");
+    const text = await readFileCached(p);
     const { fm, body } = parseFrontmatter(text);
     // Windows의 relative()는 백슬래시를 반환하나, 호출자(스킬)는 스키마 예시대로 슬래시("00_Inbox/자료.md")를 씀 — 항상 슬래시로 정규화
     const rel = relative(root, p).replace(/\\/g, "/");
