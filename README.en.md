@@ -6,7 +6,7 @@ Tell an AI agent **"organize this,"** and it takes your scattered materials (web
 
 > 📱 **Device note**: Wikimate is **Windows-PC only (desktop/laptop)**. It is **not installable on phones or tablets** (Claude Code and Codex, the AI programs you talk to, are themselves PC-only programs).
 
-> ✅ **Current status (as of 2026-09-01, honestly)**: Current version **v0.10.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 215 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). **Notion round-trip indexing and a marketplace reinstall have also been confirmed live in the user's own environment** (2026-09-01). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
+> ✅ **Current status (as of 2026-09-01, honestly)**: Current version **v0.10.0**. All **8** MCP tools are merged into `main` and pushed to GitHub. **All 223 automated tests pass** (`npm run verify`), verified via the real server protocol and via real Obsidian-vault end-to-end runs. **Every push to `main` triggers GitHub's own server to re-run the same checks plus a security scan automatically** (GitHub Actions). The session-start auto-detection (hook) and the Obsidian graph-view reflection have been **confirmed on real screens in the user's own environment** (screenshot evidence). **Notion round-trip indexing and a marketplace reinstall have also been confirmed live in the user's own environment** (2026-09-01). See [17. Current status, honestly](#17-current-status-honestly) for the item-by-item breakdown.
 
 This document is written so that **someone who has never touched AI, a computer, a mobile device, or any electronic device before** can follow it step by step from top to bottom. Every hard term is spelled out in plain language.
 
@@ -210,7 +210,7 @@ If that still fails, in the `/plugin` menu **remove → re-add → install** the
 > ```
 > npm install     # installs verification tooling (@modelcontextprotocol/sdk)
 > npm start       # runs the MCP server directly (usually unnecessary)
-> npm run verify  # runs the full automated verification (215 checks)
+> npm run verify  # runs the full automated verification (223 checks)
 > ```
 
 ---
@@ -361,7 +361,7 @@ Install → (automatic) MCP registered → (session-start Obsidian/vault auto-de
 ### Dev/verification (terminal, advanced)
 ```
 npm install      # install verification tooling (@modelcontextprotocol/sdk)
-npm run verify   # run all automated checks (215 checks)
+npm run verify   # run all automated checks (223 checks)
 npm start        # run the MCP server
 ```
 
