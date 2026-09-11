@@ -40,7 +40,7 @@ version: 0.1.0
 - `action:"set_notion_id"` — `note`(필수), `notion_id`(노션 행 생성 결과인 page ID/URL, 필수 — 지우려면 빈 문자열), `dry_run`(기본 true). **Wikimate Organize 스킬이 노션 행을 실제로 만든 직후에만** 이 action으로 그 결과를 노트에 되쓴다(옵시디언→노션 연결 고리 완성). 이 스킬(Link)이 스스로 노션 행을 새로 만들지는 않는다 — 이미 만들어진 값을 저장만 한다.
 
 ### 노션 Run Log (안전 기록 — 실제 쓰기 뒤 매번)
-- **범위**: `add_links`/`build_moc`가 실제로 쓰기를 한(`dry_run=false`이고 `ok:true`이며 **`changed:false`나 `skipped_duplicate:true`(멱등 무변경) 응답이 아닌**) 모든 경우, 로컬 Run Log(`.wikimate/runlog.jsonl`, 코어가 자동 기록)와 1:1로 대응하는 행을 노션에도 남긴다.
+- **범위**: `add_links`/`build_moc`/`set_notion_id`가 실제로 쓰기를 한(`dry_run=false`이고 `ok:true`이며 **`changed:false`나 `skipped_duplicate:true`(멱등 무변경) 응답이 아닌**) 모든 경우, 로컬 Run Log(`.wikimate/runlog.jsonl`, 코어가 자동 기록)와 1:1로 대응하는 행을 노션에도 남긴다. (`set_notion_id`는 보통 Organize 스킬의 워크플로우 중 호출돼 그쪽 Run Log 범위에도 이미 포함되지만, 이 스킬을 통해 단독 호출될 때도 빠지지 않도록 명시함 — 2026-09-11 `scripts/check-skill-triggers.mjs` 감사로 발견.)
 - **DB 확정**: `NOTION_RUNLOG_DB_ID`가 있으면 그 DB, 없으면 Notion 검색으로 "Wikimate Run Log"를 찾고, 그래도 없으면 "만들까요?" 묻는다(임의 생성 X — 존재 자체로 연결을 단정하지 말고 실제 노션 도구로 확인, `wikimate-organize` 스킬과 동일 원칙).
 - **행 속성**(02_DATA_MODEL.md `NotionRunLog`): `Run date`, `Request`(받은 명령 요약 — 예: "A 노트와 B 노트 연결" / "X 주제로 MOC 생성"), `Changed notes`(연결/편입된 노트, 가능하면 `Obsidian Link` 형식), `Errors`(5개 상한 초과 거부 등, 있을 때만), `Human approved`(개별 승인했음을 항상 표시 — 이 스킬은 사전승인으로도 건너뛸 수 없는 비가역 편집이므로 항상 `true`).
 - **실패해도 무해(graceful)**: 실패해도 원래 쓰기는 이미 끝난 뒤라 되돌리거나 막지 않는다 — "노션 Run Log 기록 실패(로컬에는 정상 기록됨)"라고만 정직히 보고. 로컬 `.wikimate/runlog.jsonl`이 항상 진실원본, 노션은 거울.
