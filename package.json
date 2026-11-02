@@ -1,6 +1,6 @@
 {
   "name": "wikimate",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": true,
   "type": "module",
   "description": "Wikimate MCP 코어 — 자료를 옵시디언 노트로 수집/정리하는 이식 가능한 MCP 서버",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node mcp/server.mjs",
-    "verify": "node scripts/verify-collect.mjs && node scripts/verify-lint.mjs && node scripts/verify-fix.mjs && node scripts/verify-runlog.mjs && node scripts/verify-vaults.mjs && node scripts/verify-link.mjs && node scripts/verify-classify.mjs && node scripts/verify-summarize.mjs && node scripts/check-skill-triggers.mjs",
+    "verify": "node scripts/verify-collect.mjs && node scripts/verify-lint.mjs && node scripts/verify-fix.mjs && node scripts/verify-runlog.mjs && node scripts/verify-vaults.mjs && node scripts/verify-link.mjs && node scripts/verify-classify.mjs && node scripts/verify-summarize.mjs && node scripts/verify-cache.mjs && node scripts/check-skill-triggers.mjs",
     "security-check": "node scripts/security-scan.mjs"
   },
   "devDependencies": {
