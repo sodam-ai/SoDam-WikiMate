@@ -8,13 +8,13 @@
 ## 로컬 검증
 ```bash
 npm install        # 검증용 devDependency(@modelcontextprotocol/sdk)만 설치 — 플러그인 실행엔 불필요
-npm run verify     # 8개 verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize), 총 191개 체크
+npm run verify     # verify-*.mjs 전체 체인(collect/lint/fix/runlog/vaults/link/classify/summarize/cache) + 스킬 트리거 점검 — 개수는 실행 출력의 "총계"를 볼 것(숫자를 여기 박으면 테스트 추가 때마다 낡음)
 npm start          # MCP 서버(stdio) 실행
 ```
 
 ## 테스트
 
-### 유닛 검증 (`npm run verify`가 순서대로 실행, 격리된 임시 볼트 사용 — 8개)
+### 유닛 검증 (`npm run verify`가 순서대로 실행, 격리된 임시 볼트 사용)
 | 스크립트 | 내용 |
 |---|---|
 | `scripts/verify-collect.mjs` | 수집 로직(이름 안전화·중복 차단·경로이탈 방지·importance 검증) 검증 |
@@ -25,6 +25,8 @@ npm start          # MCP 서버(stdio) 실행
 | `scripts/verify-link.mjs` | 자동 링크(add_links)·MOC 생성(build_moc)·노션 연결고리(set_notion_id) 검증(경로이탈·특수문자 등 경계값 포함) |
 | `scripts/verify-classify.mjs` | 자동 분류(폴더·태그·중요도) 검증 |
 | `scripts/verify-summarize.mjs` | 요약·원자노트화(원문 보존 구조적 강제 포함) 검증 |
+| `scripts/verify-cache.mjs` | 읽기 캐시(`readFileCached`) 검증 — 방금 바뀐 파일·미래 시각·mtime만 되돌린 파일은 캐시에 저장 안 함(낡은 값 0건), 오래된 파일은 여전히 저장됨, 삭제·크기 변경·읽기 실패(빈 값 미저장) 처리. 오래된 파일 검증을 위해 약 3.3초 대기 |
+| `scripts/check-skill-triggers.mjs` | 스킬 문서의 Run Log 트리거 누락 점검(스킬 ↔ RunLog action 대조) |
 
 ### 프로토콜 스모크 (실제 MCP 서버를 stdio로 띄워 JSON-RPC 경유 호출)
 | 스크립트 | 내용 |
@@ -54,8 +56,8 @@ node scripts/collect-real.mjs
 `main`에 push하거나 PR을 올릴 때마다 GitHub 서버가 아래 3단계를 **사람 개입 없이 자동으로** 재실행한다(`.github/workflows/ci.yml`).
 ```
 npm ci
-npm run verify                    # 유닛 191개
-node scripts/smoke-tools.mjs      # 프로토콜(서버경유) 13개
+npm run verify                    # 유닛(전체 체인, 개수는 출력의 "총계" 참고)
+node scripts/smoke-tools.mjs      # 프로토콜(서버경유) 전 도구 호출
 node scripts/security-scan.mjs --all   # 전체 추적 파일 보안 스캔
 ```
 로컬에서 opt-in 훅을 안 켜뒀거나 검증을 깜빡해도, push 이후엔 이 워크플로가 한 번 더 확인해준다. 시크릿·환경변수 설정이 필요 없어(무의존 프로젝트) 별도 준비 없이 그대로 동작한다. 실볼트 e2e(`-real` 스크립트, 위 표)는 `sandbox-vault/`가 CI엔 없어(`.gitignore`) 여기 포함되지 않음 — 지금까지처럼 로컬 1회성 시연으로만 실행한다.
