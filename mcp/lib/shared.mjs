@@ -161,7 +161,7 @@ export function serializeRelatedList(links) {
   return `related: [${links.map((l) => JSON.stringify(l)).join(", ")}]`;
 }
 
-// --- 신규 (볼트 재스캔 캐싱, v0.11.0) ---
+// --- 신규 (볼트 재스캔 캐싱, v0.10.1) ---
 
 // classify/link/lint/collect 4곳이 각각 "볼트 전체 훑기"(walkVault)마다 노트 전부를 매번 다시 읽고 있었다
 // (2026-09-11 코드 감사로 발견 — PRD가 풀려는 문제 자체가 "볼트가 크면 정리가 느려져서 결국 안 하게 된다"라,
@@ -170,9 +170,29 @@ export function serializeRelatedList(links) {
 // 추가·삭제된 파일을 놓치지 않고, 오직 "내용을 다시 읽어야 하는지"만 mtime+size로 판단한다.
 // 무효화 로직을 따로 안 둔 이유: 우리 도구의 쓰기(writeFileAtomic)도, 사용자의 외부 편집(옵시디언 등)도
 // 전부 파일의 mtime을 갱신하므로, 다음 읽기에서 자동으로 캐시 미스가 나 새로 읽는다 — "수동으로 무효화를
-// 깜빡해서 낡은 값을 돌려주는" 사고 유형(이 프로젝트가 stripQuotes/MOC 결함 등으로 여러 번 겪은 유형)이
-// 구조적으로 일어날 수 없다.
-const rawTextCache = new Map(); // absPath -> { mtimeMs, size, text }
+// 깜빡해서 낡은 값을 돌려주는" 사고 유형(이 프로젝트가 stripQuotes/MOC 결함 등으로 여러 번 겪은 유형)을
+// 막는 것이 이 설계의 목적이다.
+//
+// ⚠️ 단, "구조적으로 불가능"은 아니다 (2026-11-02 실측으로 정정): mtime은 시계 눈금 단위로 기록되기 때문에,
+// 같은 눈금 안에서 "같은 글자 수"(예: status inbox→draft, 둘 다 5자)로 연달아 바뀌면 mtime+size가 똑같아
+// 낡은 값이 나온다(쓰기 간격 0ms에서 150회 중 27회). 그래서 Git의 "racily clean" 처리와 같은 원리로
+// **방금 바뀐 파일(RACY_WINDOW_MS 이내)은 캐시에 넣지 않는다.** 미래 시각(시계가 어긋난 동기화 폴더 등)도
+// 같은 이유로 캐시하지 않는다. 오래된 파일만 캐시하므로 "큰 볼트 재스캔이 느려지는 문제"를 푸는 이점은 그대로다.
+// - 창은 3초: FAT 계열은 시각을 2초 단위로 반올림해 기록하므로 2초 창은 딱 경계라 여유를 둔다.
+// - mtime뿐 아니라 ctime(파일 상태가 마지막으로 바뀐 시각)도 키와 "최근 여부" 판정에 쓴다: mtime을 옛 값으로
+//   되돌리면서 내용을 바꾸는 외부 도구(rsync -t, 일부 동기화 프로그램)도 ctime은 되돌리지 못한다
+//   (NTFS 실측: utimes로 mtime을 되돌려도 ctime은 갱신됨). ctime을 못 주는 파일시스템이면 mtime만으로 동작한다.
+// 남는 한계(알고 수용): ctime까지 위조·보존하는 도구는 못 잡는다 — 일반 편집·옵시디언·동기화·우리 도구는 해당 없음.
+// 크기 상한은 두지 않았다(개인 볼트 규모에서 문제가 실측된 적 없고, 상한을 넣으면 큰 볼트에서 캐시가 매번
+// 비워져 오히려 이점이 사라지기 때문). 이동·삭제된 노트의 항목은 다음 읽기 시도 때 정리되므로 서버가 아주 오래
+// 떠 있고 노트를 대량으로 옮기는 경우에만 조금 남는다.
+const RACY_WINDOW_MS = 3000;
+const rawTextCache = new Map(); // absPath -> { mtimeMs, ctimeMs, size, text }
+
+// 캐시에 몇 개가 들어 있는지(읽기 전용 진단·테스트용 — scripts/verify-cache.mjs가 "저장됐다/안 됐다"를 직접 확인)
+export function cacheEntryCount() {
+  return rawTextCache.size;
+}
 
 export async function readFileCached(absPath) {
   let st;
@@ -183,11 +203,26 @@ export async function readFileCached(absPath) {
     return "";
   }
   const cached = rawTextCache.get(absPath);
-  if (cached && cached.mtimeMs === st.mtimeMs && cached.size === st.size) {
+  if (cached && cached.mtimeMs === st.mtimeMs && cached.ctimeMs === st.ctimeMs && cached.size === st.size) {
     return cached.text;
   }
-  const text = await readFile(absPath, "utf8").catch(() => "");
-  rawTextCache.set(absPath, { mtimeMs: st.mtimeMs, size: st.size, text });
+  let text;
+  try {
+    text = await readFile(absPath, "utf8");
+  } catch {
+    // 읽기에 실패했다(다른 프로그램이 잠금, 폴더 경로 등). ""를 캐시에 넣으면 잠금이 풀린 뒤에도 파일이 바뀌기
+    // 전까지 계속 빈 값이 나와 중복 노트 생성·"frontmatter 없음" 오보로 이어지므로 아무것도 기억하지 않는다.
+    rawTextCache.delete(absPath);
+    return "";
+  }
+  // 방금 바뀌었거나(age < 창) 미래 시각(age < 0)이면 아직 같은 눈금에서 또 바뀔 수 있으니 기억하지 않는다.
+  // 이때 이전 항목도 지워야 한다(남겨두면 키가 우연히 같을 때 낡은 값이 되살아남).
+  const lastChangeMs = Math.max(st.mtimeMs, st.ctimeMs || 0);
+  if (Date.now() - lastChangeMs < RACY_WINDOW_MS) {
+    rawTextCache.delete(absPath);
+  } else {
+    rawTextCache.set(absPath, { mtimeMs: st.mtimeMs, ctimeMs: st.ctimeMs, size: st.size, text });
+  }
   return text;
 }
 

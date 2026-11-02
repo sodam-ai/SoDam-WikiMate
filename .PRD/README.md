@@ -133,7 +133,7 @@ Phase -1~3이 전부 정의된 범위이고 그 안의 AI 실행 가능 항목�
 - [x] MCP 코어 언어 — **결정·구현됨: Node.js**(단, TS가 아니라 **순수 JavaScript**입니다 — `package.json`에 `"type": "module"`, 타입체크/`tsconfig.json` 없음, 전부 `.mjs`. 애초 후보였던 "Node/TS" 중 TS 부분은 채택 안 됨, 착오 없이 명시)
 - [x] 옵시디언 접근 — **결정·구현됨: 파일시스템 직접 방식이 검증된 기본값**. notesmd-cli는 여전히 미검증 선택 옵션, mcp-obsidian은 채택 안 함
 - [ ] 노션 접근(Win) — **여전히 열려 있음(의도적)**: 하드코딩된 단일 선택이 아니라 "연결된 노션 도구를 자동 감지해 쓴다"가 설계 그 자체라, 이 항목은 원래도 고정할 필요가 없는 항목입니다(체크 안 하는 게 맞음)
-- [x] 배포 저장소·라이선스·공개 범위 — **결정·구현됨: `sodam-ai/SoDam-WikiMate`, Apache-2.0, PUBLIC**. 태그·GitHub Release 실재(현재 v0.9.0)
+- [x] 배포 저장소·라이선스·공개 범위 — **결정·구현됨: `sodam-ai/SoDam-WikiMate`, Apache-2.0, PUBLIC**. 태그·GitHub Release 실재(현재 v0.10.1)
 - [x] 1차 검증 에이전트 — **결정·구현됨: Claude Code**(모든 실사용 라이브 검증이 이걸로 진행됨). Codex는 사람이 구현 완료 후 직접 별도 포팅하기로 확정(2026-08-18)
 
 **데이터/운영**

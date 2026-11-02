@@ -138,7 +138,7 @@ AI 에이전트(Claude Code·Codex·Gemini)에게 "이거 정리해줘"라고 �
 > 🔴 **2026-09-01 정정**: 아래 6개 중 5개가 이미 결정·구현까지 끝났는데 `[ ]`로 방치돼 있었음을 코드와 직접 대조해 발견·정정(같은 문제가 `.PRD/README.md`·`04_PROJECT_SPEC.md`에도 각각 있었고 셋 다 이번에 함께 정정함 — 이전엔 `.PRD/README.md`만 고쳐서 문서 간 모순이 생겼던 걸 재발견해 바로잡음).
 
 - [x] **MCP 코어 언어** — 결정·구현됨: **Node.js**(단, TS가 아니라 순수 JavaScript — `package.json` `"type":"module"`, `tsconfig.json` 없음, 전부 `.mjs`)
-- [x] **배포 저장소/공개 여부** — 결정·구현됨: `sodam-ai/SoDam-WikiMate`, **Apache-2.0**, **PUBLIC**(태그·GitHub Release 실재, 현재 v0.9.0)
+- [x] **배포 저장소/공개 여부** — 결정·구현됨: `sodam-ai/SoDam-WikiMate`, **Apache-2.0**, **PUBLIC**(태그·GitHub Release 실재, 현재 v0.10.1)
 - [x] **1차 검증 에이전트** — 결정·구현됨: **Claude Code**(모든 실사용 라이브 검증이 이걸로 진행됨). Codex는 사람이 구현 완료 후 직접 별도 포팅하기로 확정(2026-08-18)
 - [x] **옵시디언 접근 기본값** — 결정·구현됨: **파일시스템 직접**이 검증된 기본값. notesmd-cli는 여전히 미검증 선택 옵션
 - [ ] **노션 접근 기본값** — 여전히 열려 있음(의도적): 하드코딩된 단일 선택이 아니라 "연결된 노션 도구를 자동 감지해 쓴다"가 설계 그 자체
